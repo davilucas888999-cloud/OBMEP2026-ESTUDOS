@@ -1,1585 +1,484 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Acompanhamento OBMEP 2026 - 2ª Fase</title>
-  <!-- Chart.js para Gráficos Interativos -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Google Fonts & Font Awesome Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <style>
-    :root {
-      --primary-blue: #1e3a8a;
-      --secondary-blue: #2563eb;
-      --light-blue: #eff6ff;
-      --accent-green: #059669;
-      --light-green: #ecfdf5;
-      --dark-slate: #0f172a;
-      --text-main: #334155;
-      --text-muted: #64748b;
-      --bg-body: #f8fafc;
-      --card-bg: #ffffff;
-      --border-color: #e2e8f0;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 16px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-body);
-      color: var(--text-main);
-      display: flex;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Sidebar Navigation */
-    .sidebar {
-      width: 260px;
-      background: linear-gradient(180deg, var(--primary-blue) 0%, #0f172a 100%);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      height: 100vh;
-      z-index: 100;
-      transition: all 0.3s ease;
-    }
-
-    .sidebar-brand {
-      padding: 24px 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .sidebar-brand i {
-      font-size: 1.8rem;
-      color: #38bdf8;
-    }
-
-    .sidebar-brand h2 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    .sidebar-menu {
-      list-style: none;
-      padding: 20px 0;
-      flex-grow: 1;
-    }
-
-    .sidebar-menu li a {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 24px;
-      color: #94a3b8;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.95rem;
-      transition: all 0.2s ease;
-      border-left: 4px solid transparent;
-    }
-
-    .sidebar-menu li a:hover,
-    .sidebar-menu li.active a {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.08);
-      border-left-color: #38bdf8;
-    }
-
-    .sidebar-info {
-      padding: 20px;
-      background: rgba(0, 0, 0, 0.2);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 0.8rem;
-    }
-
-    .sidebar-info .badge-info {
-      display: inline-block;
-      background: #f59e0b;
-      color: #000;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-      margin-top: 5px;
-    }
-
-    /* Main Layout */
-    .main-content {
-      margin-left: 260px;
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    header {
-      background-color: var(--card-bg);
-      border-bottom: 1px solid var(--border-color);
-      padding: 16px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .header-title h1 {
-      font-size: 1.4rem;
-      color: var(--dark-slate);
-      font-weight: 700;
-    }
-
-    .header-title p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--light-blue);
-      padding: 8px 16px;
-      border-radius: var(--radius-md);
-      color: var(--primary-blue);
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .content-container {
-      padding: 32px;
-      flex-grow: 1;
-    }
-
-    /* Tab Views */
-    .tab-view {
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .tab-view.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Metric Cards Grid */
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 32px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius-md);
-      padding: 20px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-sm);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .card-metric {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .card-metric .info h3 {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .card-metric .info p {
-      font-size: 1.7rem;
-      font-weight: 700;
-      color: var(--dark-slate);
-      margin-top: 4px;
-    }
-
-    .card-metric .icon {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-    }
-
-    .icon-blue { background: var(--light-blue); color: var(--secondary-blue); }
-    .icon-green { background: var(--light-green); color: var(--accent-green); }
-    .icon-gold { background: #fef3c7; color: #d97706; }
-    .icon-red { background: #fee2e2; color: #dc2626; }
-
-    /* Charts Section */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 24px;
-      margin-bottom: 32px;
-    }
-
-    .chart-card {
-      background: var(--card-bg);
-      border-radius: var(--radius-md);
-      padding: 24px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .chart-card h3 {
-      font-size: 1.05rem;
-      color: var(--dark-slate);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* Buttons & Controls */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: var(--radius-sm);
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s ease;
-      text-decoration: none;
-    }
-
-    .btn-primary { background: var(--secondary-blue); color: #fff; }
-    .btn-primary:hover { background: var(--primary-blue); }
-    .btn-success { background: var(--accent-green); color: #fff; }
-    .btn-success:hover { background: #047857; }
-    .btn-secondary { background: #e2e8f0; color: var(--dark-slate); }
-    .btn-secondary:hover { background: #cbd5e1; }
-    .btn-danger { background: #ef4444; color: #fff; }
-    .btn-danger:hover { background: #dc2626; }
-    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
-
-    /* Forms */
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--dark-slate);
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-control:focus {
-      border-color: var(--secondary-blue);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-
-    /* Table Styles */
-    .table-responsive {
-      width: 100%;
-      overflow-x: auto;
-      background: var(--card-bg);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-sm);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.9rem;
-    }
-
-    th {
-      background: #f1f5f9;
-      color: var(--dark-slate);
-      padding: 14px 16px;
-      font-weight: 600;
-      border-bottom: 1px solid var(--border-color);
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border-color);
-      color: var(--text-main);
-      white-space: nowrap;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover td {
-      background-color: #f8fafc;
-    }
-
-    /* Status Badges */
-    .badge {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      display: inline-block;
-      text-transform: uppercase;
-    }
-
-    .badge-excelente { background: #dcfce7; color: #15803d; }
-    .badge-muito-bom { background: #e0f2fe; color: #0369a1; }
-    .badge-bom { background: #fef9c3; color: #a16207; }
-    .badge-regular { background: #ffedd5; color: #c2410c; }
-    .badge-precisa-melhorar { background: #fee2e2; color: #b91c1c; }
-
-    /* Score Highlighting */
-    .score-max {
-      background-color: #dcfce7 !important;
-      font-weight: 700;
-      color: #15803d;
-    }
-    .score-low {
-      background-color: #fee2e2 !important;
-      font-weight: 700;
-      color: #b91c1c;
-    }
-
-    /* Modal Component */
-    .modal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.6);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      backdrop-filter: blur(4px);
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: var(--card-bg);
-      border-radius: var(--radius-lg);
-      width: 90%;
-      max-width: 850px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow-lg);
-      padding: 28px;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 12px;
-    }
-
-    .modal-header h3 {
-      font-size: 1.2rem;
-      color: var(--dark-slate);
-    }
-
-    .close-modal {
-      background: none;
-      border: none;
-      font-size: 1.3rem;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    /* Question Dates Header */
-    .question-dates-bar {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 10px;
-      background: var(--light-blue);
-      padding: 16px;
-      border-radius: var(--radius-md);
-      margin-bottom: 20px;
-    }
-
-    .date-input-group label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--primary-blue);
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .date-input-group input {
-      width: 100%;
-      padding: 6px;
-      font-size: 0.8rem;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-    }
-
-    /* Mobile Responsive Toggle */
-    .menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      color: var(--dark-slate);
-      cursor: pointer;
-    }
-
-    @media (max-width: 992px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-      .sidebar.open {
-        transform: translateX(0);
-      }
-      .main-content {
-        margin-left: 0;
-      }
-      .menu-toggle {
-        display: block;
-      }
-      .charts-grid {
-        grid-template-columns: 1fr;
-      }
-      .question-dates-bar {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (max-width: 600px) {
-      .question-dates-bar {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .content-container {
-        padding: 16px;
-      }
-    }
-
-    /* Print Styles */
-    @media print {
-      .sidebar, header, .btn, .no-print {
-        display: none !important;
-      }
-      .main-content {
-        margin-left: 0 !important;
-      }
-      .content-container {
-        padding: 0 !important;
-      }
-      .card, .table-responsive {
-        box-shadow: none !important;
-        border: 1px solid #ccc !important;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal do Professor 2026 • Gestão Escolar</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 </head>
-<body>
+<body class="light-mode">
 
-  <!-- Sidebar Navigation -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <i class="fa-solid fa-square-root-variable"></i>
-      <h2>OBMEP 2026</h2>
+    <!-- TOPBAR MOBILE -->
+    <div class="topbar">
+        <button class="menu-hamburger" onclick="toggleMenu()" aria-label="Abrir Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="topbar-title">Portal do Professor 2026</div>
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </div>
     </div>
-    <ul class="sidebar-menu">
-      <li class="active"><a href="#" onclick="switchTab('dashboard')"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
-      <li><a href="#" onclick="switchTab('simulados')"><i class="fa-solid fa-file-pen"></i> Simulados</a></li>
-      <li><a href="#" onclick="switchTab('alunos')"><i class="fa-solid fa-user-graduate"></i> Alunos</a></li>
-      <li><a href="#" onclick="switchTab('ranking')"><i class="fa-solid fa-trophy"></i> Ranking</a></li>
-      <li><a href="#" onclick="switchTab('relatorios')"><i class="fa-solid fa-chart-line"></i> Relatórios</a></li>
-      <li><a href="#" onclick="switchTab('configuracoes')"><i class="fa-solid fa-sliders"></i> Configurações</a></li>
-    </ul>
-    <div class="sidebar-info">
-      <div><strong>Nível:</strong> 1 (7º Ano)</div>
-      <div><strong>Prova:</strong> Amarela</div>
-      <div><strong>Fase:</strong> 2ª Fase</div>
-      <span class="badge-info">OFICIAL 2026</span>
+
+    <!-- MENU LATERAL POP-UP (HAMBÚRGUER) -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="brasao.png" alt="Brasão da Escola" class="school-logo-menu">
+            <h3>Painel de Controle</h3>
+            <p class="sidebar-sub">Gestão Escolar Eficiente</p>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li onclick="navigate('home')"><i class="fas fa-th-large"></i> Disciplinas em Bloco</li>
+                <li onclick="navigate('boletim-individual')"><i class="fas fa-file-invoice"></i> Boletim Individual</li>
+                <li onclick="abrirCadastroAlunos()"><i class="fas fa-user-plus"></i> Cadastro de Alunos</li>
+                <li onclick="navigate('fechamento-global')"><i class="fas fa-lock"></i> Fechamento de Bimestre</li>
+                <li onclick="navigate('dashboard')"><i class="fas fa-chart-line"></i> Estatísticas e Gráficos</li>
+                <li onclick="navigate('backup')"><i class="fas fa-server"></i> Manutenção de Dados</li>
+                <li onclick="openAjudaModal()"><i class="fas fa-question-circle"></i> Ajuda & Instruções</li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <span>Portal do Professor 2026 • Versão Responsiva</span>
+        </div>
     </div>
-  </aside>
 
-  <!-- Main Content Layout -->
-  <main class="main-content">
-    <header>
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-        <div class="header-title">
-          <h1 id="page-title">Dashboard da Turma</h1>
-          <p>Acompanhamento de Desempenho e Metas para a 2ª Fase</p>
-        </div>
-      </div>
-      <div class="user-profile">
-        <i class="fa-solid fa-school"></i>
-        <span>Turma 7º Ano - Nível 1</span>
-      </div>
-    </header>
+    <!-- MAIN CONTAINER (CONTEÚDO DO APLICATIVO) -->
+    <div class="main-container">
 
-    <div class="content-container">
-
-      <!-- TAB 1: DASHBOARD -->
-      <section id="view-dashboard" class="tab-view active">
-        <div class="metrics-grid">
-          <div class="card card-metric">
-            <div class="info">
-              <h3>Simulados</h3>
-              <p id="dash-total-simulados">0</p>
+        <!-- TELA 1: INÍCIO (BLOCOS DE MATÉRIAS) -->
+        <div id="screen-home" class="screen active">
+            <div class="welcome-banner">
+                <div class="banner-flex">
+                    <div>
+                        <h2>Bem-vinda de volta!</h2>
+                        <p class="school-text">EM DR CUSTÓDIO DE PAULA RODRIGUES</p>
+                    </div>
+                    <img src="brasao.png" alt="Brasão" class="banner-logo">
+                </div>
+                <div class="banner-badge-container">
+                    <span class="badge">Ano Letivo: 2026</span>
+                    <span class="badge-active" id="global-bimestre-badge">Carregando Bimestre...</span>
+                </div>
             </div>
-            <div class="icon icon-blue"><i class="fa-solid fa-clipboard-list"></i></div>
-          </div>
-          <div class="card card-metric">
-            <div class="info">
-              <h3>Alunos</h3>
-              <p id="dash-total-alunos">4</p>
+            
+            <div class="section-header-block">
+                <h3 class="section-title">Minhas Disciplinas</h3>
+                <p class="section-desc">Toque em um bloco para gerenciar atividades, notas ou emitir boletins.</p>
             </div>
-            <div class="icon icon-green"><i class="fa-solid fa-users"></i></div>
-          </div>
-          <div class="card card-metric">
-            <div class="info">
-              <h3>Média Geral</h3>
-              <p id="dash-media-geral">0.0%</p>
+            
+            <div class="disciplinas-grid" id="disciplinas-grid"></div>
+        </div>
+
+        <!-- TELA: CADASTRO DE ALUNOS -->
+        <div id="screen-cadastro-alunos" class="screen">
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar ao Início</button>
+
+            <div class="table-meta-header">
+                <h3><i class="fas fa-user-plus"></i> Cadastro de Alunos</h3>
+                <p class="sub-meta">Cadastre novos alunos. O novo aluno é colocado automaticamente no fim da ordem de matrícula/chamada.</p>
             </div>
-            <div class="icon icon-gold"><i class="fa-solid fa-chart-column"></i></div>
-          </div>
-          <div class="card card-metric">
-            <div class="info">
-              <h3>Melhor Nota</h3>
-              <p id="dash-melhor-nota">0 pts</p>
+
+            <div class="card-box student-registration-card">
+                <form id="form-cadastro-aluno" onsubmit="cadastrarNovoAluno(event)">
+                    <div class="input-grid-cadastro">
+                        <div class="input-group">
+                            <label for="novo-aluno-nome">Nome completo do aluno</label>
+                            <input type="text" id="novo-aluno-nome" placeholder="NOME COMPLETO" autocomplete="off" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="novo-aluno-data">Data de matrícula</label>
+                            <input type="date" id="novo-aluno-data" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="novo-aluno-nascimento">Data de nascimento</label>
+                            <input type="date" id="novo-aluno-nascimento">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit-action"><i class="fas fa-user-plus"></i> Cadastrar Aluno</button>
+                </form>
             </div>
-            <div class="icon icon-green"><i class="fa-solid fa-award"></i></div>
-          </div>
-          <div class="card card-metric">
-            <div class="info">
-              <h3>Pior Nota</h3>
-              <p id="dash-pior-nota">0 pts</p>
+
+            <div class="section-header-block" style="margin-top:25px;">
+                <h4 class="section-title">Ordem de Matrícula e Chamada</h4>
+                <p class="section-desc">A matrícula é formada por <strong>ano da matrícula + turma 800 + ordem de chamada</strong>.</p>
             </div>
-            <div class="icon icon-red"><i class="fa-solid fa-circle-exclamation"></i></div>
-          </div>
-          <div class="card card-metric">
-            <div class="info">
-              <h3>Questões Feitas</h3>
-              <p id="dash-total-questoes">0</p>
+
+            <div class="table-responsive-container">
+                <table class="table-custom-format">
+                    <thead>
+                        <tr>
+                            <th>Ordem</th>
+                            <th>Matrícula</th>
+                            <th>Nome do Aluno</th>
+                            <th>Data de Matrícula</th>
+                            <th>Data de Nascimento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-cadastro-alunos-corpo"></tbody>
+                </table>
             </div>
-            <div class="icon icon-blue"><i class="fa-solid fa-check-double"></i></div>
-          </div>
         </div>
 
-        <div class="charts-grid">
-          <div class="chart-card">
-            <h3><i class="fa-solid fa-chart-line"></i> Evolução da Média da Turma (%)</h3>
-            <canvas id="chartEvolucaoMedia"></canvas>
-          </div>
-          <div class="chart-card">
-            <h3><i class="fa-solid fa-chart-bar"></i> Média por Questão (Todas as Provas)</h3>
-            <canvas id="chartMediaQuestoes"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h3><i class="fa-solid fa-users-line"></i> Desempenho Individual por Simulado</h3>
-          <canvas id="chartDesempenhoAlunos"></canvas>
-        </div>
-      </section>
-
-      <!-- TAB 2: SIMULADOS -->
-      <section id="view-simulados" class="tab-view">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-          <h2>Gerenciamento de Simulados</h2>
-          <button class="btn btn-primary" onclick="openModalNovoSimulado()"><i class="fa-solid fa-plus"></i> Novo Simulado</button>
-        </div>
-
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Nome do Simulado</th>
-                <th>Data de Início</th>
-                <th>Média da Turma</th>
-                <th>Maior Nota</th>
-                <th>Menor Nota</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="lista-simulados-body">
-              <!-- Renderizado via JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- TAB 3: ALUNOS -->
-      <section id="view-alunos" class="tab-view">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-          <h2>Alunos Cadastrados na Turma</h2>
-          <input type="text" id="search-aluno" class="form-control" style="width: 300px;" placeholder="Pesquisar por nome ou código..." onkeyup="renderAlunosTable()">
-        </div>
-
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Código / Inscrição</th>
-                <th>Nome Completo</th>
-                <th>Simulados Feitos</th>
-                <th>Pontuação Acumulada</th>
-                <th>Média (%)</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="lista-alunos-body">
-              <!-- Renderizado via JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- TAB 4: RANKING -->
-      <section id="view-ranking" class="tab-view">
-        <div style="margin-bottom: 24px;">
-          <h2><i class="fa-solid fa-medal" style="color: #f59e0b;"></i> Ranking Geral da Turma</h2>
-          <p style="color: var(--text-muted); font-size: 0.9rem;">Classificação automática baseada na média acumulada nos simulados.</p>
-        </div>
-
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Posição</th>
-                <th>Aluno</th>
-                <th>Total de Pontos</th>
-                <th>Média (%)</th>
-                <th>Simulados Realizados</th>
-                <th>Melhor Nota</th>
-                <th>Situação Geral</th>
-              </tr>
-            </thead>
-            <tbody id="lista-ranking-body">
-              <!-- Renderizado via JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- TAB 5: RELATÓRIOS -->
-      <section id="view-relatorios" class="tab-view">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;" class="no-print">
-          <h2>Relatórios e Exportação</h2>
-          <div style="display: flex; gap: 10px;">
-            <button class="btn btn-secondary" onclick="exportarCSV()"><i class="fa-solid fa-file-excel"></i> Exportar Excel (CSV)</button>
-            <button class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir / PDF</button>
-          </div>
-        </div>
-
-        <div class="card no-print" style="margin-bottom: 24px;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-            <div class="form-group" style="margin: 0;">
-              <label>Filtrar por Simulado:</label>
-              <select id="filter-relatorio-simulado" class="form-control" onchange="renderRelatorio()">
-                <option value="todos">Todos os Simulados</option>
-              </select>
+        <!-- TELA 10: NOVO MÓDULO - BOLETIM INDIVIDUAL -->
+        <div id="screen-boletim-individual" class="screen">
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar ao Início</button>
+            
+            <div class="table-meta-header">
+                <h3>Boletim de Aproveitamento Individual</h3>
+                <p class="sub-meta">Gere e visualize o rendimento unificado de todas as disciplinas do ano.</p>
+                
+                <div style="margin-top: 15px; margin-bottom: 5px;">
+                    <button class="btn-submit-action" onclick="exportarTodosBoletinsPDF()" style="background-color: #d4af37; color: #0f172a; font-weight: 800;">
+                        <i class="fas fa-file-pdf"></i> Exportar Todos os Boletins (1 por Aluno)
+                    </button>
+                </div>
+                
+                <input type="text" class="search-box-input" id="search-aluno-boletim" placeholder="🔍 Pesquisar estudante..." onkeyup="filterTable('table-boletim-corpo', this.value)">
             </div>
-            <div class="form-group" style="margin: 0;">
-              <label>Filtrar por Aluno:</label>
-              <select id="filter-relatorio-aluno" class="form-control" onchange="renderRelatorio()">
-                <option value="todos">Todos os Alunos</option>
-              </select>
+
+            <div class="table-responsive-container">
+                <table class="table-custom-format">
+                    <thead>
+                        <tr>
+                            <th>Estudante</th>
+                            <th style="width: 130px; text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-boletim-corpo"></tbody>
+                </table>
             </div>
-          </div>
         </div>
 
-        <div class="table-responsive" id="area-relatorio">
-          <!-- Conteúdo impresso/gerado dinamicamente -->
-        </div>
-      </section>
+        <!-- TELA 2: HUB DA MATÉRIA SELECIONADA -->
+        <div id="screen-materia-hub" class="screen">
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar ao Início</button>
+            
+            <div class="materia-header-banner">
+                <div class="materia-title-wrapper">
+                    <i class="fas fa-graduation-cap title-icon"></i>
+                    <h2 id="hub-materia-titulo">Nome da Matéria</h2>
+                </div>
+                <div class="bimestre-selector-wrapper">
+                    <label for="hub-bimestre-select">Visualizar Período:</label>
+                    <select id="hub-bimestre-select" onchange="changeBimestreHub()">
+                        <option value="1">1º Bimestre</option>
+                        <option value="2">2º Bimestre</option>
+                        <option value="3">3º Bimestre</option>
+                        <option value="4">4º Bimestre</option>
+                    </select>
+                </div>
+                <div id="status-periodo-alerta"></div>
+            </div>
 
-      <!-- TAB 6: CONFIGURAÇÕES -->
-      <section id="view-configuracoes" class="tab-view">
-        <h2 style="margin-bottom: 24px;">Configurações do Sistema</h2>
-        <div class="card" style="max-width: 600px;">
-          <h3 style="margin-bottom: 12px; color: var(--dark-slate);">Gerenciamento de Dados (LocalStorage)</h3>
-          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">
-            Todos os dados estão salvos localmente no seu navegador. Você pode criar um backup ou restaurar os dados originais.
-          </p>
-          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <button class="btn btn-secondary" onclick="exportarBackup()"><i class="fa-solid fa-download"></i> Baixar Backup (JSON)</button>
-            <button class="btn btn-danger" onclick="resetarDados()"><i class="fa-solid fa-rotate-left"></i> Resetar para Dados Iniciais</button>
-          </div>
+            <!-- Indicador de Distribuição de Pontos -->
+            <div class="progress-container">
+                <div class="progress-labels">
+                    <span>Pontos Distribuídos no Período:</span>
+                    <span><strong id="hub-points-used">0.00</strong> / 25.00</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="hub-points-bar"></div>
+                </div>
+                <p id="hub-points-msg" class="points-msg"></p>
+            </div>
+
+            <!-- Grade com Opções do Hub + Botão Condicional de Recuperação Anual -->
+            <div class="hub-options-grid">
+                <button class="hub-card-btn" onclick="openCriarAtividade()">
+                    <div class="icon-circle bc-blue"><i class="fas fa-plus"></i></div>
+                    <span>Criar Atividade</span>
+                    <small>Cadastrar avaliações</small>
+                </button>
+                <button class="hub-card-btn" onclick="openVerNotas()">
+                    <div class="icon-circle bc-green"><i class="fas fa-table"></i></div>
+                    <span>Ver Notas</span>
+                    <small>Somas diretas do ano</small>
+                </button>
+                <button class="hub-card-btn" onclick="openRecuperacaoBimestral()">
+                    <div class="icon-circle bc-orange"><i class="fas fa-medal"></i></div>
+                    <span>Recuperação Bimestral</span>
+                    <small>Alunos com nota baixa</small>
+                </button>
+                <button class="hub-card-btn" id="btn-hub-rec-anual" onclick="openRecuperacaoAnual()" style="display: none;">
+                    <div class="icon-circle bc-purple"><i class="fas fa-award"></i></div>
+                    <span>Recuperação Anual</span>
+                    <small>Menos de 60 pts no ano</small>
+                </button>
+                <button class="hub-card-btn" onclick="exportBoletimCompletoPDF()">
+                    <div class="icon-circle bc-red"><i class="fas fa-file-pdf"></i></div>
+                    <span>Exportar Notas</span>
+                    <small>Tabela - 1 folha por aluno</small>
+                </button>
+            </div>
         </div>
-      </section>
+
+        <!-- TELA 3: CRIAR / GERENCIAR ATIVIDADES -->
+        <div id="screen-criar-atividade" class="screen">
+            <button class="btn-back" onclick="navigate('materia-hub')"><i class="fas fa-chevron-left"></i> Voltar ao Menu da Matéria</button>
+            
+            <div class="card-box">
+                <h3 class="box-title"><i class="fas fa-pen-nib"></i> Cadastrar Nova Avaliação</h3>
+                <div id="wrapper-form-atividade">
+                    <form id="form-atividade" onsubmit="saveAtividade(event)">
+                        <input type="hidden" id="atv-edit-id" value="">
+                        <div class="input-group">
+                            <label for="atv-nome">Nome Curto da Atividade *</label>
+                            <input type="text" id="atv-nome" required placeholder="Ex: Prova Mensal, Trabalho 1">
+                        </div>
+                        <div class="input-group">
+                            <label for="atv-valor">Valor Máximo (Pontos) *</label>
+                            <input type="number" id="atv-valor" step="0.01" min="0.01" required placeholder="Ex: 10.00">
+                        </div>
+                        <div class="activity-form-actions">
+                            <button type="submit" class="btn-submit-action" id="btn-salvar-atividade">
+                                <i class="fas fa-save"></i> Gravar e Publicar
+                            </button>
+                            <button type="button" class="btn-cancel-edit" id="btn-cancelar-edicao" onclick="cancelarEdicaoAtividade()" style="display:none;">
+                                <i class="fas fa-times"></i> Cancelar edição
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div id="alerta-bloqueio-atividade" class="info-alert danger-alert" style="display:none;">
+                    <i class="fas fa-lock"></i> Este bimestre está fechado. Não é possível cadastrar novas atividades.
+                </div>
+            </div>
+
+            <div class="section-header-block" style="margin-top: 25px;">
+                <h4 class="section-title">Quadro de Atividades e Notas</h4>
+                <p class="section-desc">Cada atividade fica lado a lado. Dentro de cada atividade aparecem, nesta ordem, <strong>Nota</strong>, <strong>Recuperação</strong> e <strong>Nota Final</strong>. A regra de recuperação continua sendo aplicada automaticamente.</p>
+            </div>
+
+            <div class="atividades-grade-wrapper">
+                <div class="atividades-grade-scroll">
+                    <table class="atividades-grade-table" id="atividades-grade-table">
+                        <thead id="atividades-grade-head"></thead>
+                        <tbody id="atividades-grade-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 4: LANÇAR NOTAS DA ATIVIDADE SELECIONADA -->
+        <div id="screen-lancar-notas" class="screen">
+            <button class="btn-back" onclick="openCriarAtividade()"><i class="fas fa-chevron-left"></i> Voltar para Quadro de Atividades</button>
+            
+            <div class="table-meta-header">
+                <h3>Lançamento Coletivo de Notas</h3>
+                <div id="lancar-notas-subtitulo" class="sub-meta"></div>
+                <input type="text" class="search-box-input" id="search-aluno-nota" placeholder="🔍 Pesquisar aluno na lista..." onkeyup="filterTable('table-notas-corpo', this.value)">
+            </div>
+
+            <div class="table-responsive-container">
+                <table class="table-custom-format">
+                    <thead>
+                        <tr>
+                            <th>Nome Completo do Estudante</th>
+                            <th style="width: 80px;">Nota Original</th>
+                            <th style="width: 80px;">Recuperação</th>
+                            <th style="width: 90px;">Nota Final</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-notas-corpo"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TELA 5: VER NOTAS (MATRIZ GERAL DA MATÉRIA COM SOMA DIRETA) -->
+        <div id="screen-ver-notas" class="screen">
+            <button class="btn-back" onclick="navigate('materia-hub')"><i class="fas fa-chevron-left"></i> Voltar ao Menu</button>
+            
+            <div class="table-meta-header">
+                <h3>Acompanhamento de Notas Totais</h3>
+                <p class="sub-meta">Soma direta e imediata das notas registradas para cada bimestre cadastrado.</p>
+                <input type="text" class="search-box-input" id="search-aluno-visao" placeholder="🔍 Pesquisar aluno..." onkeyup="filterTable('table-visao-corpo', this.value)">
+            </div>
+
+            <div class="table-responsive-container">
+                <table class="table-custom-format">
+                    <thead>
+                        <tr>
+                            <th>Nome do Estudante</th>
+                            <th style="width: 65px;">1º B</th>
+                            <th style="width: 65px;">2º B</th>
+                            <th style="width: 65px;">3º B</th>
+                            <th style="width: 65px;">4º B</th>
+                            <th style="width: 75px;">Soma Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-visao-corpo"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TELA 6: RECUPERAÇÃO BIMESTRAL -->
+        <div id="screen-rec-bimestral" class="screen">
+            <button class="btn-back" onclick="navigate('materia-hub')"><i class="fas fa-chevron-left"></i> Voltar ao Menu</button>
+            
+            <div class="table-meta-header">
+                <h3>Recuperação Bimestral Integrada</h3>
+                <p class="sub-meta">Período ativo avaliado em até 25.00 pontos. Sistema liberado apenas para alunos com nota menor que 15.00 pontos.</p>
+            </div>
+
+            <div class="table-responsive-container">
+                <table class="table-custom-format">
+                    <thead>
+                        <tr>
+                            <th>Estudante Elegível</th>
+                            <th style="width: 80px;">Nota Original</th>
+                            <th style="width: 100px;">Nota Recuperação</th>
+                            <th style="width: 90px;">Resultado Final</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-rec-bim-corpo"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TELA 11: RECUPERAÇÃO ANUAL -->
+        <div id="screen-rec-anual" class="screen">
+            <button class="btn-back" onclick="navigate('materia-hub')"><i class="fas fa-chevron-left"></i> Voltar ao Menu</button>
+            
+            <div class="table-meta-header">
+                <h3>Recuperação Anual Integrada</h3>
+                <p class="sub-meta">Avaliação anual acumulada em até 100.00 pontos. Liberada apenas para alunos que fecharam os 4 bimestres com menos de 60.00 pontos na disciplina.</p>
+            </div>
+
+            <div class="table-responsive-container">
+                <table class="table-custom-format">
+                    <thead>
+                        <tr>
+                            <th>Estudante Elegível</th>
+                            <th style="width: 80px;">Soma Anual</th>
+                            <th style="width: 100px;">Nota Rec. Anual</th>
+                            <th style="width: 90px;">Resultado Final</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-rec-anual-corpo"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TELA 7: FECHAMENTO GLOBAL DE BIMESTRES -->
+        <div id="screen-fechamento-global" class="screen">
+            <div class="card-box decoration-border">
+                <h3 class="box-title"><i class="fas fa-lock"></i> Central de Controle de Ciclo Letivo</h3>
+                <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 20px;">
+                    O fechamento bloqueia a alteração ou criação de notas em **todas as matérias** ao mesmo tempo. Para liberar o próximo bimestre, é obrigatório encerrar o atual.
+                </p>
+
+                <div class="status-fechamento-dashboard">
+                    <div class="status-row-item">
+                        <span>Bimestre Letivo Atual Ativo:</span>
+                        <strong id="admin-current-bimestre-text" class="text-blue">1º Bimestre</strong>
+                    </div>
+                </div>
+
+                <div class="timeline-lock-workflow">
+                    <div class="timeline-step-box" id="step-b1">
+                        <div class="step-info-group">
+                            <div class="step-indicator"><i class="fas fa-check-circle"></i></div>
+                            <div class="step-details"><h5>1º Bimestre</h5><p id="txt-status-b1">Aberto para Lançamentos</p></div>
+                        </div>
+                        <div id="action-step-b1"></div>
+                    </div>
+                    <div class="timeline-step-box" id="step-b2">
+                        <div class="step-info-group">
+                            <div class="step-indicator"><i class="fas fa-lock"></i></div>
+                            <div class="step-details"><h5>2º Bimestre</h5><p id="txt-status-b2">Bloqueado - Aguardando anterior</p></div>
+                        </div>
+                        <div id="action-step-b2"></div>
+                    </div>
+                    <div class="timeline-step-box" id="step-b3">
+                        <div class="step-info-group">
+                            <div class="step-indicator"><i class="fas fa-lock"></i></div>
+                            <div class="step-details"><h5>3º Bimestre</h5><p id="txt-status-b3">Bloqueado - Aguardando anterior</p></div>
+                        </div>
+                        <div id="action-step-b3"></div>
+                    </div>
+                    <div class="timeline-step-box" id="step-b4">
+                        <div class="step-info-group">
+                            <div class="step-indicator"><i class="fas fa-lock"></i></div>
+                            <div class="step-details"><h5>4º Bimestre</h5><p id="txt-status-b4">Bloqueado - Aguardando anterior</p></div>
+                        </div>
+                        <div id="action-step-b4"></div>
+                    </div>
+                </div>
+
+                <div class="action-closure-wrapper" style="margin-top: 25px;" id="container-botao-fechamento">
+                    <!-- Botão dinâmico injetado via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 8: ESTATÍSTICAS / DASHBOARD -->
+        <div id="screen-dashboard" class="screen">
+            <h3>Painel Analítico de Rendimento</h3>
+            <p class="section-desc">Métricas geradas em tempo real com base no fechamento atual do banco de dados.</p>
+            <div class="analytics-card-deck" id="analytics-deck"></div>
+            <div class="chart-container-card">
+                <canvas id="main-analytics-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- TELA 9: MANUTENÇÃO E BACKUP -->
+        <div id="screen-backup" class="screen">
+            <h3>Segurança e Sincronização dos Dados</h3>
+            <p class="section-desc">Exporte arquivos para segurança ou limpe a memória local se houver lentidão.</p>
+            
+            <div class="backup-vertical-panel">
+                <div class="backup-action-row bg-green-light" onclick="exportBackup()">
+                    <div class="action-icon-wrapper"><i class="fas fa-download"></i></div>
+                    <div class="action-text-wrapper">
+                        <h4>Exportar Cópia de Segurança (JSON)</h4>
+                        <p>Gera um arquivo com todas as notas e configurações salvas até agora.</p>
+                    </div>
+                </div>
+
+                <div class="backup-action-row bg-blue-light" onclick="document.getElementById('file-upload-input').click()">
+                    <div class="action-icon-wrapper"><i class="fas fa-upload"></i></div>
+                    <div class="action-text-wrapper">
+                        <h4>Importar Banco de Dados Externo</h4>
+                        <p>Recupera informações de um arquivo JSON salvo anteriormente.</p>
+                    </div>
+                </div>
+                <input type="file" id="file-upload-input" style="display:none;" onchange="importBackup(event)">
+
+                <div class="backup-action-row bg-red-light" onclick="cleanAllSystemData()">
+                    <div class="action-icon-wrapper"><i class="fas fa-trash-alt"></i></div>
+                    <div class="action-text-wrapper">
+                        <h4>Zerar Todo o Sistema</h4>
+                        <p>Apaga permanentemente as notas, histórico e redefine o sistema de fábrica.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
-  </main>
 
-  <!-- MODAL NOVO / EDITAR SIMULADO -->
-  <div class="modal" id="modal-simulado">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="modal-simulado-title">Criar Novo Simulado</h3>
-        <button class="close-modal" onclick="closeModal('modal-simulado')">&times;</button>
-      </div>
-      <form id="form-simulado" onsubmit="salvarSimulado(event)">
-        <input type="hidden" id="simulado-id">
-        <div class="form-group">
-          <label>Nome do Simulado:</label>
-          <input type="text" id="simulado-nome" class="form-control" placeholder="Ex: Simulado 01 ou Simulado OBMEP 2023" required>
+    <!-- MODAL DE INSTRUÇÕES DE AJUDA -->
+    <div class="modal-overlay-view" id="help-modal">
+        <div class="modal-content-container">
+            <h4>Manual Operacional Rápido</h4>
+            <hr style="margin: 10px 0; border: 0; border-top: 1px solid var(--border);">
+            <ul style="padding-left: 20px; font-size: 0.85rem; line-height: 1.5; color: var(--text-light);">
+                <li><strong>Cores Importantes:</strong> Notas exibidas em <span style="color: #2563eb; font-weight:bold;">Azul</span> representam aproveitamento igual ou superior a 60%. Notas em <span style="color: #dc2626; font-weight:bold;">Vermelho</span> sinalizam que o estudante está abaixo da média estipulada.</li>
+                <li><strong>Bloqueios:</strong> Se o bimestre foi encerrado na aba "Fechamento de Bimestre", você não conseguirá alterar nenhuma nota ou criar atividades para aquele período.</li>
+                <li><strong>Recuperações:</strong> O sistema cumpre rigorosamente as regras do diário de classe eletrônico da instituição.</li>
+            </ul>
+            <button class="btn-submit-action" style="margin-top: 15px; background: var(--secondary);" onclick="closeAjudaModal()">Entendido</button>
         </div>
-        <div class="form-group">
-          <label>Data de Início:</label>
-          <input type="date" id="simulado-data" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label>Observações:</label>
-          <textarea id="simulado-obs" class="form-control" rows="3" placeholder="Aotações sobre este simulado..."></textarea>
-        </div>
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-simulado')">Cancelar</button>
-          <button type="submit" class="btn btn-success">Salvar Simulado</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- MODAL LANÇAMENTO DE NOTAS DA PROVA -->
-  <div class="modal" id="modal-notas">
-    <div class="modal-content" style="max-width: 1050px;">
-      <div class="modal-header">
-        <div>
-          <h3 id="modal-notas-title">Lançamento de Notas</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">6 Questões de 0 a 20 pontos cada (Total: 120 pts)</p>
-        </div>
-        <button class="close-modal" onclick="closeModal('modal-notas')">&times;</button>
-      </div>
+    <!-- IMAGEM OCULTA PARA EMBUTIR NO PDF EM BASE64 -->
+    <img src="brasao.png" id="img-brasao-base64" style="display:none;" alt="Brasão Oculto">
 
-      <!-- Datas individuais por questão -->
-      <div class="question-dates-bar">
-        <div class="date-input-group">
-          <label>Q1 Data:</label>
-          <input type="date" id="date-q1" onchange="salvarDatasQuestoesAtual()">
-        </div>
-        <div class="date-input-group">
-          <label>Q2 Data:</label>
-          <input type="date" id="date-q2" onchange="salvarDatasQuestoesAtual()">
-        </div>
-        <div class="date-input-group">
-          <label>Q3 Data:</label>
-          <input type="date" id="date-q3" onchange="salvarDatasQuestoesAtual()">
-        </div>
-        <div class="date-input-group">
-          <label>Q4 Data:</label>
-          <input type="date" id="date-q4" onchange="salvarDatasQuestoesAtual()">
-        </div>
-        <div class="date-input-group">
-          <label>Q5 Data:</label>
-          <input type="date" id="date-q5" onchange="salvarDatasQuestoesAtual()">
-        </div>
-        <div class="date-input-group">
-          <label>Q6 Data:</label>
-          <input type="date" id="date-q6" onchange="salvarDatasQuestoesAtual()">
-        </div>
-      </div>
-
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Aluno</th>
-              <th style="width: 75px;">Q1 (20)</th>
-              <th style="width: 75px;">Q2 (20)</th>
-              <th style="width: 75px;">Q3 (20)</th>
-              <th style="width: 75px;">Q4 (20)</th>
-              <th style="width: 75px;">Q5 (20)</th>
-              <th style="width: 75px;">Q6 (20)</th>
-              <th>Total</th>
-              <th>Média (%)</th>
-              <th>Situação</th>
-            </tr>
-          </thead>
-          <tbody id="tabela-notas-body">
-            <!-- Renderizado via JS -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Estatísticas das Questões -->
-      <div style="margin-top: 24px; background: #f8fafc; padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-        <h4 style="margin-bottom: 12px; font-size: 0.95rem; color: var(--dark-slate);">Resumo da Prova por Questão</h4>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Métrica</th>
-                <th>Q1</th>
-                <th>Q2</th>
-                <th>Q3</th>
-                <th>Q4</th>
-                <th>Q5</th>
-                <th>Q6</th>
-              </tr>
-            </thead>
-            <tbody id="tabela-stats-questoes">
-              <!-- Renderizado via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-        <button class="btn btn-primary" onclick="closeModal('modal-notas')">Concluir Lançamentos</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT LOGIC -->
-  <script>
-    // --- ESTADO INICIAL DA APLICAÇÃO ---
-    const INITIAL_STUDENTS = [
-      { codigo: "MG31305855100343", nome: "DAVI LUCAS PAULINO DA COSTA" },
-      { codigo: "MG31305855100379", nome: "EDYLSON ANTÔNIO DO CARMO SOARES" },
-      { codigo: "MG31305855100318", nome: "EMANUEL GOMES DE QUEIROZ" },
-      { codigo: "MG31305855100367", nome: "MARIA PAULA ALVES PEREIRA" }
-    ];
-
-    let appState = {
-      alunos: [],
-      simulados: [],
-      currentSimuladoId: null
-    };
-
-    let chartEvolucaoInstance = null;
-    let chartQuestoesInstance = null;
-    let chartDesempenhoInstance = null;
-
-    // --- INICIALIZAÇÃO DA APLICAÇÃO ---
-    window.addEventListener('DOMContentLoaded', () => {
-      carregarDados();
-      renderDashboard();
-      renderSimuladosTable();
-      renderAlunosTable();
-      renderRankingTable();
-      populateRelatorioFilters();
-      renderRelatorio();
-    });
-
-    function carregarDados() {
-      const saved = localStorage.getItem('obmep_2026_data');
-      if (saved) {
-        appState = JSON.parse(saved);
-      } else {
-        // Inicializar com alunos predefinidos e um simulado de exemplo
-        appState.alunos = [...INITIAL_STUDENTS];
-        appState.simulados = [
-          {
-            id: 'sim_' + Date.now(),
-            nome: 'Simulado 01 - OBMEP 2026',
-            dataInicio: '2026-08-05',
-            observacoes: 'Simulado inicial de diagnóstico para a 2ª Fase.',
-            datasQuestoes: ['2026-08-05', '2026-08-06', '2026-08-07', '2026-08-08', '2026-08-09', '2026-08-10'],
-            notas: {
-              'MG31305855100343': { q1: 18, q2: 15, q3: 20, q4: 12.5, q5: 16, q6: 14, obs: '' },
-              'MG31305855100379': { q1: 20, q2: 18, q3: 17.5, q4: 15, q5: 19, q6: 16, obs: '' },
-              'MG31305855100318': { q1: 12, q2: 10, q3: 15, q4: 8, q5: 11, q6: 9, obs: '' },
-              'MG31305855100367': { q1: 16, q2: 14, q3: 18, q4: 16, q5: 15, q6: 17, obs: '' }
-            },
-            ultimaAlteracao: new Date().toISOString()
-          }
-        ];
-        salvarDados();
-      }
-    }
-
-    function salvarDados() {
-      localStorage.setItem('obmep_2026_data', JSON.stringify(appState));
-    }
-
-    // --- CÁLCULOS UTILITÁRIOS ---
-    function calcularPontuacaoAluno(simulado, codigo) {
-      if (!simulado.notas || !simulado.notas[codigo]) return 0;
-      const n = simulado.notas[codigo];
-      return (Number(n.q1)||0) + (Number(n.q2)||0) + (Number(n.q3)||0) + 
-             (Number(n.q4)||0) + (Number(n.q5)||0) + (Number(n.q6)||0);
-    }
-
-    function calcularSituacao(total) {
-      const pct = (total / 120) * 100;
-      if (pct >= 90) return { texto: 'Excelente', classe: 'badge-excelente' };
-      if (pct >= 75) return { texto: 'Muito Bom', classe: 'badge-muito-bom' };
-      if (pct >= 60) return { texto: 'Bom', classe: 'badge-bom' };
-      if (pct >= 40) return { texto: 'Regular', classe: 'badge-regular' };
-      return { texto: 'Precisa Melhorar', classe: 'badge-precisa-melhorar' };
-    }
-
-    // --- NAVEGAÇÃO E INTERFACE ---
-    function switchTab(tabId) {
-      // Fecha o menu lateral automaticamente em dispositivos móveis ao clicar
-      document.getElementById('sidebar').classList.remove('open');
-
-      document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
-
-      document.getElementById(`view-${tabId}`).classList.add('active');
-      if (event && event.currentTarget && event.currentTarget.parentElement) {
-        event.currentTarget.parentElement.classList.add('active');
-      }
-
-      const titles = {
-        'dashboard': 'Dashboard da Turma',
-        'simulados': 'Gerenciamento de Simulados',
-        'alunos': 'Cadastro e Desempenho dos Alunos',
-        'ranking': 'Ranking Geral da Turma',
-        'relatorios': 'Relatórios e Análises',
-        'configuracoes': 'Configurações do Sistema'
-      };
-      document.getElementById('page-title').innerText = titles[tabId] || 'OBMEP 2026';
-
-      if (tabId === 'dashboard') renderDashboard();
-      if (tabId === 'simulados') renderSimuladosTable();
-      if (tabId === 'alunos') renderAlunosTable();
-      if (tabId === 'ranking') renderRankingTable();
-      if (tabId === 'relatorios') { populateRelatorioFilters(); renderRelatorio(); }
-    }
-
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
-
-    // --- DASHBOARD ---
-    function renderDashboard() {
-      const simulados = appState.simulados;
-      const alunos = appState.alunos;
-
-      document.getElementById('dash-total-simulados').innerText = simulados.length;
-      document.getElementById('dash-total-alunos').innerText = alunos.length;
-
-      let somaTotais = 0;
-      let countTotais = 0;
-      let maiorNotaGlobal = 0;
-      let menorNotaGlobal = 120;
-      let totalQuestoesRespondidas = 0;
-
-      simulados.forEach(sim => {
-        alunos.forEach(aluno => {
-          if (sim.notas && sim.notas[aluno.codigo]) {
-            const tot = calcularPontuacaoAluno(sim, aluno.codigo);
-            somaTotais += tot;
-            countTotais++;
-            if (tot > maiorNotaGlobal) maiorNotaGlobal = tot;
-            if (tot < menorNotaGlobal) menorNotaGlobal = tot;
-
-            // Contar questões respondidas
-            const n = sim.notas[aluno.codigo];
-            ['q1','q2','q3','q4','q5','q6'].forEach(q => {
-              if (n[q] !== undefined && n[q] !== '' && n[q] !== null) totalQuestoesRespondidas++;
-            });
-          }
-        });
-      });
-
-      const mediaGeralPct = countTotais > 0 ? ((somaTotais / (countTotais * 120)) * 100).toFixed(1) : '0.0';
-      document.getElementById('dash-media-geral').innerText = `${mediaGeralPct}%`;
-      document.getElementById('dash-melhor-nota').innerText = countTotais > 0 ? `${maiorNotaGlobal} pts` : '0 pts';
-      document.getElementById('dash-pior-nota').innerText = countTotais > 0 ? `${menorNotaGlobal} pts` : '0 pts';
-      document.getElementById('dash-total-questoes').innerText = totalQuestoesRespondidas;
-
-      renderCharts();
-    }
-
-    // --- GRÁFICOS (CHART.JS) ---
-    function renderCharts() {
-      const labelsSimulados = appState.simulados.map(s => s.nome);
-      
-      // 1. Evolução da Média
-      const mediasSimulados = appState.simulados.map(sim => {
-        let soma = 0;
-        let count = 0;
-        appState.alunos.forEach(a => {
-          if (sim.notas && sim.notas[a.codigo]) {
-            soma += calcularPontuacaoAluno(sim, a.codigo);
-            count++;
-          }
-        });
-        return count > 0 ? Number(((soma / (count * 120)) * 100).toFixed(1)) : 0;
-      });
-
-      const ctxEvolucao = document.getElementById('chartEvolucaoMedia').getContext('2d');
-      if (chartEvolucaoInstance) chartEvolucaoInstance.destroy();
-      chartEvolucaoInstance = new Chart(ctxEvolucao, {
-        type: 'line',
-        data: {
-          labels: labelsSimulados,
-          datasets: [{
-            label: 'Média da Turma (%)',
-            data: mediasSimulados,
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-            fill: true,
-            tension: 0.3,
-            borderWidth: 3
-          }]
-        },
-        options: { responsive: true, scales: { y: { min: 0, max: 100 } } }
-      });
-
-      // 2. Média por Questão
-      const mediasQuestoes = [1, 2, 3, 4, 5, 6].map(qNum => {
-        let soma = 0;
-        let count = 0;
-        const qKey = `q${qNum}`;
-        appState.simulados.forEach(sim => {
-          appState.alunos.forEach(a => {
-            if (sim.notas && sim.notas[a.codigo] && sim.notas[a.codigo][qKey] !== undefined) {
-              soma += Number(sim.notas[a.codigo][qKey]) || 0;
-              count++;
-            }
-          });
-        });
-        return count > 0 ? Number((soma / count).toFixed(1)) : 0;
-      });
-
-      const ctxQuestoes = document.getElementById('chartMediaQuestoes').getContext('2d');
-      if (chartQuestoesInstance) chartQuestoesInstance.destroy();
-      chartQuestoesInstance = new Chart(ctxQuestoes, {
-        type: 'bar',
-        data: {
-          labels: ['Questão 1', 'Questão 2', 'Questão 3', 'Questão 4', 'Questão 5', 'Questão 6'],
-          datasets: [{
-            label: 'Média de Pontos (Máx 20)',
-            data: mediasQuestoes,
-            backgroundColor: '#059669',
-            borderRadius: 6
-          }]
-        },
-        options: { responsive: true, scales: { y: { min: 0, max: 20 } } }
-      });
-
-      // 3. Desempenho Individual por Aluno
-      const datasetsAlunos = appState.alunos.map((aluno, index) => {
-        const colors = ['#2563eb', '#059669', '#d97706', '#dc2626', '#8b5cf6'];
-        const data = appState.simulados.map(sim => calcularPontuacaoAluno(sim, aluno.codigo));
-        return {
-          label: aluno.nome.split(' ')[0] + ' ' + (aluno.nome.split(' ')[1] || ''),
-          data: data,
-          borderColor: colors[index % colors.length],
-          backgroundColor: colors[index % colors.length],
-          tension: 0.2
-        };
-      });
-
-      const ctxDesempenho = document.getElementById('chartDesempenhoAlunos').getContext('2d');
-      if (chartDesempenhoInstance) chartDesempenhoInstance.destroy();
-      chartDesempenhoInstance = new Chart(ctxDesempenho, {
-        type: 'line',
-        data: { labels: labelsSimulados, datasets: datasetsAlunos },
-        options: { responsive: true, scales: { y: { min: 0, max: 120 } } }
-      });
-    }
-
-    // --- GERENCIAMENTO DE SIMULADOS ---
-    function renderSimuladosTable() {
-      const tbody = document.getElementById('lista-simulados-body');
-      tbody.innerHTML = '';
-
-      if (appState.simulados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Nenhum simulado cadastrado.</td></tr>`;
-        return;
-      }
-
-      appState.simulados.forEach(sim => {
-        let soma = 0, count = 0, maior = 0, menor = 120;
-        appState.alunos.forEach(a => {
-          if (sim.notas && sim.notas[a.codigo]) {
-            const tot = calcularPontuacaoAluno(sim, a.codigo);
-            soma += tot;
-            count++;
-            if (tot > maior) maior = tot;
-            if (tot < menor) menor = tot;
-          }
-        });
-
-        const mediaPct = count > 0 ? ((soma / (count * 120)) * 100).toFixed(1) : '0.0';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${sim.nome}</strong></td>
-          <td>${formatarData(sim.dataInicio)}</td>
-          <td><span class="badge badge-muito-bom">${mediaPct}%</span></td>
-          <td><strong style="color: var(--accent-green);">${count > 0 ? maior : 0} pts</strong></td>
-          <td><strong style="color: #dc2626;">${count > 0 ? menor : 0} pts</strong></td>
-          <td>
-            <button class="btn btn-primary btn-sm" onclick="openModalNotas('${sim.id}')"><i class="fa-solid fa-pen-to-square"></i> Notas</button>
-            <button class="btn btn-secondary btn-sm" onclick="duplicarSimulado('${sim.id}')"><i class="fa-solid fa-copy"></i> Duplicar</button>
-            <button class="btn btn-danger btn-sm" onclick="excluirSimulado('${sim.id}')"><i class="fa-solid fa-trash"></i></button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function openModalNovoSimulado() {
-      document.getElementById('simulado-id').value = '';
-      document.getElementById('simulado-nome').value = '';
-      document.getElementById('simulado-data').value = new Date().toISOString().split('T')[0];
-      document.getElementById('simulado-obs').value = '';
-      document.getElementById('modal-simulado-title').innerText = 'Criar Novo Simulado';
-      document.getElementById('modal-simulado').classList.add('active');
-    }
-
-    function salvarSimulado(e) {
-      e.preventDefault();
-      const id = document.getElementById('simulado-id').value;
-      const nome = document.getElementById('simulado-nome').value;
-      const dataInicio = document.getElementById('simulado-data').value;
-      const observacoes = document.getElementById('simulado-obs').value;
-
-      if (id) {
-        // Editar
-        const sim = appState.simulados.find(s => s.id === id);
-        if (sim) {
-          sim.nome = nome;
-          sim.dataInicio = dataInicio;
-          sim.observacoes = observacoes;
-          sim.ultimaAlteracao = new Date().toISOString();
-        }
-      } else {
-        // Criar Novo
-        const newSim = {
-          id: 'sim_' + Date.now(),
-          nome: nome,
-          dataInicio: dataInicio,
-          observacoes: observacoes,
-          datasQuestoes: [dataInicio, dataInicio, dataInicio, dataInicio, dataInicio, dataInicio],
-          notas: {},
-          ultimaAlteracao: new Date().toISOString()
-        };
-        // Inicializar notas dos alunos
-        appState.alunos.forEach(a => {
-          newSim.notas[a.codigo] = { q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, obs: '' };
-        });
-        appState.simulados.push(newSim);
-      }
-
-      salvarDados();
-      closeModal('modal-simulado');
-      renderSimuladosTable();
-      renderDashboard();
-    }
-
-    function duplicarSimulado(id) {
-      const original = appState.simulados.find(s => s.id === id);
-      if (!original) return;
-      const novo = JSON.parse(JSON.stringify(original));
-      novo.id = 'sim_' + Date.now();
-      novo.nome = original.nome + ' (Cópia)';
-      novo.ultimaAlteracao = new Date().toISOString();
-      appState.simulados.push(novo);
-      salvarDados();
-      renderSimuladosTable();
-      renderDashboard();
-    }
-
-    function excluirSimulado(id) {
-      if (confirm('Tem certeza que deseja excluir este simulado? Os dados lançados serão perdidos.')) {
-        appState.simulados = appState.simulados.filter(s => s.id !== id);
-        salvarDados();
-        renderSimuladosTable();
-        renderDashboard();
-      }
-    }
-
-    // --- LANÇAMENTO DE NOTAS ---
-    function openModalNotas(simuladoId) {
-      appState.currentSimuladoId = simuladoId;
-      const sim = appState.simulados.find(s => s.id === simuladoId);
-      if (!sim) return;
-
-      document.getElementById('modal-notas-title').innerText = `Lançamento de Notas - ${sim.nome}`;
-
-      // Carregar datas das questões
-      const datas = sim.datasQuestoes || [sim.dataInicio, sim.dataInicio, sim.dataInicio, sim.dataInicio, sim.dataInicio, sim.dataInicio];
-      for (let i = 1; i <= 6; i++) {
-        document.getElementById(`date-q${i}`).value = datas[i - 1] || sim.dataInicio;
-      }
-
-      renderTabelaNotas(sim);
-      document.getElementById('modal-notas').classList.add('active');
-    }
-
-    function salvarDatasQuestoesAtual() {
-      const sim = appState.simulados.find(s => s.id === appState.currentSimuladoId);
-      if (!sim) return;
-      sim.datasQuestoes = [];
-      for (let i = 1; i <= 6; i++) {
-        sim.datasQuestoes.push(document.getElementById(`date-q${i}`).value);
-      }
-      sim.ultimaAlteracao = new Date().toISOString();
-      salvarDados();
-    }
-
-    function renderTabelaNotas(sim) {
-      const tbody = document.getElementById('tabela-notas-body');
-      tbody.innerHTML = '';
-
-      appState.alunos.forEach(aluno => {
-        if (!sim.notas[aluno.codigo]) {
-          sim.notas[aluno.codigo] = { q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, obs: '' };
-        }
-        const n = sim.notas[aluno.codigo];
-        const total = calcularPontuacaoAluno(sim, aluno.codigo);
-        const pct = ((total / 120) * 100).toFixed(1);
-        const sit = calcularSituacao(total);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="font-size: 0.8rem; color: var(--text-muted);">${aluno.codigo}</td>
-          <td><strong>${aluno.nome}</strong></td>
-          ${[1,2,3,4,5,6].map(q => {
-            const val = n[`q${q}`] !== undefined ? n[`q${q}`] : '';
-            const cls = val == 20 ? 'score-max' : (val !== '' && val < 8 ? 'score-low' : '');
-            return `<td>
-              <input type="number" step="0.25" min="0" max="20" class="form-control ${cls}" style="padding: 4px 6px; text-align: center;" 
-                value="${val}" onchange="atualizarNotaInput('${aluno.codigo}', 'q${q}', this.value)">
-            </td>`;
-          }).join('')}
-          <td><strong id="total-${aluno.codigo}">${total}</strong></td>
-          <td id="pct-${aluno.codigo}">${pct}%</td>
-          <td><span id="badge-${aluno.codigo}" class="badge ${sit.classe}">${sit.texto}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      renderEstatisticasQuestoesModal(sim);
-    }
-
-    function atualizarNotaInput(codigoAluno, qKey, val) {
-      const sim = appState.simulados.find(s => s.id === appState.currentSimuladoId);
-      if (!sim) return;
-
-      let num = parseFloat(val);
-      if (isNaN(num)) num = 0;
-      if (num < 0) num = 0;
-      if (num > 20) num = 20;
-
-      sim.notas[codigoAluno][qKey] = num;
-      sim.ultimaAlteracao = new Date().toISOString();
-      salvarDados();
-
-      // Atualizar Totais da linha em tempo real
-      const total = calcularPontuacaoAluno(sim, codigoAluno);
-      const pct = ((total / 120) * 100).toFixed(1);
-      const sit = calcularSituacao(total);
-
-      document.getElementById(`total-${codigoAluno}`).innerText = total;
-      document.getElementById(`pct-${codigoAluno}`).innerText = `${pct}%`;
-      const badge = document.getElementById(`badge-${codigoAluno}`);
-      badge.className = `badge ${sit.classe}`;
-      badge.innerText = sit.texto;
-
-      renderEstatisticasQuestoesModal(sim);
-      renderDashboard();
-    }
-
-    function renderEstatisticasQuestoesModal(sim) {
-      const tbody = document.getElementById('tabela-stats-questoes');
-      tbody.innerHTML = '';
-
-      const stats = { media: [], maior: [], menor: [], count: [] };
-
-      for (let i = 1; i <= 6; i++) {
-        const qKey = `q${i}`;
-        let soma = 0, count = 0, max = 0, min = 20;
-
-        appState.alunos.forEach(a => {
-          if (sim.notas && sim.notas[a.codigo]) {
-            const val = Number(sim.notas[a.codigo][qKey]);
-            if (!isNaN(val)) {
-              soma += val;
-              count++;
-              if (val > max) max = val;
-              if (val < min) min = val;
-            }
-          }
-        });
-
-        stats.media.push(count > 0 ? (soma / count).toFixed(1) : 0);
-        stats.maior.push(count > 0 ? max : 0);
-        stats.menor.push(count > 0 ? min : 0);
-        stats.count.push(count);
-      }
-
-      tbody.innerHTML = `
-        <tr><td><strong>Média</strong></td>${stats.media.map(v => `<td>${v} pts</td>`).join('')}</tr>
-        <tr><td><strong>Maior Nota</strong></td>${stats.maior.map(v => `<td style="color:var(--accent-green); font-weight:700;">${v}</td>`).join('')}</tr>
-        <tr><td><strong>Menor Nota</strong></td>${stats.menor.map(v => `<td style="color:#dc2626; font-weight:700;">${v}</td>`).join('')}</tr>
-        <tr><td><strong>Lançados</strong></td>${stats.count.map(v => `<td>${v}/${appState.alunos.length}</td>`).join('')}</tr>
-      `;
-    }
-
-    // --- ALUNOS ---
-    function renderAlunosTable() {
-      const tbody = document.getElementById('lista-alunos-body');
-      tbody.innerHTML = '';
-      const filterText = document.getElementById('search-aluno').value.toLowerCase();
-
-      appState.alunos.filter(a => a.nome.toLowerCase().includes(filterText) || a.codigo.toLowerCase().includes(filterText))
-      .forEach(aluno => {
-        let somaTotal = 0;
-        let simuladosFeitos = 0;
-
-        appState.simulados.forEach(sim => {
-          if (sim.notas && sim.notas[aluno.codigo]) {
-            somaTotal += calcularPontuacaoAluno(sim, aluno.codigo);
-            simuladosFeitos++;
-          }
-        });
-
-        const mediaPct = simuladosFeitos > 0 ? ((somaTotal / (simuladosFeitos * 120)) * 100).toFixed(1) : '0.0';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><code>${aluno.codigo}</code></td>
-          <td><strong>${aluno.nome}</strong></td>
-          <td>${simuladosFeitos} / ${appState.simulados.length}</td>
-          <td>${somaTotal} pts</td>
-          <td><span class="badge badge-muito-bom">${mediaPct}%</span></td>
-          <td>
-            <button class="btn btn-secondary btn-sm" onclick="verHistoricoAluno('${aluno.codigo}')"><i class="fa-solid fa-clock-rotate-left"></i> Histórico</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function verHistoricoAluno(codigo) {
-      switchTab('relatorios');
-      document.getElementById('filter-relatorio-aluno').value = codigo;
-      document.getElementById('filter-relatorio-simulado').value = 'todos';
-      renderRelatorio();
-    }
-
-    // --- RANKING ---
-    function renderRankingTable() {
-      const tbody = document.getElementById('lista-ranking-body');
-      tbody.innerHTML = '';
-
-      const rankingData = appState.alunos.map(aluno => {
-        let somaTotal = 0;
-        let simuladosFeitos = 0;
-        let melhorNota = 0;
-
-        appState.simulados.forEach(sim => {
-          if (sim.notas && sim.notas[aluno.codigo]) {
-            const tot = calcularPontuacaoAluno(sim, aluno.codigo);
-            somaTotal += tot;
-            simuladosFeitos++;
-            if (tot > melhorNota) melhorNota = tot;
-          }
-        });
-
-        const mediaPct = simuladosFeitos > 0 ? Number(((somaTotal / (simuladosFeitos * 120)) * 100).toFixed(1)) : 0;
-
-        return {
-          aluno: aluno,
-          somaTotal: somaTotal,
-          simuladosFeitos: simuladosFeitos,
-          melhorNota: melhorNota,
-          mediaPct: mediaPct
-        };
-      });
-
-      // Ordenar por Média Percentual Decrescente
-      rankingData.sort((a, b) => b.mediaPct - a.mediaPct);
-
-      const medalhas = ['🥇 1º', '🥈 2º', '🥉 3º'];
-
-      rankingData.forEach((item, index) => {
-        const pos = index < 3 ? `<strong>${medalhas[index]}</strong>` : `${index + 1}º`;
-        const sit = calcularSituacao(item.mediaPct * 1.2);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="font-size: 1.1rem;">${pos}</td>
-          <td><strong>${item.aluno.nome}</strong><br><small style="color:var(--text-muted);">${item.aluno.codigo}</small></td>
-          <td><strong>${item.somaTotal} pts</strong></td>
-          <td><span class="badge badge-excelente" style="font-size: 0.85rem;">${item.mediaPct}%</span></td>
-          <td>${item.simuladosFeitos}</td>
-          <td>${item.melhorNota} pts</td>
-          <td><span class="badge ${sit.classe}">${sit.texto}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // --- RELATÓRIOS ---
-    function populateRelatorioFilters() {
-      const selSim = document.getElementById('filter-relatorio-simulado');
-      const selAluno = document.getElementById('filter-relatorio-aluno');
-
-      selSim.innerHTML = '<option value="todos">Todos os Simulados</option>';
-      appState.simulados.forEach(s => {
-        selSim.innerHTML += `<option value="${s.id}">${s.nome}</option>`;
-      });
-
-      selAluno.innerHTML = '<option value="todos">Todos os Alunos</option>';
-      appState.alunos.forEach(a => {
-        selAluno.innerHTML += `<option value="${a.codigo}">${a.nome}</option>`;
-      });
-    }
-
-    function renderRelatorio() {
-      const simId = document.getElementById('filter-relatorio-simulado').value;
-      const alunoCod = document.getElementById('filter-relatorio-aluno').value;
-      const container = document.getElementById('area-relatorio');
-
-      let html = `
-        <div style="padding: 20px; background: white;">
-          <h2 style="color: var(--primary-blue); margin-bottom: 8px;">Relatório de Desempenho - OBMEP 2026</h2>
-          <p style="color: var(--text-muted); margin-bottom: 20px;">Nível 1 - 7º Ano | Prova Amarela | Emitido em: ${new Date().toLocaleDateString('pt-BR')}</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Simulado</th>
-                <th>Data Q1..Q6</th>
-                <th>Código Aluno</th>
-                <th>Nome do Aluno</th>
-                <th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Q5</th><th>Q6</th>
-                <th>Total</th>
-                <th>%</th>
-                <th>Situação</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      appState.simulados.forEach(sim => {
-        if (simId !== 'todos' && sim.id !== simId) return;
-
-        appState.alunos.forEach(aluno => {
-          if (alunoCod !== 'todos' && aluno.codigo !== alunoCod) return;
-
-          const n = sim.notas && sim.notas[aluno.codigo] ? sim.notas[aluno.codigo] : {q1:0,q2:0,q3:0,q4:0,q5:0,q6:0};
-          const total = calcularPontuacaoAluno(sim, aluno.codigo);
-          const pct = ((total / 120) * 100).toFixed(1);
-          const sit = calcularSituacao(total);
-          const datasStr = sim.datasQuestoes ? `${formatarData(sim.datasQuestoes[0])} a ${formatarData(sim.datasQuestoes[5])}` : formatarData(sim.dataInicio);
-
-          html += `
-            <tr>
-              <td><strong>${sim.nome}</strong></td>
-              <td style="font-size:0.75rem;">${datasStr}</td>
-              <td><code>${aluno.codigo}</code></td>
-              <td>${aluno.nome}</td>
-              <td>${n.q1||0}</td><td>${n.q2||0}</td><td>${n.q3||0}</td><td>${n.q4||0}</td><td>${n.q5||0}</td><td>${n.q6||0}</td>
-              <td><strong>${total}</strong></td>
-              <td>${pct}%</td>
-              <td><span class="badge ${sit.classe}">${sit.texto}</span></td>
-            </tr>
-          `;
-        });
-      });
-
-      html += `</tbody></table></div>`;
-      container.innerHTML = html;
-    }
-
-    // --- EXPORTAÇÃO E BACKUP ---
-    function formatarData(dataIso) {
-      if (!dataIso) return '-';
-      const parts = dataIso.split('-');
-      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      return dataIso;
-    }
-
-    function exportarCSV() {
-      let csv = 'Simulado;Data;Codigo;Aluno;Q1;Q2;Q3;Q4;Q5;Q6;Total;Percentual;Situacao\n';
-
-      appState.simulados.forEach(sim => {
-        appState.alunos.forEach(aluno => {
-          const n = sim.notas && sim.notas[aluno.codigo] ? sim.notas[aluno.codigo] : {q1:0,q2:0,q3:0,q4:0,q5:0,q6:0};
-          const total = calcularPontuacaoAluno(sim, aluno.codigo);
-          const pct = ((total / 120) * 100).toFixed(1);
-          const sit = calcularSituacao(total).texto;
-
-          csv += `"${sim.nome}";"${sim.dataInicio}";"${aluno.codigo}";"${aluno.nome}";${n.q1||0};${n.q2||0};${n.q3||0};${n.q4||0};${n.q5||0};${n.q6||0};${total};"${pct}%";"${sit}"\n`;
-        });
-      });
-
-      const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Relatorio_OBMEP_2026_${new Date().toISOString().split('T')[0]}.csv`;
-      a.click();
-    }
-
-    function exportarBackup() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
-      const a = document.createElement('a');
-      a.href = dataStr;
-      a.download = `backup_obmep_2026_${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-    }
-
-    function resetarDados() {
-      if (confirm('Deseja restaurar o sistema para as configurações iniciais com os 4 alunos cadastrados? Todos os dados customizados serão sobrescritos.')) {
-        localStorage.removeItem('obmep_2026_data');
-        carregarDados();
-        renderDashboard();
-        renderSimuladosTable();
-        renderAlunosTable();
-        renderRankingTable();
-        alert('Dados restaurados com sucesso!');
-      }
-    }
-  </script>
+    <script src="script.js"></script>
 </body>
 </html>
