@@ -535,9 +535,24 @@ function buscarLancamentoNotasInline(){
 function atualizarNotaInline(input){
     const aluno=input.dataset.aluno,atvId=input.dataset.atv,atv=db.disciplinas[selectedMateria][selectedBimestre].atividades.find(a=>a.id===atvId);if(!atv)return;
     if(!atv.notas)atv.notas={};if(!atv.notas[aluno])atv.notas[aluno]={notaOrig:'',notaRec:'',notaFinal:0};
-    const campo=input.dataset.campo,max=Number(input.dataset.max),raw=String(input.value||'').replace(',','.').trim();
-    atv.notas[aluno][campo]=raw===''?'':Math.max(0,Math.min(max,Math.round((Number(raw)||0)*10)/10));
-    if(raw!=='')input.value=atv.notas[aluno][campo];
+    const campo=input.dataset.campo,max=Number(input.dataset.max);
+    let exibicao=String(input.value??'').replace(/[^0-9.,]/g,'');
+    exibicao=exibicao.replace(/,/g,'.');
+    const partes=exibicao.split('.');
+    if(partes.length>2)exibicao=partes[0]+'.'+partes.slice(1).join('');
+    input.value=exibicao;
+    // Mantém o separador decimal durante a digitação (ex.: "7." ou "7,").
+    if(exibicao===''||/^\d+\.$/.test(exibicao)){
+        atv.notas[aluno][campo]=exibicao===' '?'':(exibicao===''?'':exibicao);
+        if(exibicao==='')atv.notas[aluno][campo]='';
+    }else{
+        const numero=Number(exibicao);
+        if(Number.isFinite(numero)){
+            const limitado=Math.max(0,Math.min(max,Math.round(numero*10)/10));
+            atv.notas[aluno][campo]=limitado;
+            input.value=String(limitado).replace('.',',');
+        }
+    }
     recalcularNotasDaAtividade(atv);
     const nd=atv.notas[aluno],corte=max*CONFIG.passingScorePct,rec=document.querySelector(`.rec-inline-input[data-aluno="${CSS.escape(aluno)}"][data-atv="${CSS.escape(atvId)}"]`),fin=document.getElementById(`inline-final-${safeId(atvId)}-${safeId(aluno)}`);
     if(rec){rec.value=nd.notaRec??'';rec.disabled=(nd.notaOrig!==''&&Number(nd.notaOrig)>=corte)||!!db.configGlobal.bimestresFechados[selectedBimestre];}
