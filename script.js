@@ -536,28 +536,19 @@ function atualizarNotaInline(input){
     const aluno=input.dataset.aluno,atvId=input.dataset.atv,atv=db.disciplinas[selectedMateria][selectedBimestre].atividades.find(a=>a.id===atvId);if(!atv)return;
     if(!atv.notas)atv.notas={};if(!atv.notas[aluno])atv.notas[aluno]={notaOrig:'',notaRec:'',notaFinal:0};
     const campo=input.dataset.campo,max=Number(input.dataset.max);
-    let exibicao=String(input.value??'').replace(/[^0-9.,]/g,'');
-    exibicao=exibicao.replace(/,/g,'.');
-    const partes=exibicao.split('.');
-    if(partes.length>2)exibicao=partes[0]+'.'+partes.slice(1).join('');
+    let exibicao=String(input.value??'').replace(/[^0-9.,]/g,'').replace(/,/g,'.');
+    const primeiroPonto=exibicao.indexOf('.');
+    if(primeiroPonto>=0)exibicao=exibicao.slice(0,primeiroPonto+1)+exibicao.slice(primeiroPonto+1).replace(/\./g,'');
+    if(primeiroPonto>=0&&exibicao.length-primeiroPonto-1>2)exibicao=exibicao.slice(0,primeiroPonto+3);
     input.value=exibicao;
-    // Mantém o separador decimal durante a digitação (ex.: "7." ou "7,").
-    if(exibicao===''||/^\d+\.$/.test(exibicao)){
-        atv.notas[aluno][campo]=exibicao===' '?'':(exibicao===''?'':exibicao);
-        if(exibicao==='')atv.notas[aluno][campo]='';
-    }else{
-        const numero=Number(exibicao);
-        if(Number.isFinite(numero)){
-            const limitado=Math.max(0,Math.min(max,Math.round(numero*10)/10));
-            atv.notas[aluno][campo]=limitado;
-            input.value=String(limitado).replace('.',',');
-        }
-    }
+    if(exibicao==='')atv.notas[aluno][campo]='';
+    else if(/^\d+\.$/.test(exibicao))atv.notas[aluno][campo]=exibicao;
+    else{const numero=Number(exibicao);if(Number.isFinite(numero))atv.notas[aluno][campo]=Math.max(0,Math.min(max,numero));}
     recalcularNotasDaAtividade(atv);
     const nd=atv.notas[aluno],corte=max*CONFIG.passingScorePct,rec=document.querySelector(`.rec-inline-input[data-aluno="${CSS.escape(aluno)}"][data-atv="${CSS.escape(atvId)}"]`),fin=document.getElementById(`inline-final-${safeId(atvId)}-${safeId(aluno)}`);
     if(rec){rec.value=nd.notaRec??'';rec.disabled=(nd.notaOrig!==''&&Number(nd.notaOrig)>=corte)||!!db.configGlobal.bimestresFechados[selectedBimestre];}
     if(fin){fin.textContent=(Number(nd.notaFinal)||0).toFixed(2);fin.className='nota-final-value '+((Number(nd.notaFinal)||0)>=corte?'nota-alta':'nota-baixa');}
-    const btotal=(db.disciplinas[selectedMateria][selectedBimestre].atividades||[]).reduce((s,a)=>s+(Number(a.notas?.[aluno]?.notaFinal)||0),0),bt=document.getElementById(`inline-bim-${safeId(aluno)}`);if(bt)bt.textContent=btotal.toFixed(2);
+    const btotal=(db.disciplinas[selectedMateria][selectedBimestre].atividades||[]).reduce((sum,a)=>sum+(Number(a.notas?.[aluno]?.notaFinal)||0),0),bt=document.getElementById(`inline-bim-${safeId(aluno)}`);if(bt)bt.textContent=btotal.toFixed(2);
     saveStorage();
 }
 function salvarLancamentoNotasInline(){
@@ -1392,13 +1383,13 @@ function renderNotasTable(atv) {
         tr.innerHTML = `
             <td><strong>${getCadastroAluno(aluno).matricula} • ${aluno}</strong><small class="student-enrollment-date">Matrícula: ${formatarDataMatricula(getCadastroAluno(aluno).dataMatricula)}${getCadastroAluno(aluno).dataNascimento ? ` • Nasc.: ${formatarDataNascimento(getCadastroAluno(aluno).dataNascimento)}` : ""}</small></td>
             <td>
-                <input type="number" step="0.01" min="0" max="${atv.valor}" 
+                <input type="text" inputmode="decimal" maxlength="6" 
                     value="${nData.notaOrig}" 
                     ${isFechado ? 'disabled' : ''} 
                     oninput="autoSaveNotaEngine('${aluno}', 'notaOrig', this, ${atv.valor})" onkeydown="avancarCampoComEnter(event)">
             </td>
             <td>
-                <input type="number" step="0.01" min="0" max="${atv.valor}" 
+                <input type="text" inputmode="decimal" maxlength="6" 
                     value="${nData.notaRec}" 
                     id="rec-in-${aluno.replace(/ /g, '_')}" 
                     ${isBlockedRec || isFechado ? 'disabled' : ''} 
@@ -1414,18 +1405,20 @@ function renderNotasTable(atv) {
 
 function autoSaveNotaEngine(aluno, campo, input, valorAtv) {
     const atv = db.disciplinas[selectedMateria][selectedBimestre].atividades.find(a => a.id === selectedAtividadeId);
-    let valStr = input.value.replace(',', '.');
-    
-    if (valStr === "") {
-        atv.notas[aluno][campo] = "";
-    } else {
-        let numeric = parseFloat(valStr);
-        if (numeric > valorAtv) numeric = valorAtv;
-        if (numeric < 0) numeric = 0;
-        atv.notas[aluno][campo] = numeric;
-        input.value = numeric;
+    let valStr = String(input.value || '').replace(/[^0-9.,]/g, '').replace(/,/g, '.');
+    const ponto = valStr.indexOf('.');
+    if (ponto >= 0) {
+        valStr = valStr.slice(0, ponto + 1) + valStr.slice(ponto + 1).replace(/\./g, '');
+        if (valStr.length - ponto - 1 > 2) valStr = valStr.slice(0, ponto + 3);
     }
-
+    input.value = valStr;
+    if (valStr === "") atv.notas[aluno][campo] = "";
+    else if (/^\d+\.$/.test(valStr)) atv.notas[aluno][campo] = valStr;
+    else {
+        let numeric = Number(valStr);
+        if (!Number.isFinite(numeric)) numeric = 0;
+        atv.notas[aluno][campo] = Math.max(0, Math.min(valorAtv, numeric));
+    }
     const nData = atv.notas[aluno];
     const recInput = document.getElementById(`rec-in-${aluno.replace(/ /g, '_')}`);
     const displayFinal = document.getElementById(`final-disp-${aluno.replace(/ /g, '_')}`);
@@ -1567,7 +1560,7 @@ function openRecuperacaoBimestral() {
                 <td><strong>${aluno}</strong></td>
                 <td class="nota-baixa">${notaOrigBimestre.toFixed(2)}</td>
                 <td>
-                    <input type="number" step="0.01" min="0" max="25" 
+                    <input type="text" inputmode="decimal" maxlength="6" 
                         value="${currentRecVal}" 
                         ${isFechado ? 'disabled' : ''} 
                         oninput="saveRecBimestralAuto('${aluno}', this, ${notaOrigBimestre})">
@@ -1664,7 +1657,7 @@ function openRecuperacaoAnual() {
                 <td><strong>${aluno}</strong></td>
                 <td class="nota-baixa">${totalAnual.toFixed(2)}</td>
                 <td>
-                    <input type="number" step="0.01" min="0" max="100" 
+                    <input type="text" inputmode="decimal" maxlength="7" 
                         value="${currentRecVal}" 
                         oninput="saveRecAnualAuto('${aluno}', this, ${totalAnual})">
                 </td>
