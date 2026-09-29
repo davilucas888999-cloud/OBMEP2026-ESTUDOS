@@ -1874,3 +1874,14 @@ select,input,button,.card-box,.table-meta-header,.table-responsive-container,.di
 #screen-nota-final-disciplina .nota-final-disc-table thead th{background:#2b4e80;color:#fff;border-color:#2b4e80;}
 #screen-nota-final-disciplina .nota-final-disc-table tbody tr:hover{background:#f3f7fc;}
 #screen-nota-final-disciplina .nota-final-disc-table td:last-child{font-weight:700;color:#2b4e80;}
+
+
+/* CORES DE CORTE: abaixo de 60% vermelho; 60% ou mais preto */
+.nota-abaixo-corte { color:#b00000 !important; }
+.nota-no-corte { color:#111111 !important; }
+.situacao-abaixo-corte { color:#b00000 !important; }
+.situacao-no-corte { color:#111111 !important; }
+.nota-baixa { color:#b00000 !important; }
+.nota-alta { color:#111111 !important; }
+.nota-final-value.nota-baixa { color:#b00000 !important; }
+.nota-final-value.nota-alta { color:#111111 !important; }

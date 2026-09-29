@@ -583,7 +583,7 @@ function buscarNotaFinalDisciplina(){
  garantirEstruturaFaltas();const disciplina=document.getElementById('final-disciplina-select')?.value,corpo=document.getElementById('table-nota-final-disciplina-corpo');if(!disciplina){alert('Selecione a DISCIPLINA antes de buscar.');return;}
  const tabela=document.querySelector('#screen-nota-final-disciplina .nota-final-disc-table');if(tabela)tabela.style.display='table';
  const todosFechados=[1,2,3,4].every(b=>db.configGlobal.bimestresFechados[b]);
- corpo.innerHTML=ALUNOS.map(aluno=>{const notas=[1,2,3,4].map(b=>getNotaFinalBimestre(disciplina,b,aluno)),faltas=[1,2,3,4].map(b=>obterFaltasAlunoDisciplina(aluno,disciplina,b)),anual=notas.reduce((a,v)=>a+v,0);let final=anual;const recAnual=db.disciplinas[disciplina]?.recuperacaoAnual?.[aluno];if(todosFechados&&anual<60&&recAnual!==undefined&&recAnual!=='')final=Math.max(anual,Number(recAnual)||0);const situacao=final>=60?'Aprovado':'Abaixo de 60 pontos';return `<tr><td><strong>${escapeHtml(aluno)}</strong></td>${notas.map((n,i)=>`<td>${n.toFixed(1)}</td><td>${faltas[i]}</td>`).join('')}<td><strong>${final.toFixed(1)}</strong></td><td><strong>${faltas.reduce((a,v)=>a+v,0)}</strong></td><td>${situacao}</td></tr>`}).join('');
+ corpo.innerHTML=ALUNOS.map(aluno=>{const notas=[1,2,3,4].map(b=>getNotaFinalBimestre(disciplina,b,aluno)),faltas=[1,2,3,4].map(b=>obterFaltasAlunoDisciplina(aluno,disciplina,b)),anual=notas.reduce((a,v)=>a+v,0);let final=anual;const recAnual=db.disciplinas[disciplina]?.recuperacaoAnual?.[aluno];if(todosFechados&&anual<60&&recAnual!==undefined&&recAnual!=='')final=Math.max(anual,Number(recAnual)||0);const situacao=final>=60?'Aprovado':'Abaixo de 60 pontos';return `<tr><td><strong>${escapeHtml(aluno)}</strong></td>${notas.map((n,i)=>`<td class="${n<15?'nota-abaixo-corte':'nota-no-corte'}">${n.toFixed(1)}</td><td>${faltas[i]}</td>`).join('')}<td class="${final<60?'nota-abaixo-corte':'nota-no-corte'}"><strong>${final.toFixed(1)}</strong></td><td><strong>${faltas.reduce((a,v)=>a+v,0)}</strong></td><td class="${final<60?'situacao-abaixo-corte':'situacao-no-corte'}">${situacao}</td></tr>`}).join('');
 }
 
 function buscarLancamentoNotas(){
@@ -593,7 +593,7 @@ function buscarLancamentoNotas(){
  area.innerHTML=`<div class="notas-central-head"><div><strong>${escapeHtml(disciplina.toUpperCase())}</strong><span>${b}º BIMESTRE · ${atividades.length} ATIVIDADE(S)</span></div><div class="notas-central-head-actions"><button class="btn-secondary-action" ${fechado?'disabled':''} onclick="abrirCriacaoAtividadeCentral()"><i class="fas fa-plus"></i> CRIAR ATIVIDADE</button><button class="btn-submit-action" ${fechado?'disabled':''} onclick="salvarLancamentoNotasCentral()"><i class="fas fa-save"></i> SALVAR LANÇAMENTO</button></div></div><div id="central-notas-planilha"></div>`;
  if(!atividades.length){document.getElementById('central-notas-planilha').innerHTML='<div class="empty-state-panel">Nenhuma atividade criada para este bimestre. Clique em <strong>CRIAR ATIVIDADE</strong> para começar.</div>';return;}
  document.getElementById('central-notas-planilha').innerHTML=`<div class="table-responsive-container"><table class="table-custom-format notas-central-table"><thead><tr><th>ALUNO</th>${atividades.map(a=>`<th>${escapeHtml(a.nome.toUpperCase())}<small>/${Number(a.valor).toFixed(1)}</small></th>`).join('')}<th>NOTA FINAL</th><th>RECUPERAÇÃO BIMESTRAL</th></tr></thead><tbody id="central-notas-corpo"></tbody></table></div>`;
- document.getElementById('central-notas-corpo').innerHTML=ALUNOS.map(aluno=>{const soma=atividades.reduce((s,a)=>s+(parseFloat(a.notas?.[aluno]?.notaFinal)||0),0),rec=db.disciplinas[disciplina][b].recuperacaoBimestral?.[aluno]??'',precisa=soma<15;return `<tr><td><strong>${escapeHtml(aluno)}</strong></td>${atividades.map(a=>{const nd=a.notas?.[aluno]||{notaOrig:'',notaRec:'',notaFinal:0};return `<td><input class="nota-central-input" type="text" inputmode="decimal" value="${escapeAttr(nd.notaOrig??'')}" data-aluno="${escapeAttr(aluno)}" data-atv="${escapeAttr(a.id)}" data-max="${a.valor}" ${fechado?'disabled':''} oninput="normalizarNumeroCampo(this)" onkeydown="avancarCampoComEnter(event)"></td>`}).join('')}<td class="nota-central-total">${soma.toFixed(1)}</td><td><input class="rec-central-input" type="text" inputmode="decimal" value="${escapeAttr(rec)}" data-aluno="${escapeAttr(aluno)}" ${!precisa||fechado?'disabled':''} oninput="normalizarNumeroCampo(this)" onkeydown="avancarCampoComEnter(event)"></td></tr>`}).join('');
+ document.getElementById('central-notas-corpo').innerHTML=ALUNOS.map(aluno=>{const soma=atividades.reduce((s,a)=>s+(parseFloat(a.notas?.[aluno]?.notaFinal)||0),0),rec=db.disciplinas[disciplina][b].recuperacaoBimestral?.[aluno]??'',precisa=soma<15;return `<tr><td><strong>${escapeHtml(aluno)}</strong></td>${atividades.map(a=>{const nd=a.notas?.[aluno]||{notaOrig:'',notaRec:'',notaFinal:0};return `<td><input class="nota-central-input" type="text" inputmode="decimal" value="${escapeAttr(nd.notaOrig??'')}" data-aluno="${escapeAttr(aluno)}" data-atv="${escapeAttr(a.id)}" data-max="${a.valor}" ${fechado?'disabled':''} oninput="normalizarNumeroCampo(this)" onkeydown="avancarCampoComEnter(event)"></td>`}).join('')}<td class="nota-central-total ${soma<15?'nota-abaixo-corte':'nota-no-corte'}">${soma.toFixed(1)}</td><td><input class="rec-central-input" type="text" inputmode="decimal" value="${escapeAttr(rec)}" data-aluno="${escapeAttr(aluno)}" ${!precisa||fechado?'disabled':''} oninput="normalizarNumeroCampo(this)" onkeydown="avancarCampoComEnter(event)"></td></tr>`}).join('');
 }
 function normalizarNumeroCampo(input){let v=String(input.value??'').replace(',','.').replace(/[^\d.]/g,'');const partes=v.split('.');if(partes.length>2)v=partes[0]+'.'+partes.slice(1).join('');if(v.includes('.'))v=v.slice(0,v.indexOf('.')+2);input.value=v;}
 function notaUmaCasa(v,max=Infinity){const n=Number(String(v??'').replace(',','.'));if(!Number.isFinite(n))return '';return Math.max(0,Math.min(Number(max),Math.round(n*10)/10));}
@@ -2214,24 +2214,21 @@ function adicionarPaginaBoletim(doc, aluno, imgLogo) {
                 if ([1, 3, 5, 7].includes(data.column.index)) {
                     const val = parseFloat(data.cell.raw.replace(',', '.'));
                     if (val < 15.00) {
-                        data.cell.styles.textColor = [43, 78, 128];
+                        data.cell.styles.textColor = [176, 0, 0];
                     } else {
-                        // Azul corrigido para o novo escuro #2b353e
-                        data.cell.styles.textColor = [43, 78, 128]; 
+                        data.cell.styles.textColor = [15, 23, 42]; 
                     }
                 }
                 if (data.column.index === 9) {
                     const val = parseFloat(data.cell.raw.replace(',', '.'));
-                    if (val < 60.00) data.cell.styles.textColor = [43, 78, 128];
-                    else data.cell.styles.textColor = [47, 107, 80];
+                    if (val < 60.00) data.cell.styles.textColor = [176, 0, 0];
+                    else data.cell.styles.textColor = [15, 23, 42];
                 }
                 if (data.column.index === 11) {
-                    if (data.cell.raw === "Aprovado") {
-                        data.cell.styles.textColor = [47, 107, 80];
-                    } else if (data.cell.raw === "Em Curso") {
-                        data.cell.styles.textColor = [43, 78, 128];
+                    if (data.cell.raw === "Reprovado") {
+                        data.cell.styles.textColor = [176, 0, 0];
                     } else {
-                        data.cell.styles.textColor = [43, 78, 128];
+                        data.cell.styles.textColor = [15, 23, 42];
                     }
                 }
             }
