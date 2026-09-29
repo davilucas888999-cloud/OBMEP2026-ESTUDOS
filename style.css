@@ -768,7 +768,7 @@ body {
 
 .bg-green-light { background-color: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
 .bg-blue-light { background-color: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
-.bg-red-light { background-color: #fef2f2; color: #991b1b; border-color: #fca5a5; }
+.bg-red-light { background-color: #fef2f2; color: #2b4e80; border-color: #fca5a5; }
 
 /* COMPONENTE: MODAIS DE ALERTA */
 .modal-overlay-view {
@@ -1172,9 +1172,9 @@ body {
 }
 
 .nota-final-value.nota-baixa {
-    color: #2b4e80;
-    background: #e8eef7;
-    border-color: #b9cbe5;
+    color: #b91c1c;
+    background: #fee2e2;
+    border-color: #f4b4b4;
 }
 
 .summary-head {
@@ -1637,7 +1637,7 @@ body { background: #eef2f7; }
     border:1px solid transparent; padding:7px 10px; border-radius:2px; font-weight:800; cursor:pointer;
 }
 .btn-table-edit { background:var(--primary-light); color:var(--primary); border-color:#b8c9de; }
-.btn-table-delete { background:#fff1f2; color:#b4232d; border-color:#fecdd3; }
+.btn-table-delete { background:#fff1f2; color:#2b4e80; border-color:#fecdd3; }
 
 /* Responsividade real */
 .main-container { max-width: 1180px; }
@@ -1713,34 +1713,30 @@ input,select,textarea,.search-box-input{border:1px solid #9da5ad!important;borde
 .nota-final-disc-table{min-width:1120px}.nota-final-disc-table th,.nota-final-disc-table td{text-align:center;white-space:nowrap}.nota-final-disc-table th:first-child,.nota-final-disc-table td:first-child{text-align:left;min-width:220px}
 @media(max-width:760px){.tipo-lancamento-grid{grid-template-columns:1fr}.lancamento-filtros{display:grid;grid-template-columns:1fr}.lancamento-filtros>div{min-width:0}.lancamento-filtros .btn-submit-action{width:100%}.planilha-resumo span{display:block;margin:5px 0 0}.grade-slots-grid{grid-template-columns:1fr 1fr}.grade-editor-footer{align-items:stretch;flex-direction:column}.grade-editor-footer button{width:100%}.notas-central-head{align-items:stretch;flex-direction:column}.notas-central-head button{width:100%}}
 
-/* ===== AJUSTES FINAIS — LANÇAMENTOS 2026 ===== */
-:root{--primary:#2b4e80;--primary-dark:#203b61;--primary-light:#e8eef7}
-.lancamento-seletor-principal{display:grid;grid-template-columns:1fr 1fr 1.5fr auto;gap:10px;align-items:end;margin-top:18px;padding:14px;border:1px solid var(--border);background:#f7f9fc;border-radius:5px}
-.lancamento-seletor-principal label{display:block;margin-bottom:5px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text-light)}
-.lancamento-seletor-principal select{width:100%;height:36px;padding:0 8px;border:1px solid #b9c2ce;border-radius:3px;background:#fff;color:#252a30;font-size:.76rem;font-weight:700}
-.lancamento-seletor-principal .btn-buscar-lancamento{height:36px;white-space:nowrap}
-.lancamento-filtros{display:grid;grid-template-columns:180px 260px auto;align-items:end;gap:10px;padding:12px;border-radius:5px}
-.lancamento-filtros>div{min-width:0}
-.lancamento-filtros select{height:36px;border-radius:3px;padding:0 8px;font-size:.76rem;font-weight:700;background:#fff;text-transform:uppercase}
-.lancamento-filtros select option{text-transform:uppercase}
-.lancamento-acoes-final{display:flex;justify-content:flex-end;margin:12px 0 4px}
-.lancamento-acoes-final .btn-submit-action{min-width:190px}
-#home-tipo-lancamento,#home-bimestre-lancamento,#home-disciplina-lancamento{background:#fff}
-#home-tipo-lancamento option,#home-bimestre-lancamento option,#home-disciplina-lancamento option{text-transform:uppercase}
-.faltas-matriz-table .falta-dia-input{width:54px;max-width:54px;padding:6px 3px}
-.notas-central-table .nota-central-input,.notas-central-table .rec-central-input{width:58px;max-width:58px;padding:5px 3px}
-.notas-central-table th{font-size:.68rem}
-.notas-central-table td,.notas-central-table th{padding:7px 5px}
-.atividade-header-actions button{width:30px;height:30px;border-radius:3px}
-.btn-grade-edit,.btn-grade-delete{border:1px solid #b9c2ce;background:#fff;color:#2b4e80;cursor:pointer}
-.btn-grade-delete{color:#4f5861}
-.student-actions-cell button{border-radius:3px!important}
-/* Boletim mais compacto e elegante */
-.boletim-table th,.boletim-table td{font-size:7.2pt!important;padding:4px 3px!important}
-.boletim-table th{font-size:6.8pt!important;font-weight:700!important}
-.boletim-table .boletim-vertical-header{font-size:6.5pt!important}
-@media(max-width:760px){
- .lancamento-seletor-principal,.lancamento-filtros{grid-template-columns:1fr}
- .lancamento-seletor-principal .btn-buscar-lancamento,.lancamento-acoes-final .btn-submit-action{width:100%}
- .lancamento-acoes-final{display:block}
-}
+/* REPAGINAÇÃO FINAL — identidade #2b4e80 */
+:root{--primary:#2b4e80;--primary-dark:#203b61;--primary-light:#e8eef7;--secondary:#172b46;--bg:#f4f6f9;--card:#fff;--text:#172235;--text-light:#667085;--border:#c9d2df;--success:#2f6b50;--warning:#8a6b2e;--danger:#2b4e80;--radius-lg:6px;--radius-md:4px;--shadow:0 3px 12px rgba(31,55,88,.08)}
+body{background:var(--bg);color:var(--text)}
+.topbar{height:62px;background:#fff;border-bottom:2px solid var(--primary);box-shadow:0 2px 10px rgba(31,55,88,.08)}.topbar-title{color:var(--primary);font-size:1.05rem}.menu-hamburger,.theme-toggle{border-radius:4px;color:var(--primary)}
+.main-container{max-width:1180px;padding:24px}.sidebar{width:310px;border-right:3px solid var(--primary);padding:22px 16px}.sidebar-nav ul li{border-radius:5px}.sidebar-nav ul li:hover,.sidebar-nav ul li:active{background:var(--primary-light);color:var(--primary)}
+.welcome-banner{background:linear-gradient(135deg,#203b61,#2b4e80);border-radius:6px;box-shadow:0 10px 24px rgba(43,78,128,.18)}.badge-active{background:#fff;color:var(--primary)}
+.disciplinas-grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.disciplina-card,.hub-card-btn,.card-box,.materia-header-banner,.table-meta-header,.table-responsive-container,.atividades-grade-wrapper{border-radius:6px}.disciplina-card{padding:20px 12px;border:1px solid var(--border);box-shadow:var(--shadow)}.disciplina-card i,.title-icon{color:var(--primary)}.disciplina-card:hover,.hub-card-btn:hover{border-color:var(--primary);box-shadow:0 7px 18px rgba(43,78,128,.14)}.hub-card-btn{padding:18px 12px}.icon-circle{border-radius:5px}.bc-blue,.bc-green,.bc-orange,.bc-red,.bc-purple{background:var(--primary)!important;color:#fff!important}.btn-submit-action,.btn-action-atv{background:var(--primary);border-radius:4px}.btn-submit-action:hover,.btn-action-atv:hover{background:var(--primary-dark)}.btn-back{color:var(--primary)}
+.input-group input,.search-box-input,.lancamento-filtros select,.grade-slot select{border-radius:4px;border:1px solid var(--border)}.input-group input:focus,.search-box-input:focus,.lancamento-filtros select:focus,.grade-slot select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(43,78,128,.12)}
+.table-responsive-container{overflow:auto;border:1px solid #aeb9c8;background:#fff}.table-custom-format{border-collapse:separate;border-spacing:0;border:1px solid #aeb9c8;min-width:100%}.table-custom-format th{background:var(--primary);color:#fff;border-right:1px solid rgba(255,255,255,.25);border-bottom:1px solid var(--primary-dark);padding:9px 8px;white-space:nowrap}.table-custom-format td{border-right:1px solid #d4dbe5;border-bottom:1px solid #d4dbe5;padding:7px 8px}.table-custom-format tr:last-child td{border-bottom:0}.table-custom-format td:last-child,.table-custom-format th:last-child{border-right:0}.table-custom-format tbody tr:nth-child(even){background:#f8fafc}.table-custom-format tbody tr:hover{background:#eef3fa}
+.table-custom-format input[type=number]{width:50px;min-width:50px;max-width:50px;height:32px;padding:3px;border:1px solid #aeb9c8;border-radius:3px;background:#fff;text-align:center;font-weight:800;color:var(--text)}.table-custom-format input[type=number]:focus{outline:2px solid rgba(43,78,128,.18);border-color:var(--primary)}
+#screen-lancar-notas .table-custom-format th:nth-child(n+2),#screen-lancar-notas .table-custom-format td:nth-child(n+2){width:58px;min-width:58px;max-width:58px;text-align:center}#screen-lancar-notas .table-custom-format th:first-child,#screen-lancar-notas .table-custom-format td:first-child{min-width:230px}.notas-central-table{min-width:760px}.nota-central-input,.rec-central-input{width:50px!important;min-width:50px!important;max-width:50px!important;height:32px;padding:3px!important;border-radius:3px!important;border:1px solid #aeb9c8!important;text-align:center}.nota-central-total{font-weight:800;background:#edf2f8!important;color:var(--primary)!important}
+.lancamento-flutuante{border:1px solid #b8c4d3;border-radius:7px;box-shadow:0 8px 24px rgba(31,55,88,.08);background:#fff}.tipo-lancamento-card{border:1px solid var(--border);border-radius:5px;background:#fff}.tipo-lancamento-card:hover{border-color:var(--primary);background:var(--primary-light)}.lancamento-filtros{background:#f7f9fc;border:1px solid #d3dae5;border-radius:5px;padding:14px}.planilha-resumo{border-left:4px solid var(--primary);background:#eef3fa;border-radius:4px;color:var(--text)}.frequencia-instruction{display:flex;gap:9px;align-items:flex-start;margin:12px 0;padding:11px 13px;border:1px solid #cdd7e4;border-radius:5px;background:#f7f9fc;color:var(--text-light);font-size:.8rem}.frequencia-instruction i{color:var(--primary);margin-top:2px}
+.faltas-matriz-table{min-width:820px}.faltas-matriz-table th,.faltas-matriz-table td{text-align:center;vertical-align:middle}.faltas-matriz-table th:first-child,.faltas-matriz-table td:first-child{text-align:left;min-width:240px}.falta-dia-input{width:52px!important;min-width:52px!important;max-width:52px!important;height:32px!important;border:1px solid #aeb9c8!important;border-radius:3px!important;padding:3px!important;text-align:center;font-weight:800}.faltas-matriz-total{font-weight:800;background:#edf2f8!important;color:var(--primary)!important}
+.grade-editor-card{border:1px solid var(--border);border-radius:6px;background:#fff;box-shadow:var(--shadow)}.grade-count-badge{border-radius:4px;background:var(--primary)}.grade-slot{border-radius:4px;background:#f8fafc}.grade-slot select{background:#fff}.notas-central-head{border-radius:6px;background:#f7f9fc}.empty-state-panel{border-radius:5px}
+.modal-overlay-view{background:rgba(15,28,48,.58);backdrop-filter:blur(3px)}.modal-content-container{border:1px solid #b7c3d2;border-radius:7px;box-shadow:0 18px 50px rgba(18,37,62,.24)}.modal-close-btn{border-radius:4px;color:var(--primary)}.btn-modal-secondary{border-radius:4px;border:1px solid var(--border);background:#fff}.bg-red-light,.danger-alert{background:#eef3fa!important;color:var(--primary)!important;border-color:#c6d3e3!important}.btn-icon-del{color:var(--primary)!important}.nota-alta,.nota-baixa,.nota-final-value{color:var(--primary)!important}
+@media(min-width:900px){body{padding-top:68px}.topbar{padding:0 28px}.main-container{padding:28px 30px}.disciplinas-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.main-container{padding:14px 10px}.topbar{height:58px}body{padding-top:58px}.welcome-banner{padding:16px}.welcome-banner h2{font-size:1.2rem}.school-text{font-size:.72rem}.disciplinas-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.disciplina-card{padding:15px 8px;gap:8px}.disciplina-card i{font-size:1.5rem}.disciplina-card span{font-size:.76rem}.hub-options-grid{grid-template-columns:1fr 1fr;gap:9px}.table-meta-header{padding:12px}.table-custom-format{font-size:.74rem}.table-custom-format th{padding:8px 6px}.table-custom-format td{padding:6px}.table-custom-format input[type=number]{width:48px;min-width:48px;max-width:48px}#screen-lancar-notas .table-custom-format th:first-child,#screen-lancar-notas .table-custom-format td:first-child{min-width:190px}.lancamento-filtros{grid-template-columns:1fr;display:grid}.lancamento-filtros .btn-submit-action{width:100%}.grade-slots-grid{grid-template-columns:1fr 1fr}.grade-editor-footer{flex-direction:column;align-items:stretch}.grade-editor-footer button{width:100%}.nota-final-disc-table{min-width:1040px}}
+@media(max-width:420px){.hub-options-grid{grid-template-columns:1fr}.topbar-title{font-size:.94rem}}
+
+/* POLIMENTO FINAL — identidade #2b4e80 */
+:root{--primary:#2b4e80!important;--primary-dark:#203b61!important;--primary-light:#e8eef7!important;--danger:#2b4e80!important;--radius-lg:6px!important;--radius-md:4px!important}
+select option{background:#fff;color:#172235}
+.lancamento-filtros-unificados{display:grid!important;grid-template-columns:minmax(150px,220px) minmax(150px,260px) auto;align-items:end!important;gap:10px!important;padding:12px!important;background:#f8fafc!important;border:1px solid #cbd5e1!important;border-radius:5px!important}.lancamento-filtros-unificados>div{min-width:0!important}.lancamento-filtros-unificados select{height:36px!important;padding:0 9px!important;font-size:.76rem!important;font-weight:800!important;text-transform:uppercase;border-radius:4px!important;background:#fff!important}.btn-buscar-lancamento{width:auto!important;min-width:105px;height:36px!important;padding:0 13px!important;font-size:.78rem!important;border-radius:4px!important}.lancamento-result-area{margin-top:14px}
+.table-custom-format th{background:#2b4e80!important;color:#fff!important;text-transform:uppercase}.table-custom-format input[type=number],.table-custom-format input[type=text]{border-radius:3px!important}.faltas-diarias-table{min-width:930px}.faltas-diarias-table th:not(:first-child),.faltas-diarias-table td:not(:first-child){text-align:center}.falta-diaria-input{width:48px!important;min-width:48px!important;max-width:48px!important;height:31px!important;padding:3px!important}.faltas-dia-total{font-weight:900;color:#2b4e80!important;background:#edf2f8!important}.frequencia-resumo{display:flex;justify-content:space-between;gap:14px;align-items:center}.frequencia-dia-resumo{display:flex;gap:12px;flex-wrap:wrap;font-size:.75rem}.frequencia-disc-preview{margin-top:16px}.preview-title{font-size:.75rem;font-weight:900;letter-spacing:.06em;color:#2b4e80;margin:0 0 8px}
+.save-launch-bar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:12px;padding:12px 14px;background:#fff;border:1px solid #cbd5e1;border-radius:5px;color:#667085;font-size:.78rem}.save-launch-bar .btn-submit-action{width:auto;padding:10px 16px}.notas-central-head-actions{display:flex;gap:8px;align-items:center}.btn-secondary-action{height:36px;padding:0 12px;border:1px solid #b9c7d8;background:#fff;color:#2b4e80;border-radius:4px;font-weight:800;cursor:pointer;font-size:.75rem}.btn-secondary-action:hover{background:#e8eef7}.notas-central-table{min-width:780px}.notas-central-table th,.notas-central-table td{text-align:center}.notas-central-table th:first-child,.notas-central-table td:first-child{text-align:left;min-width:225px}.notas-central-table input[type=text]{width:50px!important;min-width:50px!important;max-width:50px!important;height:31px!important;text-align:center}.nota-central-total{font-weight:900!important;color:#2b4e80!important}.btn-grade-delete,.btn-grade-edit{color:#2b4e80!important;background:#eef3fa!important;border-color:#c7d4e4!important}.bg-red-light,.danger-alert{background:#eef3fa!important;color:#2b4e80!important;border-color:#c7d4e4!important}.nota-baixa,.nota-alta,.nota-final-value{color:#2b4e80!important}.btn-table-delete{background:#eef3fa!important;color:#2b4e80!important;border-color:#c7d4e4!important}
+.nota-final-disc-table th:not(:first-child){writing-mode:vertical-rl;transform:rotate(180deg);min-width:38px;height:105px;white-space:nowrap;text-align:center!important}.nota-final-disc-table th:first-child{min-width:220px}
+@media(min-width:761px){.main-container{max-width:1240px!important}.table-custom-format{font-size:.76rem}}@media(max-width:760px){.lancamento-filtros-unificados{grid-template-columns:1fr!important}.lancamento-filtros-unificados .btn-buscar-lancamento{width:100%!important}.notas-central-head-actions{flex-direction:column;align-items:stretch}.notas-central-head-actions button{width:100%}.frequencia-resumo{display:block}.frequencia-dia-resumo{margin-top:7px}.save-launch-bar{flex-direction:column;align-items:stretch}.save-launch-bar .btn-submit-action{width:100%}.faltas-diarias-table{min-width:880px}}@media(max-width:430px){.grade-slots-grid{grid-template-columns:1fr}.disciplinas-grid{grid-template-columns:1fr 1fr!important}.hub-options-grid{grid-template-columns:1fr!important}}
