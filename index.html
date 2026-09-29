@@ -36,7 +36,6 @@
                 <li onclick="navigate('home')"><i class="fas fa-th-large"></i> Disciplinas em Bloco</li>
                 <li onclick="navigate('boletim-individual')"><i class="fas fa-file-invoice"></i> Boletim Individual</li>
                 <li onclick="abrirCadastroAlunos()"><i class="fas fa-user-plus"></i> Cadastro de Alunos</li>
-                <li onclick="abrirCadastroAulas()"><i class="fas fa-calendar-day"></i> Cadastro de Aulas por Dia</li>
                 <li onclick="abrirLancamentos()"><i class="fas fa-pen-ruler"></i> Lançamentos</li>
                 <li onclick="abrirNotaFinalDisciplina()"><i class="fas fa-list-check"></i> Ver Nota Final por Disciplina</li>
                 <li onclick="navigate('fechamento-global')"><i class="fas fa-lock"></i> Fechamento de Bimestre</li>
@@ -76,7 +75,7 @@
                 <div class="tipo-lancamento-grid">
                     <button class="tipo-lancamento-card" onclick="abrirLancamentoFaltas()">
                         <span class="tipo-lancamento-icon"><i class="fas fa-calendar-check"></i></span>
-                        <span><strong>Lançamento de Faltas</strong><small>Bimestre + disciplina + dias da semana</small></span>
+                        <span><strong>Lançamento de Faltas</strong><small>Bimestre + faltas por dia da semana</small></span>
                     </button>
                     <button class="tipo-lancamento-card" onclick="abrirLancamentoNotas()">
                         <span class="tipo-lancamento-icon"><i class="fas fa-pen-to-square"></i></span>
@@ -85,7 +84,10 @@
                 </div>
             </div>
 
-            <div class="section-header-block">
+            <!-- ÁREA INLINE DE LANÇAMENTOS: ocupa o lugar de MINHAS DISCIPLINAS sem trocar de tela -->
+            <div id="lancamento-inline-area" class="lancamento-inline-area" style="display:none;"></div>
+
+            <div class="section-header-block" id="minhas-disciplinas-header">
                 <h3 class="section-title">Minhas Disciplinas</h3>
                 <p class="section-desc">Toque em um bloco para gerenciar atividades, notas ou emitir boletins.</p>
             </div>
