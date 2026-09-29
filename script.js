@@ -450,7 +450,7 @@ function renderLancamentoFaltasInline(){
       </div>`;
 }
 function buscarLancamentoFaltasInline(){
-    const b=Number(document.getElementById('inline-faltas-bimestre')?.value||0),area=document.getElementById('lancamento-inline-resultado');
+    const b=Number(document.getElementById('inline-faltas-bimestre')?.value||0),area=document.getElementById('lancamento-inline-resultado')||document.getElementById('inline-faltas-planilha');
     if(!area)return;
     if(!b){alert('Selecione o BIMESTRE antes de buscar.');return;}
     garantirEstruturaFaltas();
@@ -464,7 +464,7 @@ function buscarLancamentoFaltasInline(){
       <div class="save-launch-bar"><span>As faltas por disciplina são calculadas automaticamente pela grade.</span><button class="btn-submit-action" type="button" onclick="salvarFaltasDiariasInline()"><i class="fas fa-save"></i> SALVAR LANÇAMENTO</button></div>`;
 }
 function atualizarTotaisFaltasDiariasInline(){
-    document.querySelectorAll('#inline-faltas-planilha tbody tr').forEach(row=>{
+    document.querySelectorAll('#inline-faltas-planilha tbody tr, #lancamento-inline-resultado .faltas-diarias-table tbody tr').forEach(row=>{
         let total=0;row.querySelectorAll('.falta-diaria-input').forEach(i=>{total+=Math.max(0,Math.min(5,Number(i.value)||0));});
         const out=row.querySelector('.faltas-dia-total');if(out)out.textContent=total;
     });
@@ -473,7 +473,7 @@ function salvarFaltasDiariasInline(){
     const b=Number(document.getElementById('inline-faltas-bimestre')?.value||0);
     if(!b){alert('Selecione o BIMESTRE antes de salvar.');return;}
     garantirEstruturaFaltas();
-    document.querySelectorAll('#inline-faltas-planilha .falta-diaria-input').forEach(input=>{
+    document.querySelectorAll('#inline-faltas-planilha .falta-diaria-input, #lancamento-inline-resultado .falta-diaria-input').forEach(input=>{
         const aluno=input.dataset.aluno,dia=input.dataset.dia;
         const v=Math.max(0,Math.min(5,Math.round(Number(String(input.value||'0').replace(',','.'))||0)));
         if(!db.faltasDiarias[b])db.faltasDiarias[b]={};
@@ -512,7 +512,7 @@ function renderLancamentoNotasInline(){
       </div>`;
 }
 function buscarLancamentoNotasInline(){
-    const b=Number(document.getElementById('inline-notas-bimestre')?.value||0),disciplina=document.getElementById('inline-notas-disciplina')?.value||'',area=document.getElementById('inline-notas-planilha');
+    const b=Number(document.getElementById('inline-notas-bimestre')?.value||0),disciplina=document.getElementById('inline-notas-disciplina')?.value||'',area=document.getElementById('inline-notas-planilha')||document.getElementById('lancamento-inline-resultado');
     if(!area)return;
     if(!b||!disciplina){alert('Selecione o BIMESTRE e a DISCIPLINA antes de buscar.');return;}
     selectedBimestre=b;selectedMateria=disciplina;
