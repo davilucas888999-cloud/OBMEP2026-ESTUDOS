@@ -36,6 +36,8 @@
                 <li onclick="navigate('home')"><i class="fas fa-th-large"></i> Disciplinas em Bloco</li>
                 <li onclick="navigate('boletim-individual')"><i class="fas fa-file-invoice"></i> Boletim Individual</li>
                 <li onclick="abrirCadastroAlunos()"><i class="fas fa-user-plus"></i> Cadastro de Alunos</li>
+                <li onclick="abrirCadastroAulas()"><i class="fas fa-calendar-day"></i> Cadastro de Aulas por Dia</li>
+                <li onclick="abrirFaltasDiarias()"><i class="fas fa-user-clock"></i> Lançar Faltas</li>
                 <li onclick="navigate('fechamento-global')"><i class="fas fa-lock"></i> Fechamento de Bimestre</li>
                 <li onclick="navigate('dashboard')"><i class="fas fa-chart-line"></i> Estatísticas e Gráficos</li>
                 <li onclick="navigate('backup')"><i class="fas fa-server"></i> Manutenção de Dados</li>
@@ -199,11 +201,6 @@
                     <div class="icon-circle bc-green"><i class="fas fa-table"></i></div>
                     <span>Ver Notas</span>
                     <small>Somas diretas do ano</small>
-                </button>
-                <button class="hub-card-btn" onclick="openLancamentoFaltas()">
-                    <div class="icon-circle bc-blue"><i class="fas fa-user-clock"></i></div>
-                    <span>Lançar Faltas</span>
-                    <small>Por disciplina e bimestre</small>
                 </button>
                 <button class="hub-card-btn" onclick="openRecuperacaoBimestral()">
                     <div class="icon-circle bc-orange"><i class="fas fa-medal"></i></div>
@@ -400,6 +397,48 @@
                         </tr>
                     </thead>
                     <tbody id="table-faltas-corpo"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TELA: CADASTRO DE AULAS POR DIA -->
+        <div id="screen-cadastro-aulas" class="screen">
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar ao Início</button>
+            <div class="table-meta-header">
+                <h3><i class="fas fa-calendar-day"></i> Cadastro de Aulas por Dia</h3>
+                <p class="sub-meta">Cadastre cada data letiva e quantas aulas aconteceram. O padrão é 5 aulas por dia.</p>
+                <form class="daily-form" onsubmit="salvarAulasDoDia(event)">
+                    <div><label>Data</label><input type="date" id="aula-data" required></div>
+                    <div><label>Bimestre</label><select id="aula-bimestre"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
+                    <div><label>Quantidade de aulas</label><input type="number" id="aula-quantidade" min="1" max="20" value="5" required></div>
+                    <button class="btn-submit-action" type="submit"><i class="fas fa-save"></i> Salvar Dia</button>
+                </form>
+            </div>
+            <div class="table-responsive-container">
+                <table class="table-custom-format daily-table">
+                    <thead><tr><th>Data</th><th>Dia da Semana</th><th>Bimestre</th><th>Aulas</th><th>Ações</th></tr></thead>
+                    <tbody id="table-aulas-corpo"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TELA: LANÇAMENTO DE FALTAS DIÁRIAS -->
+        <div id="screen-faltas-diarias" class="screen">
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar ao Início</button>
+            <div class="table-meta-header">
+                <h3><i class="fas fa-user-clock"></i> Lançamento de Faltas</h3>
+                <p class="sub-meta">Escolha o bimestre e a data. Informe quantas das aulas daquele dia o aluno perdeu.</p>
+                <div class="faltas-diarias-toolbar">
+                    <div><label>Bimestre</label><select id="faltas-dia-bimestre" onchange="atualizarDatasFaltas()"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
+                    <div><label>Data</label><select id="faltas-dia-data" onchange="renderFaltasDiarias()"></select></div>
+                    <div id="faltas-dia-resumo" class="daily-summary">Cadastre as aulas do dia para começar.</div>
+                    <input type="text" class="search-box-input" id="search-aluno-faltas-dia" placeholder="Pesquisar aluno..." onkeyup="filterTable('table-faltas-diarias-corpo', this.value)">
+                </div>
+            </div>
+            <div class="table-responsive-container">
+                <table class="table-custom-format daily-table">
+                    <thead><tr><th>Aluno</th><th>Faltas no dia</th><th>Total de faltas no bimestre</th><th>Frequência no bimestre</th></tr></thead>
+                    <tbody id="table-faltas-diarias-corpo"></tbody>
                 </table>
             </div>
         </div>

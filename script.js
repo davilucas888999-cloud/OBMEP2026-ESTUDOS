@@ -290,72 +290,53 @@ function excluirAluno(nome) {
 }
 
 function garantirEstruturaFaltas() {
+    if (!db.aulasPorDia || typeof db.aulasPorDia !== 'object') db.aulasPorDia = {};
+    if (!db.faltasDiarias || typeof db.faltasDiarias !== 'object') db.faltasDiarias = {};
     DISCIPLINAS.forEach(m => {
         if (!db.disciplinas[m]) return;
-        for (let b = 1; b <= 4; b++) {
-            if (!db.disciplinas[m][b].faltas) db.disciplinas[m][b].faltas = {};
-        }
+        for (let b=1;b<=4;b++) if (!db.disciplinas[m][b].faltas) db.disciplinas[m][b].faltas={};
     });
 }
-
-function openLancamentoFaltas() {
-    garantirEstruturaFaltas();
-    selectedBimestre = (db.configGlobal.currentBimestre <= 4 ? db.configGlobal.currentBimestre : 4).toString();
-    const select = document.getElementById('faltas-bimestre-select');
-    if (select) select.value = selectedBimestre;
-    renderFaltasTable();
-    navigate('lancar-faltas');
+function abrirCadastroAulas(){ garantirEstruturaFaltas(); renderCadastroAulas(); navigate('cadastro-aulas'); }
+function formatarDataISO(data){ if(!data)return ''; const [a,m,d]=data.split('-'); return `${d}/${m}/${a}`; }
+function nomeDiaSemana(data){ return new Date(`${data}T12:00:00`).toLocaleDateString('pt-BR',{weekday:'long'}).replace(/^./,c=>c.toUpperCase()); }
+function salvarAulasDoDia(e){
+    e.preventDefault(); garantirEstruturaFaltas();
+    const data=document.getElementById('aula-data').value, b=Number(document.getElementById('aula-bimestre').value), aulas=Math.max(1,Math.min(20,Number(document.getElementById('aula-quantidade').value)||5));
+    if(!data)return;
+    db.aulasPorDia[data]={bimestre:b,aulas}; if(!db.faltasDiarias[data])db.faltasDiarias[data]={}; saveStorage(); renderCadastroAulas(); atualizarDatasFaltas();
 }
-
-function changeBimestreFaltas() {
-    selectedBimestre = document.getElementById('faltas-bimestre-select').value;
-    renderFaltasTable();
+function editarAulasDoDia(data){ const x=db.aulasPorDia[data]; if(!x)return; document.getElementById('aula-data').value=data; document.getElementById('aula-bimestre').value=x.bimestre; document.getElementById('aula-quantidade').value=x.aulas; }
+function excluirAulasDoDia(data){ if(!confirm(`Excluir ${formatarDataISO(data)} e as faltas lançadas nessa data?`))return; delete db.aulasPorDia[data]; delete db.faltasDiarias[data]; saveStorage(); renderCadastroAulas(); atualizarDatasFaltas(); }
+function renderCadastroAulas(){
+    const corpo=document.getElementById('table-aulas-corpo'); if(!corpo)return; const datas=Object.keys(db.aulasPorDia||{}).sort().reverse();
+    corpo.innerHTML=datas.length?datas.map(data=>{const x=db.aulasPorDia[data];return `<tr><td><strong>${formatarDataISO(data)}</strong></td><td>${nomeDiaSemana(data)}</td><td>${x.bimestre}º Bimestre</td><td><strong>${x.aulas}</strong></td><td><button class="btn-table-edit" onclick="editarAulasDoDia('${data}')"><i class="fas fa-pen"></i> Alterar</button> <button class="btn-table-delete" onclick="excluirAulasDoDia('${data}')"><i class="fas fa-trash"></i></button></td></tr>`}).join(''):'<tr><td colspan="5" class="empty-state">Nenhuma aula cadastrada.</td></tr>';
 }
-
-function obterFaltasAlunoDisciplina(aluno, disciplina, bimestre) {
-    garantirEstruturaFaltas();
-    return Number(db.disciplinas[disciplina]?.[bimestre]?.faltas?.[aluno] || 0);
+function abrirFaltasDiarias(){ garantirEstruturaFaltas(); const b=Number(db.configGlobal.currentBimestre||1); document.getElementById('faltas-dia-bimestre').value=b<=4?b:1; atualizarDatasFaltas(); navigate('faltas-diarias'); }
+function atualizarDatasFaltas(){
+    garantirEstruturaFaltas(); const b=Number(document.getElementById('faltas-dia-bimestre')?.value||1), s=document.getElementById('faltas-dia-data'); if(!s)return;
+    const datas=Object.keys(db.aulasPorDia).filter(d=>Number(db.aulasPorDia[d].bimestre)===b).sort();
+    s.innerHTML=datas.length?datas.map(d=>`<option value="${d}">${formatarDataISO(d)} — ${nomeDiaSemana(d)} (${db.aulasPorDia[d].aulas} aulas)</option>`).join(''):'<option value="">Nenhuma data cadastrada</option>';
+    renderFaltasDiarias();
 }
-
-function totalFaltasDisciplina(aluno, disciplina) {
-    let total = 0;
-    for (let b = 1; b <= 4; b++) total += obterFaltasAlunoDisciplina(aluno, disciplina, b);
-    return total;
+function obterTotalAulasBimestre(b){ return Object.keys(db.aulasPorDia).filter(d=>Number(db.aulasPorDia[d].bimestre)===Number(b)).reduce((t,d)=>t+Number(db.aulasPorDia[d].aulas||0),0); }
+function obterFaltasAlunoBimestre(aluno,b){ return Object.keys(db.aulasPorDia).filter(d=>Number(db.aulasPorDia[d].bimestre)===Number(b)).reduce((t,d)=>t+Number(db.faltasDiarias[d]?.[aluno]||0),0); }
+function salvarFaltaDiaria(aluno,input){
+    const data=document.getElementById('faltas-dia-data').value;if(!data||!db.aulasPorDia[data])return; const max=Number(db.aulasPorDia[data].aulas||0); let v=parseInt(input.value,10);if(!Number.isFinite(v)||v<0)v=0;if(v>max)v=max; if(!db.faltasDiarias[data])db.faltasDiarias[data]={};db.faltasDiarias[data][aluno]=v;input.value=v;saveStorage();renderFaltasDiarias();
 }
-
-function salvarFaltaAluno(aluno, input) {
-    garantirEstruturaFaltas();
-    const b = selectedBimestre;
-    let valor = parseInt(String(input.value).replace(/\D/g, ''), 10);
-    if (!Number.isFinite(valor) || valor < 0) valor = 0;
-    db.disciplinas[selectedMateria][b].faltas[aluno] = valor;
-    input.value = valor;
-    const totalCell = document.getElementById(`faltas-total-${encodeURIComponent(aluno)}`);
-    if (totalCell) totalCell.textContent = totalFaltasDisciplina(aluno, selectedMateria);
-    saveStorage();
+function renderFaltasDiarias(){
+    const corpo=document.getElementById('table-faltas-diarias-corpo'),s=document.getElementById('faltas-dia-data');if(!corpo||!s)return; const data=s.value,b=Number(document.getElementById('faltas-dia-bimestre')?.value||1);
+    if(!data||!db.aulasPorDia[data]){corpo.innerHTML='<tr><td colspan="4" class="empty-state">Cadastre as aulas do dia antes de lançar faltas.</td></tr>';return;}
+    const aulasDia=Number(db.aulasPorDia[data].aulas||0),totalAulas=obterTotalAulasBimestre(b),res=document.getElementById('faltas-dia-resumo');
+    if(res)res.innerHTML=`<strong>${formatarDataISO(data)}</strong> · ${nomeDiaSemana(data)} · <strong>${aulasDia} aulas</strong> · ${totalAulas} aulas no bimestre`;
+    corpo.innerHTML=ALUNOS.map(aluno=>{const fd=Number(db.faltasDiarias[data]?.[aluno]||0),fb=obterFaltasAlunoBimestre(aluno,b),freq=totalAulas?((totalAulas-fb)/totalAulas*100):0;return `<tr><td><strong>${escapeHtml(aluno)}</strong></td><td style="text-align:center"><input class="daily-absence-input" type="number" min="0" max="${aulasDia}" value="${fd}" onchange="salvarFaltaDiaria('${escapeAttr(aluno)}',this)" onkeydown="avancarCampoComEnter(event)"></td><td class="faltas-total-cell">${fb}</td><td class="frequencia-cell">${Math.max(0,freq).toFixed(1)}%</td></tr>`}).join('');
 }
-
-function renderFaltasTable() {
-    garantirEstruturaFaltas();
-    const corpo = document.getElementById('table-faltas-corpo');
-    if (!corpo) return;
-    const subtitulo = document.getElementById('faltas-subtitulo');
-    if (subtitulo) subtitulo.textContent = `${selectedMateria} • ${selectedBimestre}º Bimestre — lance somente o total de faltas do aluno neste período.`;
-
-    corpo.innerHTML = ALUNOS.map(aluno => {
-        const faltas = obterFaltasAlunoDisciplina(aluno, selectedMateria, selectedBimestre);
-        const total = totalFaltasDisciplina(aluno, selectedMateria);
-        const id = encodeURIComponent(aluno);
-        return `<tr>
-            <td><strong>${escapeHtml(aluno)}</strong></td>
-            <td style="text-align:center;">
-                <input type="number" min="0" step="1" value="${faltas}"
-                    aria-label="Faltas de ${escapeAttr(aluno)}"
-                    onchange="salvarFaltaAluno('${escapeAttr(aluno)}', this)">
-            </td>
-            <td class="faltas-total-cell" id="faltas-total-${id}">${total}</td>
-        </tr>`;
-    }).join('');
+function obterFaltasAlunoDisciplina(aluno,disciplina,bimestre){ garantirEstruturaFaltas(); return Number(db.disciplinas[disciplina]?.[bimestre]?.faltas?.[aluno]||0); }
+function totalFaltasDisciplina(aluno,disciplina){let t=0;for(let b=1;b<=4;b++)t+=obterFaltasAlunoDisciplina(aluno,disciplina,b);return t;}
+function salvarFaltaAluno(aluno,input){ garantirEstruturaFaltas();const b=selectedBimestre;let v=parseInt(input.value,10);if(!Number.isFinite(v)||v<0)v=0;db.disciplinas[selectedMateria][b].faltas[aluno]=v;saveStorage(); }
+function renderFaltasTable(){ renderFaltasDiarias(); }
+function avancarCampoComEnter(e){
+    if(e.key!=='Enter')return;e.preventDefault(); const root=e.target.closest('.screen')||document; const campos=[...root.querySelectorAll('input:not([disabled]),select:not([disabled])')].filter(x=>x.offsetParent!==null);const i=campos.indexOf(e.target);if(i>=0&&campos[i+1]){campos[i+1].focus();campos[i+1].select?.();}
 }
 
 /**
@@ -376,11 +357,8 @@ function initDatabaseEngine() {
     } catch (e) {
         console.warn(e.message);
         db = {
-            configGlobal: {
-                currentBimestre: 1,
-                bimestresFechados: { 1: false, 2: false, 3: false, 4: false }
-            },
-            disciplinas: {}
+            configGlobal: { currentBimestre: 1, bimestresFechados: { 1:false, 2:false, 3:false, 4:false } },
+            disciplinas: {}, aulasPorDia: {}, faltasDiarias: {}
         };
         
         DISCIPLINAS.forEach(d => {
@@ -399,6 +377,8 @@ function initDatabaseEngine() {
 
     inicializarCadastroAlunos();
     garantirEstruturaFaltas();
+    if (!db.aulasPorDia) db.aulasPorDia = {};
+    if (!db.faltasDiarias) db.faltasDiarias = {};
 
     // Garante compatibilidade de chaves para recuperação anual em bases migradas
     DISCIPLINAS.forEach(d => {
@@ -1029,14 +1009,14 @@ function renderNotasTable(atv) {
                 <input type="number" step="0.01" min="0" max="${atv.valor}" 
                     value="${nData.notaOrig}" 
                     ${isFechado ? 'disabled' : ''} 
-                    oninput="autoSaveNotaEngine('${aluno}', 'notaOrig', this, ${atv.valor})">
+                    oninput="autoSaveNotaEngine('${aluno}', 'notaOrig', this, ${atv.valor})" onkeydown="avancarCampoComEnter(event)">
             </td>
             <td>
                 <input type="number" step="0.01" min="0" max="${atv.valor}" 
                     value="${nData.notaRec}" 
                     id="rec-in-${aluno.replace(/ /g, '_')}" 
                     ${isBlockedRec || isFechado ? 'disabled' : ''} 
-                    oninput="autoSaveNotaEngine('${aluno}', 'notaRec', this, ${atv.valor})">
+                    oninput="autoSaveNotaEngine('${aluno}', 'notaRec', this, ${atv.valor})" onkeydown="avancarCampoComEnter(event)">
             </td>
             <td id="final-disp-${aluno.replace(/ /g, '_')}" class="${corClasse}">
                 ${notaFinalNum.toFixed(2)}
@@ -1519,7 +1499,7 @@ function exportBoletimCompletoPDF() {
                 { content: totalBimVal.toFixed(2), styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } },
                 { content: rbVal, styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } },
                 // Azul da tabela pdf corrigido para [43, 78, 128] que equivale a #2b353e
-                { content: finalBimVal.toFixed(2), styles: { fontStyle: 'bold', fillColor: [224, 242, 254], textColor: [43, 78, 128] } }
+                { content: finalBimVal.toFixed(2), styles: { fontStyle: 'bold', fillColor: [224, 242, 254], textColor: [52, 58, 64] } }
             ]);
         }
 
@@ -1545,7 +1525,7 @@ function exportBoletimCompletoPDF() {
             { content: `PONTUAÇÃO ACUMULADA DA DISCIPLINA NO ANO`, colSpan: 2, styles: { fontStyle: 'bold', fillColor: [15, 23, 42], textColor: [255, 255, 255] } },
             { content: "100.00", styles: { fontStyle: 'bold', fillColor: [15, 23, 42], textColor: [255, 255, 255] } },
             { content: "", colSpan: 2, styles: { fillColor: [15, 23, 42] } },
-            { content: finalComRecAnualPDF.toFixed(2), styles: { fontStyle: 'bold', fillColor: [16, 185, 129], textColor: [255, 255, 255], fontSize: 10 } }
+            { content: finalComRecAnualPDF.toFixed(2), styles: { fontStyle: 'bold', fillColor: [92, 111, 98], textColor: [255, 255, 255], fontSize: 10 } }
         ]);
 
         doc.autoTable({
@@ -1820,7 +1800,7 @@ function adicionarPaginaBoletim(doc, aluno, imgLogo) {
     // Cabeçalho institucional com visual unificado
     doc.setFont("helvetica", "bold");
     doc.setFontSize(13);
-    doc.setTextColor(107, 20, 45);
+    doc.setTextColor(52, 58, 64);
     doc.text("PREFEITURA MUNICIPAL DE ABRE CAMPO", 40, 20);
     
     doc.setFontSize(9);
@@ -1840,7 +1820,7 @@ function adicionarPaginaBoletim(doc, aluno, imgLogo) {
     // Metadados do Boletim
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.setTextColor(107, 20, 45);
+    doc.setTextColor(52, 58, 64);
     doc.text("BOLETIM DE RENDIMENTO ESCOLAR INDIVIDUAL", 15, 44);
 
     doc.setFont("helvetica", "normal");
@@ -1893,7 +1873,7 @@ function adicionarPaginaBoletim(doc, aluno, imgLogo) {
         body: tableBody,
         theme: 'grid',
         headStyles: { 
-            fillColor: [43, 78, 128], // Azul do Brasão
+            fillColor: [52, 58, 64], // Azul do Brasão
             textColor: [255, 255, 255], 
             fontStyle: 'bold', 
             halign: 'center',
@@ -1913,29 +1893,40 @@ function adicionarPaginaBoletim(doc, aluno, imgLogo) {
             10: { fontStyle: 'bold' },
             11: { fontStyle: 'bold' }
         },
+        didDrawCell: function (data) {
+            if (data.section === 'head' && data.column.index > 0) {
+                const txt = String(data.cell.raw || '');
+                const x = data.cell.x + data.cell.width / 2;
+                const y = data.cell.y + data.cell.height / 2;
+                doc.setFontSize(6.5);
+                doc.setTextColor(255,255,255);
+                doc.text(txt, x, y, { angle: 90, align: 'center' });
+                data.cell.text = [];
+            }
+        },
         didParseCell: function (data) {
             if (data.section === 'body') {
                 if ([1, 3, 5, 7].includes(data.column.index)) {
                     const val = parseFloat(data.cell.raw.replace(',', '.'));
                     if (val < 15.00) {
-                        data.cell.styles.textColor = [220, 38, 38];
+                        data.cell.styles.textColor = [73, 80, 87];
                     } else {
                         // Azul corrigido para o novo escuro #2b353e
-                        data.cell.styles.textColor = [43, 78, 128]; 
+                        data.cell.styles.textColor = [52, 58, 64]; 
                     }
                 }
                 if (data.column.index === 9) {
                     const val = parseFloat(data.cell.raw.replace(',', '.'));
-                    if (val < 60.00) data.cell.styles.textColor = [220, 38, 38];
-                    else data.cell.styles.textColor = [16, 185, 129];
+                    if (val < 60.00) data.cell.styles.textColor = [73, 80, 87];
+                    else data.cell.styles.textColor = [92, 111, 98];
                 }
                 if (data.column.index === 11) {
                     if (data.cell.raw === "Aprovado") {
-                        data.cell.styles.textColor = [16, 185, 129];
+                        data.cell.styles.textColor = [92, 111, 98];
                     } else if (data.cell.raw === "Em Curso") {
-                        data.cell.styles.textColor = [245, 158, 11];
+                        data.cell.styles.textColor = [128, 107, 69];
                     } else {
-                        data.cell.styles.textColor = [220, 38, 38];
+                        data.cell.styles.textColor = [73, 80, 87];
                     }
                 }
             }
@@ -1955,7 +1946,7 @@ function adicionarPaginaBoletim(doc, aluno, imgLogo) {
         doc.roundedRect(x, assinaturaY, boxW, boxH, 2, 2);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(7);
-        doc.setTextColor(107, 20, 45);
+        doc.setTextColor(52, 58, 64);
         doc.text(label, x + boxW / 2, assinaturaY + 7, { align: 'center' });
         doc.setDrawColor(148, 163, 184);
         doc.line(x + 5, assinaturaY + 20, x + boxW - 5, assinaturaY + 20);

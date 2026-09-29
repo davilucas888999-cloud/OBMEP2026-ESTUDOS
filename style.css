@@ -4,13 +4,13 @@
     --card: #ffffff;
     --text: #0f172a;
     --text-light: #475569;
-    --primary: #2b4e80;       /* Azul Alterado para Dark Slate */
+    --primary: #343a40;       /* Azul Alterado para Dark Slate */
     --primary-light: #e9f0f8;
     --secondary: #1e293b;
     --border: #cbd5e1;
     --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #dc2626;        /* Vermelho Padrão para Notas Abaixo da Média */
+    --warning: #806b45;
+    --danger: #495057;        /* Vermelho Padrão para Notas Abaixo da Média */
     --radius-lg: 0px;         /* Bordas Retas */
     --radius-md: 0px;         /* Bordas Retas */
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
@@ -21,7 +21,7 @@
     --card: #1e293b;
     --text: #f8fafc;
     --text-light: #94a3b8;
-    --primary: #2b4e80;       /* Azul Alterado para Dark Slate */
+    --primary: #343a40;       /* Azul Alterado para Dark Slate */
     --primary-light: rgba(43, 78, 128, 0.30);
     --secondary: #f8fafc;
     --border: #334155;
@@ -206,7 +206,7 @@ body {
 
 /* COMPONENTE: BANNER DE BOAS-VINDAS */
 .welcome-banner {
-    background: linear-gradient(135deg, #213d63, #2b4e80);
+    background: linear-gradient(135deg, #252a30, #343a40);
     color: #ffffff;
     padding: 20px;
     border-radius: var(--radius-lg);
@@ -400,8 +400,8 @@ body {
 
 .bc-blue { background: var(--primary); }
 .bc-green { background: #10b981; }
-.bc-orange { background: #f59e0b; }
-.bc-red { background: #dc2626; }
+.bc-orange { background: #806b45; }
+.bc-red { background: #495057; }
 .bc-purple { background: #8b5cf6; }
 
 /* COMPONENTE: ELEMENTOS DE FORMULÁRIO */
@@ -1307,8 +1307,8 @@ body {
 }
 
 .nota-baixa {
-    color: #c62828 !important;
-    background: #ffebeb !important;
+    color: #495057 !important;
+    background: #eef0f2 !important;
 }
 
 @media (min-width: 900px) {
@@ -1331,13 +1331,13 @@ body {
     --card: #ffffff;
     --text: #172033;
     --text-light: #647084;
-    --primary: #6b142d;
+    --primary: #343a40;
     --primary-light: #f7e9ed;
-    --secondary: #8f1d39;
+    --secondary: #495057;
     --border: #e3d9d4;
     --success: #15803d;
     --warning: #b7791f;
-    --danger: #dc2626;
+    --danger: #495057;
     --radius-lg: 18px;
     --radius-md: 11px;
     --shadow: 0 10px 30px rgba(70, 28, 39, .08);
@@ -1346,7 +1346,7 @@ body { background: linear-gradient(180deg,#fbfaf8 0%,#f5f0ed 100%); }
 .topbar {
     height: 82px;
     background: linear-gradient(105deg,#640f29,#8f1835);
-    border-bottom: 3px solid #d4af37;
+    border-bottom: 3px solid #b08a3e;
     color:#fff;
     padding: 0 28px;
     box-shadow: 0 5px 18px rgba(68,13,31,.18);
@@ -1373,7 +1373,7 @@ body { background: linear-gradient(180deg,#fbfaf8 0%,#f5f0ed 100%); }
 .welcome-banner,.materia-header-banner,.table-meta-header,.card-box,.progress-container,.hub-card-btn,.table-responsive-container,.atividades-grade-wrapper {
     border:1px solid #eadfdb; box-shadow:var(--shadow); border-radius:18px;
 }
-.welcome-banner { background:linear-gradient(120deg,#6b142d,#941c3b); box-shadow:0 14px 32px rgba(107,20,45,.18); }
+.welcome-banner { background:linear-gradient(120deg,#343a40,#343a40); box-shadow:0 14px 32px rgba(107,20,45,.18); }
 .banner-logo { background:#fff; border-radius:50%; padding:6px; }
 .section-title,.box-title,.table-meta-header h3,.materia-title-wrapper h2 { color:var(--text); }
 .btn-submit-action,.hub-card-btn:hover { background:var(--primary) !important; }
@@ -1388,10 +1388,10 @@ body { background: linear-gradient(180deg,#fbfaf8 0%,#f5f0ed 100%); }
 .aluno-fixed-head { background:var(--primary) !important; border-right-color:#8c304a !important; }
 .nota-final-value { background:#f7f9fc; border-color:#dfe5ec; }
 .nota-alta { color:#0756b6 !important; background:#e8f1ff !important; }
-.nota-baixa { color:#c62828 !important; background:#ffebeb !important; }
+.nota-baixa { color:#495057 !important; background:#eef0f2 !important; }
 .info-alert { border-radius:11px; }
 .decoration-border { position:relative; overflow:hidden; }
-.decoration-border::before { content:""; position:absolute; inset:0 0 auto 0; height:4px; background:linear-gradient(90deg,#6b142d,#d4af37,#6b142d); }
+.decoration-border::before { content:""; position:absolute; inset:0 0 auto 0; height:4px; background:linear-gradient(90deg,#343a40,#b08a3e,#343a40); }
 @media (min-width: 900px) {
     .main-container { max-width:none !important; width:100% !important; padding:28px 34px !important; }
 }
@@ -1421,13 +1421,13 @@ body { background: linear-gradient(180deg,#fbfaf8 0%,#f5f0ed 100%); }
     --card: #ffffff;
     --text: #182235;
     --text-light: #667085;
-    --primary: #6b142d;
+    --primary: #343a40;
     --primary-light: #f8e9ed;
-    --secondary: #8f1d39;
+    --secondary: #495057;
     --border: #e5d9d5;
     --success: #15803d;
     --warning: #b7791f;
-    --danger: #c62828;
+    --danger: #495057;
     --radius-lg: 18px;
     --radius-md: 11px;
     --shadow: 0 10px 30px rgba(70, 28, 39, .08);
@@ -1451,7 +1451,7 @@ body { background: linear-gradient(180deg,#fbfaf8 0%,#f5f0ed 100%); }
     box-shadow:0 8px 24px rgba(72, 29, 41, .06);
 }
 input, select, textarea, .search-box-input { border:1px solid #d8cbc6 !important; border-radius:11px !important; }
-input:focus, select:focus, textarea:focus { border-color:#8f1d39 !important; box-shadow:0 0 0 3px rgba(143,29,57,.10) !important; outline:none; }
+input:focus, select:focus, textarea:focus { border-color:#495057 !important; box-shadow:0 0 0 3px rgba(143,29,57,.10) !important; outline:none; }
 
 @media (max-width: 700px) {
     .input-grid-cadastro { grid-template-columns:1fr; gap:10px; }
@@ -1510,7 +1510,7 @@ input:focus, select:focus, textarea:focus { border-color:#8f1d39 !important; box
 .btn-table-edit {
     border: 1.5px solid #8c304a;
     background: #fff;
-    color: #6b142d;
+    color: #343a40;
     border-radius: 8px;
     padding: 7px 10px;
     font-weight: 800;
@@ -1518,7 +1518,7 @@ input:focus, select:focus, textarea:focus { border-color:#8f1d39 !important; box
     transition: .18s ease;
 }
 .btn-table-edit:hover {
-    background: #6b142d;
+    background: #343a40;
     color: #fff;
     transform: translateY(-1px);
 }
@@ -1543,14 +1543,14 @@ input:focus, select:focus, textarea:focus { border-color:#8f1d39 !important; box
 
 
 /* =========================================================
-   POLIMENTO VISUAL 2026 — AZUL #2b4e80
+   POLIMENTO VISUAL 2026 — AZUL #343a40
    Mantém a planilha de notas e reduz apenas os campos numéricos.
    ========================================================= */
 :root {
-    --primary: #2b4e80;
-    --primary-dark: #213d63;
+    --primary: #343a40;
+    --primary-dark: #252a30;
     --primary-light: #e9f0f8;
-    --secondary: #213d63;
+    --secondary: #252a30;
     --border: #cbd5e1;
     --radius-lg: 3px;
     --radius-md: 2px;
@@ -1559,7 +1559,7 @@ body { background: #eef2f7; }
 .topbar { border-bottom: 2px solid var(--primary); }
 .topbar-title { color: var(--primary); }
 .welcome-banner {
-    background: linear-gradient(135deg, #213d63 0%, #2b4e80 100%);
+    background: linear-gradient(135deg, #252a30 0%, #343a40 100%);
     border-radius: 3px;
     box-shadow: 0 8px 18px rgba(43,78,128,.18);
 }
@@ -1568,7 +1568,7 @@ body { background: #eef2f7; }
     border-radius: 3px;
 }
 .disciplina-card:hover, .hub-card-btn:hover {
-    border-color: #2b4e80;
+    border-color: #343a40;
     box-shadow: 0 6px 16px rgba(43,78,128,.14);
 }
 .btn-submit-action, .btn-action-atv { background-color: var(--primary); }
@@ -1672,3 +1672,18 @@ body { background: #eef2f7; }
     .student-actions-cell { flex-direction:column; }
     .btn-table-edit, .btn-table-delete { width:100%; }
 }
+
+/* ==================== TEMA FINAL PROFISSIONAL ==================== */
+:root{--bg:#f4f5f6!important;--card:#fff!important;--text:#252a30!important;--text-light:#68717b!important;--primary:#343a40!important;--primary-dark:#252a30!important;--primary-light:#eef0f2!important;--secondary:#495057!important;--border:#c7ccd1!important;--success:#5c6f62!important;--warning:#806b45!important;--danger:#495057!important;--radius-lg:6px!important;--radius-md:4px!important;--shadow:0 5px 18px rgba(37,42,48,.07)!important}
+body{background:#f4f5f6!important;color:#252a30!important}.topbar{background:#252a30!important;border-bottom:3px solid #b08a3e!important}.topbar-title{color:#fff!important}.sidebar{background:#fff!important;border-right:1px solid #c7ccd1!important}.welcome-banner{background:#343a40!important;border:1px solid #252a30!important;border-radius:6px!important}.card-box,.materia-header-banner,.table-meta-header,.table-responsive-container,.atividades-grade-wrapper,.hub-card-btn,.disciplina-card{border:1px solid #c7ccd1!important;border-radius:6px!important;box-shadow:var(--shadow)!important}
+.btn-submit-action,.btn-action-atv{background:#343a40!important;border-color:#252a30!important;color:#fff!important;border-radius:4px!important}.btn-submit-action:hover,.btn-action-atv:hover{background:#252a30!important}
+input,select,textarea,.search-box-input{border:1px solid #9da5ad!important;border-radius:4px!important;color:#252a30!important;background:#fff!important}input:focus,select:focus,textarea:focus,.search-box-input:focus{border-color:#59616a!important;box-shadow:0 0 0 2px rgba(52,58,64,.12)!important}
+.bc-blue,.bc-green,.bc-orange,.bc-red,.bc-purple{background:#343a40!important;color:#fff!important}
+/* tabela de notas: quadrada com leve arredondamento, sem alterar a estrutura */
+#screen-lancar-notas .table-responsive-container{border-radius:6px!important}.table-custom-format,#table-notas,.atividades-grade-table{border:1px solid #9da5ad!important;border-collapse:separate!important;border-spacing:0!important;border-radius:5px!important;overflow:hidden!important}.table-custom-format th,#table-notas th,.atividades-grade-table th{background:#343a40!important;color:#fff!important;border-right:1px solid #59616a!important;border-bottom:1px solid #252a30!important;white-space:nowrap!important}.table-custom-format td,#table-notas td,.atividades-grade-table td{border-right:1px solid #c7ccd1!important;border-bottom:1px solid #c7ccd1!important}.table-custom-format tbody tr:nth-child(even),#table-notas tbody tr:nth-child(even),.atividades-grade-table tbody tr:nth-child(even){background:#f7f8f9!important}.table-custom-format tbody tr:hover,#table-notas tbody tr:hover,.atividades-grade-table tbody tr:hover{background:#eef0f2!important}
+#screen-lancar-notas .table-custom-format input[type=number]{width:55px!important;min-width:55px!important;max-width:55px!important;height:34px!important;padding:3px!important;border:1px solid #7f8891!important;border-radius:4px!important;text-align:center!important;font-weight:800!important}#screen-lancar-notas .table-custom-format th:nth-child(n+2),#screen-lancar-notas .table-custom-format td:nth-child(n+2){width:70px!important;min-width:70px!important;max-width:70px!important;text-align:center!important}
+.nota-alta,.nota-baixa,.nota-final-value{color:#252a30!important;background:#eef0f2!important;border-color:#c7ccd1!important}
+/* faltas diárias */
+.daily-form{display:grid;grid-template-columns:1.2fr 1fr .8fr auto;gap:12px;align-items:end;margin-top:18px}.daily-form label,.faltas-diarias-toolbar label{display:block;margin-bottom:6px;font-size:.76rem;font-weight:800;color:#4f5861}.daily-form input,.daily-form select,.faltas-diarias-toolbar select{width:100%;height:40px;padding:0 10px}.faltas-diarias-toolbar{display:grid;grid-template-columns:170px 330px 1fr;gap:12px;align-items:end;margin-top:16px}.faltas-diarias-toolbar .search-box-input{margin-top:0!important}.daily-summary{min-height:40px;display:flex;align-items:center;padding:0 12px;background:#eef0f2;border:1px solid #c7ccd1;border-radius:4px;font-size:.78rem;color:#4f5861}.daily-absence-input{width:60px!important;min-width:60px!important;max-width:60px!important;text-align:center!important;font-weight:800!important}.faltas-total-cell,.frequencia-cell{text-align:center!important;font-weight:800!important;color:#343a40!important}.btn-table-delete{border:1px solid #9da5ad!important;background:#fff!important;color:#4f5861!important;border-radius:4px!important;width:34px;height:34px;cursor:pointer}.empty-state{text-align:center!important;padding:28px!important;color:#6c757d!important}
+/* Boletim PDF e tabelas: títulos sem quebra */.boletim-vertical-header{writing-mode:vertical-rl!important;text-orientation:mixed!important;transform:rotate(180deg)!important;white-space:nowrap!important;display:inline-block!important}.boletim-table th,.boletim-table td{white-space:nowrap!important}
+@media(max-width:800px){.daily-form,.faltas-diarias-toolbar{grid-template-columns:1fr 1fr}.daily-summary{grid-column:1/-1}}@media(max-width:560px){.daily-form,.faltas-diarias-toolbar{grid-template-columns:1fr}.daily-summary{grid-column:auto}}
