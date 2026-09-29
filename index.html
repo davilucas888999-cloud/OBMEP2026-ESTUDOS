@@ -200,6 +200,11 @@
                     <span>Ver Notas</span>
                     <small>Somas diretas do ano</small>
                 </button>
+                <button class="hub-card-btn" onclick="openLancamentoFaltas()">
+                    <div class="icon-circle bc-blue"><i class="fas fa-user-clock"></i></div>
+                    <span>Lançar Faltas</span>
+                    <small>Por disciplina e bimestre</small>
+                </button>
                 <button class="hub-card-btn" onclick="openRecuperacaoBimestral()">
                     <div class="icon-circle bc-orange"><i class="fas fa-medal"></i></div>
                     <span>Recuperação Bimestral</span>
@@ -365,6 +370,40 @@
             </div>
         </div>
 
+
+        <!-- TELA: LANÇAMENTO DE FALTAS POR DISCIPLINA -->
+        <div id="screen-lancar-faltas" class="screen">
+            <button class="btn-back" onclick="navigate('materia-hub')"><i class="fas fa-chevron-left"></i> Voltar ao Menu da Matéria</button>
+
+            <div class="table-meta-header">
+                <h3><i class="fas fa-user-clock"></i> Lançamento de Faltas</h3>
+                <p class="sub-meta" id="faltas-subtitulo">Informe a quantidade de faltas de cada aluno na disciplina e no bimestre selecionados.</p>
+                <div class="faltas-toolbar">
+                    <label for="faltas-bimestre-select">Bimestre</label>
+                    <select id="faltas-bimestre-select" onchange="changeBimestreFaltas()">
+                        <option value="1">1º Bimestre</option>
+                        <option value="2">2º Bimestre</option>
+                        <option value="3">3º Bimestre</option>
+                        <option value="4">4º Bimestre</option>
+                    </select>
+                    <input type="text" class="search-box-input" id="search-aluno-faltas" placeholder="Pesquisar aluno..." onkeyup="filterTable('table-faltas-corpo', this.value)">
+                </div>
+            </div>
+
+            <div class="table-responsive-container">
+                <table class="table-custom-format faltas-table">
+                    <thead>
+                        <tr>
+                            <th>Aluno</th>
+                            <th class="faltas-input-col">Faltas</th>
+                            <th class="faltas-total-col">Total na Disciplina</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-faltas-corpo"></tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- TELA 7: FECHAMENTO GLOBAL DE BIMESTRES -->
         <div id="screen-fechamento-global" class="screen">
             <div class="card-box decoration-border">
@@ -462,13 +501,48 @@
 
     </div>
 
+
+    <!-- MODAL DE EDIÇÃO DE ALUNO -->
+    <div class="modal-overlay-view" id="edit-aluno-modal" role="dialog" aria-modal="true" aria-labelledby="edit-aluno-title">
+        <div class="modal-content-container aluno-edit-modal">
+            <div class="modal-header-row">
+                <div>
+                    <span class="modal-kicker">CADASTRO</span>
+                    <h4 id="edit-aluno-title">Editar aluno</h4>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="fecharModalEditarAluno()" aria-label="Fechar">×</button>
+            </div>
+            <form id="form-editar-aluno" onsubmit="salvarEdicaoAluno(event)">
+                <input type="hidden" id="edit-aluno-original">
+                <div class="input-group">
+                    <label for="edit-aluno-nome">Nome completo</label>
+                    <input type="text" id="edit-aluno-nome" required autocomplete="off">
+                </div>
+                <div class="edit-aluno-grid">
+                    <div class="input-group">
+                        <label for="edit-aluno-data">Data de matrícula</label>
+                        <input type="date" id="edit-aluno-data">
+                    </div>
+                    <div class="input-group">
+                        <label for="edit-aluno-nascimento">Data de nascimento</label>
+                        <input type="date" id="edit-aluno-nascimento">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-modal-secondary" onclick="fecharModalEditarAluno()">Cancelar</button>
+                    <button type="submit" class="btn-submit-action"><i class="fas fa-save"></i> Salvar alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL DE INSTRUÇÕES DE AJUDA -->
     <div class="modal-overlay-view" id="help-modal">
         <div class="modal-content-container">
             <h4>Manual Operacional Rápido</h4>
             <hr style="margin: 10px 0; border: 0; border-top: 1px solid var(--border);">
             <ul style="padding-left: 20px; font-size: 0.85rem; line-height: 1.5; color: var(--text-light);">
-                <li><strong>Cores Importantes:</strong> Notas exibidas em <span style="color: #2563eb; font-weight:bold;">Azul</span> representam aproveitamento igual ou superior a 60%. Notas em <span style="color: #dc2626; font-weight:bold;">Vermelho</span> sinalizam que o estudante está abaixo da média estipulada.</li>
+                <li><strong>Cores Importantes:</strong> Notas exibidas em <span style="color: #2b4e80; font-weight:bold;">Azul</span> representam aproveitamento igual ou superior a 60%. Notas em <span style="color: #dc2626; font-weight:bold;">Vermelho</span> sinalizam que o estudante está abaixo da média estipulada.</li>
                 <li><strong>Bloqueios:</strong> Se o bimestre foi encerrado na aba "Fechamento de Bimestre", você não conseguirá alterar nenhuma nota ou criar atividades para aquele período.</li>
                 <li><strong>Recuperações:</strong> O sistema cumpre rigorosamente as regras do diário de classe eletrônico da instituição.</li>
             </ul>

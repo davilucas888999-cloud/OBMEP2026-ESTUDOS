@@ -4,8 +4,8 @@
     --card: #ffffff;
     --text: #0f172a;
     --text-light: #475569;
-    --primary: #2b353e;       /* Azul Alterado para Dark Slate */
-    --primary-light: #eff6ff;
+    --primary: #2b4e80;       /* Azul Alterado para Dark Slate */
+    --primary-light: #e9f0f8;
     --secondary: #1e293b;
     --border: #cbd5e1;
     --success: #10b981;
@@ -21,8 +21,8 @@
     --card: #1e293b;
     --text: #f8fafc;
     --text-light: #94a3b8;
-    --primary: #2b353e;       /* Azul Alterado para Dark Slate */
-    --primary-light: rgba(43, 53, 62, 0.3);
+    --primary: #2b4e80;       /* Azul Alterado para Dark Slate */
+    --primary-light: rgba(43, 78, 128, 0.30);
     --secondary: #f8fafc;
     --border: #334155;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -206,12 +206,12 @@ body {
 
 /* COMPONENTE: BANNER DE BOAS-VINDAS */
 .welcome-banner {
-    background: linear-gradient(135deg, #1a202c, #2b353e);
+    background: linear-gradient(135deg, #213d63, #2b4e80);
     color: #ffffff;
     padding: 20px;
     border-radius: var(--radius-lg);
     margin-bottom: 24px;
-    box-shadow: 0 10px 15px -3px rgba(43, 53, 62, 0.3);
+    box-shadow: 0 10px 15px -3px rgba(43, 78, 128, 0.25);
 }
 
 .banner-flex {
@@ -438,7 +438,7 @@ body {
 .input-group input {
     padding: 12px;
     border-radius: 0px; /* Bordas Retas */
-    border: 2px solid orange; /* Bordas Laranjas Adicionadas */
+    border: 1px solid var(--border); /* Bordas Laranjas Adicionadas */
     background-color: var(--bg);
     color: var(--text);
     font-size: 1rem;
@@ -555,7 +555,7 @@ body {
     width: 100%;
     padding: 10px 12px;
     border-radius: 0px; /* Bordas Retas */
-    border: 2px solid orange; /* Bordas Laranjas Adicionadas */
+    border: 1px solid var(--border); /* Bordas Laranjas Adicionadas */
     background-color: var(--bg);
     color: var(--text);
     font-size: 0.85rem;
@@ -599,7 +599,7 @@ body {
 .table-custom-format input[type="number"] {
     width: 72px;
     padding: 8px;
-    border: 2px solid orange; /* Bordas Laranjas Adicionadas */
+    border: 1px solid var(--border); /* Bordas Laranjas Adicionadas */
     border-radius: 0px; /* Bordas Retas */
     background-color: var(--bg);
     color: var(--text);
@@ -1001,7 +1001,7 @@ body {
 .grade-input-cell input[type="number"] {
     width: 76px;
     padding: 7px 4px;
-    border: 2px solid orange;
+    border: 1px solid var(--border);
     border-radius: 0;
     background: var(--bg);
     color: var(--text);
@@ -1539,4 +1539,136 @@ input:focus, select:focus, textarea:focus { border-color:#8f1d39 !important; box
     .table-custom-format td,
     #table-notas th,
     #table-notas td { border-width: 1px !important; }
+}
+
+
+/* =========================================================
+   POLIMENTO VISUAL 2026 — AZUL #2b4e80
+   Mantém a planilha de notas e reduz apenas os campos numéricos.
+   ========================================================= */
+:root {
+    --primary: #2b4e80;
+    --primary-dark: #213d63;
+    --primary-light: #e9f0f8;
+    --secondary: #213d63;
+    --border: #cbd5e1;
+    --radius-lg: 3px;
+    --radius-md: 2px;
+}
+body { background: #eef2f7; }
+.topbar { border-bottom: 2px solid var(--primary); }
+.topbar-title { color: var(--primary); }
+.welcome-banner {
+    background: linear-gradient(135deg, #213d63 0%, #2b4e80 100%);
+    border-radius: 3px;
+    box-shadow: 0 8px 18px rgba(43,78,128,.18);
+}
+.card-box, .materia-header-banner, .disciplina-card, .hub-card-btn,
+.table-meta-header, .table-responsive-container, .atividades-grade-wrapper {
+    border-radius: 3px;
+}
+.disciplina-card:hover, .hub-card-btn:hover {
+    border-color: #2b4e80;
+    box-shadow: 0 6px 16px rgba(43,78,128,.14);
+}
+.btn-submit-action, .btn-action-atv { background-color: var(--primary); }
+.search-box-input:focus, .input-group input:focus,
+.faltas-toolbar select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+/* Campos da planilha de notas menores, sem mudar a estrutura. */
+.table-custom-format input[type="number"] {
+    width: 54px;
+    min-width: 54px;
+    max-width: 54px;
+    padding: 6px 3px;
+    border: 1px solid var(--border);
+}
+#screen-lancar-notas .table-custom-format th:nth-child(n+2),
+#screen-lancar-notas .table-custom-format td:nth-child(n+2) {
+    width: 62px;
+    min-width: 62px;
+    max-width: 62px;
+    text-align: center;
+}
+#screen-lancar-notas .table-custom-format th:first-child,
+#screen-lancar-notas .table-custom-format td:first-child {
+    min-width: 220px;
+}
+
+/* Faltas */
+.faltas-toolbar {
+    display: grid;
+    grid-template-columns: auto 180px 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-top: 14px;
+}
+.faltas-toolbar label { font-size: .82rem; font-weight: 800; color: var(--text-light); }
+.faltas-toolbar select {
+    height: 40px; padding: 0 10px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); border-radius: 2px; font-weight: 700;
+}
+.faltas-toolbar .search-box-input { margin-top: 0; }
+.faltas-table th, .faltas-table td { vertical-align: middle; }
+.faltas-input-col, .faltas-total-col { width: 120px; text-align:center !important; }
+.faltas-table input[type="number"] {
+    width: 64px !important; min-width: 64px !important; max-width: 64px !important;
+    text-align: center; padding: 7px 4px;
+}
+.faltas-total-cell { text-align:center; font-weight:800; color:var(--primary); }
+
+/* Modal de edição */
+.aluno-edit-modal { max-width: 560px; border-top: 4px solid var(--primary); }
+.modal-header-row { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:18px; }
+.modal-kicker { font-size:.68rem; font-weight:900; color:var(--primary); letter-spacing:.08em; }
+.modal-header-row h4 { font-size:1.2rem; margin-top:3px; }
+.modal-close-btn {
+    border:1px solid var(--border); background:var(--bg); color:var(--text);
+    width:36px; height:36px; border-radius:2px; font-size:1.5rem; line-height:1; cursor:pointer;
+}
+.edit-aluno-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:8px; }
+.btn-modal-secondary {
+    border:1px solid var(--border); background:var(--bg); color:var(--text);
+    padding:12px 16px; border-radius:2px; font-weight:800; cursor:pointer;
+}
+.student-actions-cell { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+.btn-table-edit, .btn-table-delete {
+    border:1px solid transparent; padding:7px 10px; border-radius:2px; font-weight:800; cursor:pointer;
+}
+.btn-table-edit { background:var(--primary-light); color:var(--primary); border-color:#b8c9de; }
+.btn-table-delete { background:#fff1f2; color:#b4232d; border-color:#fecdd3; }
+
+/* Responsividade real */
+.main-container { max-width: 1180px; }
+@media (max-width: 760px) {
+    body { padding-top:58px; }
+    .topbar { height:58px; padding:0 10px; }
+    .topbar-title { font-size:1rem; }
+    .main-container { padding:10px; width:100%; }
+    .welcome-banner { padding:16px; margin-bottom:16px; }
+    .banner-logo { height:40px; }
+    .disciplinas-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .disciplina-card { padding:17px 8px; min-height:108px; }
+    .hub-options-grid { grid-template-columns:1fr 1fr; gap:8px; }
+    .hub-card-btn { padding:15px 8px; min-height:115px; }
+    .table-meta-header { padding:11px; }
+    .table-custom-format { font-size:.78rem; }
+    .table-custom-format th, .table-custom-format td { padding:8px 8px; }
+    .table-responsive-container { max-width:100%; }
+    .faltas-toolbar { grid-template-columns:1fr 1fr; }
+    .faltas-toolbar label { grid-column:1 / -1; }
+    .faltas-toolbar .search-box-input { grid-column:1 / -1; }
+    .edit-aluno-grid { grid-template-columns:1fr; }
+    .modal-overlay-view { padding:10px; }
+    .modal-content-container { max-height:90vh; overflow:auto; }
+}
+@media (min-width: 761px) {
+    .disciplina-card { min-height:150px; }
+}
+@media (max-width: 430px) {
+    .hub-options-grid { grid-template-columns:1fr; }
+    .disciplinas-grid { grid-template-columns:1fr 1fr; }
+    .student-actions-cell { flex-direction:column; }
+    .btn-table-edit, .btn-table-delete { width:100%; }
 }

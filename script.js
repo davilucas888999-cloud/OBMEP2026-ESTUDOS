@@ -135,7 +135,10 @@ function renderCadastroAlunos() {
             <td><strong>${escapeHtml(aluno)}</strong></td>
             <td>${formatarDataMatricula(c.dataMatricula)}</td>
             <td>${formatarDataNascimento(c.dataNascimento)}</td>
-            <td class="student-actions-cell"><button class="btn-table-edit" onclick="editarAluno('${escapeAttr(aluno)}')"><i class="fas fa-pen"></i> Alterar</button></td>
+            <td class="student-actions-cell">
+                <button class="btn-table-edit" onclick="editarAluno('${escapeAttr(aluno)}')"><i class="fas fa-pen"></i> Alterar</button>
+                <button class="btn-table-delete" onclick="excluirAluno('${escapeAttr(aluno)}')"><i class="fas fa-trash"></i> Excluir</button>
+            </td>
         </tr>`;
     }).join('');
 }
@@ -181,23 +184,40 @@ function cadastrarNovoAluno(event) {
 
 function editarAluno(nomeAtual) {
     const c = getCadastroAluno(nomeAtual);
-    const novoNome = prompt('Nome completo do aluno:', c.nome);
-    if (novoNome === null) return;
-    const nome = novoNome.trim().replace(/\s+/g, ' ').toUpperCase();
+    const modal = document.getElementById('edit-aluno-modal');
+    if (!modal) return;
+    document.getElementById('edit-aluno-original').value = nomeAtual;
+    document.getElementById('edit-aluno-nome').value = c.nome || '';
+    document.getElementById('edit-aluno-data').value = dataBRParaISO(c.dataMatricula);
+    document.getElementById('edit-aluno-nascimento').value = dataBRParaISO(c.dataNascimento);
+    modal.style.display = 'flex';
+    setTimeout(() => document.getElementById('edit-aluno-nome')?.focus(), 50);
+}
+
+function fecharModalEditarAluno() {
+    const modal = document.getElementById('edit-aluno-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function salvarEdicaoAluno(event) {
+    event.preventDefault();
+    const nomeAtual = document.getElementById('edit-aluno-original').value;
+    const c = getCadastroAluno(nomeAtual);
+    const nome = (document.getElementById('edit-aluno-nome').value || '').trim().replace(/\s+/g, ' ').toUpperCase();
+    const dataMatriculaISO = document.getElementById('edit-aluno-data').value;
+    const dataNascimentoISO = document.getElementById('edit-aluno-nascimento').value;
+
     if (!nome) return alert('Informe o nome completo do aluno.');
-    if (nome !== nomeAtual && ALUNOS.some(a => a.toUpperCase() === nome)) return alert('Já existe outro aluno com esse nome.');
+    if (nome !== nomeAtual && ALUNOS.some(a => a.toUpperCase() === nome)) {
+        return alert('Já existe outro aluno com esse nome.');
+    }
 
-    const dataMatriculaInput = prompt('Data de matrícula (DD/MM/AAAA):', c.dataMatricula || '');
-    if (dataMatriculaInput === null) return;
-    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dataMatriculaInput.trim())) return alert('Use a data no formato DD/MM/AAAA.');
-
-    const dataNascimentoInput = prompt('Data de nascimento (DD/MM/AAAA):', c.dataNascimento || '');
-    if (dataNascimentoInput === null) return;
-    if (dataNascimentoInput.trim() && !/^\d{2}\/\d{2}\/\d{4}$/.test(dataNascimentoInput.trim())) return alert('Use a data de nascimento no formato DD/MM/AAAA.');
+    const dataMatricula = dataMatriculaISO ? formatarDataMatricula(dataMatriculaISO) : c.dataMatricula;
+    const dataNascimento = dataNascimentoISO ? formatarDataMatricula(dataNascimentoISO) : '';
 
     c.nome = nome;
-    c.dataMatricula = dataMatriculaInput.trim();
-    c.dataNascimento = dataNascimentoInput.trim();
+    c.dataMatricula = dataMatricula;
+    c.dataNascimento = dataNascimento;
 
     if (nome !== nomeAtual) {
         DISCIPLINAS.forEach(m => {
@@ -213,20 +233,25 @@ function editarAluno(nomeAtual) {
                     bData.recuperacaoBimestral[nome] = bData.recuperacaoBimestral[nomeAtual];
                     delete bData.recuperacaoBimestral[nomeAtual];
                 }
+                if (bData.faltas && Object.prototype.hasOwnProperty.call(bData.faltas, nomeAtual)) {
+                    bData.faltas[nome] = bData.faltas[nomeAtual];
+                    delete bData.faltas[nomeAtual];
+                }
             }
         });
         const idx = ALUNOS.indexOf(nomeAtual);
         if (idx >= 0) ALUNOS[idx] = nome;
     }
 
-    // A matrícula permanece vinculada à ordem da turma; apenas o ano dela acompanha a data de matrícula.
     const idx = db.alunosCadastro.findIndex(a => a.nome === nome);
     if (idx >= 0) {
         const ordem = idx + 1;
         const ano = Number(c.dataMatricula.split('/')[2]) || CONFIG.ano;
         c.matricula = gerarNumeroMatricula(ano, ordem);
     }
+
     saveStorage();
+    fecharModalEditarAluno();
     renderCadastroAlunos();
     renderMateriaBlocks();
     if (typeof renderBoletimIndividualList === 'function') renderBoletimIndividualList();
@@ -234,6 +259,103 @@ function editarAluno(nomeAtual) {
         const atv = db.disciplinas[selectedMateria]?.[selectedBimestre]?.atividades?.find(a => a.id === selectedAtividadeId);
         if (atv) renderNotasTable(atv);
     }
+}
+
+
+function excluirAluno(nome) {
+    const aluno = getCadastroAluno(nome);
+    const confirma = confirm(`Excluir o aluno "${nome}" do sistema?\n\nAs notas e faltas desse aluno também serão removidas da base local.`);
+    if (!confirma) return;
+
+    db.alunosCadastro = (db.alunosCadastro || []).filter(a => a.nome !== nome);
+    ALUNOS = ALUNOS.filter(a => a !== nome);
+
+    DISCIPLINAS.forEach(m => {
+        for (let b = 1; b <= 4; b++) {
+            const bData = db.disciplinas[m][b];
+            (bData.atividades || []).forEach(atv => {
+                if (atv.notas) delete atv.notas[nome];
+            });
+            if (bData.recuperacaoBimestral) delete bData.recuperacaoBimestral[nome];
+            if (bData.faltas) delete bData.faltas[nome];
+        }
+        if (db.disciplinas[m].recuperacaoAnual) delete db.disciplinas[m].recuperacaoAnual[nome];
+    });
+
+    saveStorage();
+    renderCadastroAlunos();
+    renderMateriaBlocks();
+    if (typeof renderBoletimIndividualList === 'function') renderBoletimIndividualList();
+    alert('Aluno excluído com sucesso.');
+}
+
+function garantirEstruturaFaltas() {
+    DISCIPLINAS.forEach(m => {
+        if (!db.disciplinas[m]) return;
+        for (let b = 1; b <= 4; b++) {
+            if (!db.disciplinas[m][b].faltas) db.disciplinas[m][b].faltas = {};
+        }
+    });
+}
+
+function openLancamentoFaltas() {
+    garantirEstruturaFaltas();
+    selectedBimestre = (db.configGlobal.currentBimestre <= 4 ? db.configGlobal.currentBimestre : 4).toString();
+    const select = document.getElementById('faltas-bimestre-select');
+    if (select) select.value = selectedBimestre;
+    renderFaltasTable();
+    navigate('lancar-faltas');
+}
+
+function changeBimestreFaltas() {
+    selectedBimestre = document.getElementById('faltas-bimestre-select').value;
+    renderFaltasTable();
+}
+
+function obterFaltasAlunoDisciplina(aluno, disciplina, bimestre) {
+    garantirEstruturaFaltas();
+    return Number(db.disciplinas[disciplina]?.[bimestre]?.faltas?.[aluno] || 0);
+}
+
+function totalFaltasDisciplina(aluno, disciplina) {
+    let total = 0;
+    for (let b = 1; b <= 4; b++) total += obterFaltasAlunoDisciplina(aluno, disciplina, b);
+    return total;
+}
+
+function salvarFaltaAluno(aluno, input) {
+    garantirEstruturaFaltas();
+    const b = selectedBimestre;
+    let valor = parseInt(String(input.value).replace(/\D/g, ''), 10);
+    if (!Number.isFinite(valor) || valor < 0) valor = 0;
+    db.disciplinas[selectedMateria][b].faltas[aluno] = valor;
+    input.value = valor;
+    const totalCell = document.getElementById(`faltas-total-${encodeURIComponent(aluno)}`);
+    if (totalCell) totalCell.textContent = totalFaltasDisciplina(aluno, selectedMateria);
+    saveStorage();
+}
+
+function renderFaltasTable() {
+    garantirEstruturaFaltas();
+    const corpo = document.getElementById('table-faltas-corpo');
+    if (!corpo) return;
+    const subtitulo = document.getElementById('faltas-subtitulo');
+    if (subtitulo) subtitulo.textContent = `${selectedMateria} • ${selectedBimestre}º Bimestre — lance somente o total de faltas do aluno neste período.`;
+
+    corpo.innerHTML = ALUNOS.map(aluno => {
+        const faltas = obterFaltasAlunoDisciplina(aluno, selectedMateria, selectedBimestre);
+        const total = totalFaltasDisciplina(aluno, selectedMateria);
+        const id = encodeURIComponent(aluno);
+        return `<tr>
+            <td><strong>${escapeHtml(aluno)}</strong></td>
+            <td style="text-align:center;">
+                <input type="number" min="0" step="1" value="${faltas}"
+                    aria-label="Faltas de ${escapeAttr(aluno)}"
+                    onchange="salvarFaltaAluno('${escapeAttr(aluno)}', this)">
+            </td>
+            <td class="faltas-total-cell" id="faltas-total-${id}">${total}</td>
+        </tr>`;
+    }).join('');
 }
 
 /**
@@ -276,6 +398,7 @@ function initDatabaseEngine() {
     }
 
     inicializarCadastroAlunos();
+    garantirEstruturaFaltas();
 
     // Garante compatibilidade de chaves para recuperação anual em bases migradas
     DISCIPLINAS.forEach(d => {
@@ -1395,8 +1518,8 @@ function exportBoletimCompletoPDF() {
                 { content: "25,00", styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } },
                 { content: totalBimVal.toFixed(2), styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } },
                 { content: rbVal, styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } },
-                // Azul da tabela pdf corrigido para [43, 53, 62] que equivale a #2b353e
-                { content: finalBimVal.toFixed(2), styles: { fontStyle: 'bold', fillColor: [224, 242, 254], textColor: [43, 53, 62] } }
+                // Azul da tabela pdf corrigido para [43, 78, 128] que equivale a #2b353e
+                { content: finalBimVal.toFixed(2), styles: { fontStyle: 'bold', fillColor: [224, 242, 254], textColor: [43, 78, 128] } }
             ]);
         }
 
@@ -1614,7 +1737,7 @@ function renderBoletimIndividualList() {
         tr.innerHTML = `
             <td><strong>${getCadastroAluno(aluno).matricula} • ${aluno}</strong><small class="student-enrollment-date">Matrícula: ${formatarDataMatricula(getCadastroAluno(aluno).dataMatricula)}${getCadastroAluno(aluno).dataNascimento ? ` • Nasc.: ${formatarDataNascimento(getCadastroAluno(aluno).dataNascimento)}` : ""}</small></td>
             <td style="text-align: center;">
-                <button class="btn-action-atv" style="background-color: #0c2c5c; color: #ffffff;" onclick="gerarBoletimPDF('${aluno}')">
+                <button class="btn-action-atv" style="background-color: #2b4e80; color: #ffffff;" onclick="gerarBoletimPDF('${aluno}')">
                     <i class="fas fa-file-pdf"></i> Gerar Boletim
                 </button>
             </td>
@@ -1630,6 +1753,8 @@ function obterFichaRendimentoAluno(aluno) {
     DISCIPLINAS.forEach(m => {
         ficha[m] = {
             somas: { 1: 0, 2: 0, 3: 0, 4: 0 },
+            faltas: { 1: 0, 2: 0, 3: 0, 4: 0 },
+            totalFaltas: 0,
             totalAnual: 0,
             media: 0,
             situacao: ""
@@ -1648,6 +1773,8 @@ function obterFichaRendimentoAluno(aluno) {
                 }
             }
             ficha[m].somas[b] = somaBimestre;
+            ficha[m].faltas[b] = Number(bData.faltas?.[aluno] || 0);
+            ficha[m].totalFaltas += ficha[m].faltas[b];
             ficha[m].totalAnual += somaBimestre;
         }
 
@@ -1745,23 +1872,28 @@ function adicionarPaginaBoletim(doc, aluno, imgLogo) {
         tableBody.push([
             m,
             f.somas[1].toFixed(1),
+            String(f.faltas[1]),
             f.somas[2].toFixed(1),
+            String(f.faltas[2]),
             f.somas[3].toFixed(1),
+            String(f.faltas[3]),
             f.somas[4].toFixed(1),
+            String(f.faltas[4]),
             f.totalAnual.toFixed(1),
+            String(f.totalFaltas),
             f.situacao
         ]);
     });
 
-    // Injeção da tabela utilizando AutoTable customizada nas cores solicitadas
+    // Tabela consolidada: nota + faltas em cada bimestre.
     doc.autoTable({
         startY: 67,
-        margin: { left: 15, right: 15 },
-        head: [['Componente Curricular', '1º Bim', '2º Bim', '3º Bim', '4º Bim', 'Total', 'Situação']],
+        margin: { left: 10, right: 10 },
+        head: [['Componente Curricular', '1º BIMESTRE', 'FALTAS', '2º BIMESTRE', 'FALTAS', '3º BIMESTRE', 'FALTAS', '4º BIMESTRE', 'FALTAS', 'CONCEITO FINAL', 'TOTAL DE FALTAS', 'SITUAÇÃO']],
         body: tableBody,
         theme: 'grid',
         headStyles: { 
-            fillColor: [107, 20, 45], // Azul do Brasão
+            fillColor: [43, 78, 128], // Azul do Brasão
             textColor: [255, 255, 255], 
             fontStyle: 'bold', 
             halign: 'center',
@@ -1776,27 +1908,28 @@ function adicionarPaginaBoletim(doc, aluno, imgLogo) {
             textColor: [15, 23, 42]
         },
         columnStyles: { 
-            0: { halign: 'left', fontStyle: 'bold', cellWidth: 48 },
-            5: { fontStyle: 'bold' },
-            6: { fontStyle: 'bold' }
+            0: { halign: 'left', fontStyle: 'bold', cellWidth: 42 },
+            9: { fontStyle: 'bold' },
+            10: { fontStyle: 'bold' },
+            11: { fontStyle: 'bold' }
         },
         didParseCell: function (data) {
             if (data.section === 'body') {
-                if (data.column.index >= 1 && data.column.index <= 4) {
+                if ([1, 3, 5, 7].includes(data.column.index)) {
                     const val = parseFloat(data.cell.raw.replace(',', '.'));
                     if (val < 15.00) {
                         data.cell.styles.textColor = [220, 38, 38];
                     } else {
                         // Azul corrigido para o novo escuro #2b353e
-                        data.cell.styles.textColor = [43, 53, 62]; 
+                        data.cell.styles.textColor = [43, 78, 128]; 
                     }
                 }
-                if (data.column.index === 5) {
+                if (data.column.index === 9) {
                     const val = parseFloat(data.cell.raw.replace(',', '.'));
                     if (val < 60.00) data.cell.styles.textColor = [220, 38, 38];
                     else data.cell.styles.textColor = [16, 185, 129];
                 }
-                if (data.column.index === 6) {
+                if (data.column.index === 11) {
                     if (data.cell.raw === "Aprovado") {
                         data.cell.styles.textColor = [16, 185, 129];
                     } else if (data.cell.raw === "Em Curso") {
