@@ -36,8 +36,9 @@
                 <li onclick="navigate('home')"><i class="fas fa-th-large"></i> Disciplinas em Bloco</li>
                 <li onclick="navigate('boletim-individual')"><i class="fas fa-file-invoice"></i> Boletim Individual</li>
                 <li onclick="abrirCadastroAlunos()"><i class="fas fa-user-plus"></i> Cadastro de Alunos</li>
-                <li onclick="abrirCadastroAulas()"><i class="fas fa-calendar-day"></i> Cadastro de Aulas por Dia</li>
                 <li onclick="abrirLancamentos()"><i class="fas fa-pen-ruler"></i> Lançamentos</li>
+                <li onclick="abrirLancamentoFaltas()"><i class="fas fa-calendar-check"></i> Lançamento de Faltas</li>
+                <li onclick="abrirCadastroAulas()"><i class="fas fa-calendar-days"></i> Cadastro de Aulas por Dia</li>
                 <li onclick="abrirNotaFinalDisciplina()"><i class="fas fa-list-check"></i> Ver Nota Final por Disciplina</li>
                 <li onclick="navigate('fechamento-global')"><i class="fas fa-lock"></i> Fechamento de Bimestre</li>
                 <li onclick="navigate('dashboard')"><i class="fas fa-chart-line"></i> Estatísticas e Gráficos</li>
@@ -69,28 +70,15 @@
                 </div>
             </div>
             
-            <div class="lancamento-flutuante">
+            <div class="lancamento-flutuante lancamento-inicial">
                 <div class="lancamento-kicker">CENTRAL DE LANÇAMENTOS</div>
-                <h3>O que você deseja lançar?</h3>
-                <p>Escolha o tipo de lançamento para abrir somente os campos necessários.</p>
-                <div class="tipo-lancamento-grid">
-                    <button class="tipo-lancamento-card" onclick="abrirLancamentoFaltas()">
-                        <span class="tipo-lancamento-icon"><i class="fas fa-calendar-check"></i></span>
-                        <span><strong>Lançamento de Faltas</strong><small>Bimestre + disciplina + dias da semana</small></span>
-                    </button>
-                    <button class="tipo-lancamento-card" onclick="abrirLancamentoNotas()">
-                        <span class="tipo-lancamento-icon"><i class="fas fa-pen-to-square"></i></span>
-                        <span><strong>Lançamento de Notas</strong><small>Bimestre + disciplina + atividades</small></span>
-                    </button>
-                </div>
+                <h3>LANÇAMENTOS</h3>
+                <div id="lancamento-seletor-home" class="lancamento-seletor-home"></div>
+                <div id="lancamento-inline-resultado" class="lancamento-result-area"></div>
             </div>
 
-            <div class="section-header-block">
-                <h3 class="section-title">Minhas Disciplinas</h3>
-                <p class="section-desc">Toque em um bloco para gerenciar atividades, notas ou emitir boletins.</p>
-            </div>
-            
-            <div class="disciplinas-grid" id="disciplinas-grid"></div>
+            <!-- O lançamento continua abaixo, no mesmo espaço da tela inicial. -->
+            <div id="lancamento-inline-area" class="lancamento-inline-area" style="display:none;"></div>
         </div>
 
         <!-- TELA: CADASTRO DE ALUNOS -->
@@ -581,6 +569,33 @@
     </div>
 
     <!-- MODAL DE INSTRUÇÕES DE AJUDA -->
+    <div class="modal-overlay-view" id="atividade-modal" role="dialog" aria-modal="true" aria-labelledby="atividade-modal-title">
+        <div class="modal-content-container atividade-modal-content">
+            <div class="modal-header-row">
+                <div>
+                    <span class="modal-kicker">ATIVIDADE AVALIATIVA</span>
+                    <h3 id="atividade-modal-title">CRIAR ATIVIDADE</h3>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="fecharModalAtividade()" aria-label="Fechar">×</button>
+            </div>
+            <input type="hidden" id="atividade-modal-id" value="">
+            <div class="input-grid-cadastro atividade-modal-grid">
+                <div class="input-group">
+                    <label for="atividade-modal-nome">NOME DA ATIVIDADE</label>
+                    <input type="text" id="atividade-modal-nome" placeholder="EX.: PROVA, TRABALHO 1" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label for="atividade-modal-valor">VALOR MÁXIMO</label>
+                    <input type="text" id="atividade-modal-valor" inputmode="decimal" placeholder="0,00" autocomplete="off">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-secondary" onclick="fecharModalAtividade()">Cancelar</button>
+                <button type="button" class="btn-submit-action" onclick="salvarAtividadeModal()"><i class="fas fa-save"></i> SALVAR</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay-view" id="help-modal">
         <div class="modal-content-container">
             <h4>Manual Operacional Rápido</h4>
@@ -598,5 +613,17 @@
     <img src="brasao.png" id="img-brasao-base64" style="display:none;" alt="Brasão Oculto">
 
     <script src="script.js"></script>
+
+    <!-- Estrutura reservada para expansão responsiva do Portal do Professor. -->
+    <!-- Todos os lançamentos permanecem no fluxo principal da página. -->
+    <!-- A planilha de notas mantém a identidade visual da tabela original. -->
+    <!-- Os campos numéricos são compactos para facilitar o lançamento. -->
+    <!-- A grade semanal permanece persistida no armazenamento local. -->
+    <!-- As faltas são lançadas somente por dia da semana. -->
+    <!-- O cálculo por disciplina utiliza a grade cadastrada. -->
+    <!-- A consulta final apresenta notas e faltas por bimestre. -->
+    <!-- Os cabeçalhos longos do boletim podem ser apresentados na vertical. -->
+    <!-- O layout se adapta a celular, tablet e computador. -->
+    <!-- Fim da estrutura complementar. -->
 </body>
 </html>
