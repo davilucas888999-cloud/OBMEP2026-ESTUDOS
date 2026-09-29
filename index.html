@@ -37,7 +37,8 @@
                 <li onclick="navigate('boletim-individual')"><i class="fas fa-file-invoice"></i> Boletim Individual</li>
                 <li onclick="abrirCadastroAlunos()"><i class="fas fa-user-plus"></i> Cadastro de Alunos</li>
                 <li onclick="abrirCadastroAulas()"><i class="fas fa-calendar-day"></i> Cadastro de Aulas por Dia</li>
-                <li onclick="abrirFaltasDiarias()"><i class="fas fa-user-clock"></i> Lançar Faltas</li>
+                <li onclick="abrirLancamentos()"><i class="fas fa-pen-ruler"></i> Lançamentos</li>
+                <li onclick="abrirNotaFinalDisciplina()"><i class="fas fa-list-check"></i> Ver Nota Final por Disciplina</li>
                 <li onclick="navigate('fechamento-global')"><i class="fas fa-lock"></i> Fechamento de Bimestre</li>
                 <li onclick="navigate('dashboard')"><i class="fas fa-chart-line"></i> Estatísticas e Gráficos</li>
                 <li onclick="navigate('backup')"><i class="fas fa-server"></i> Manutenção de Dados</li>
@@ -68,6 +69,22 @@
                 </div>
             </div>
             
+            <div class="lancamento-flutuante">
+                <div class="lancamento-kicker">CENTRAL DE LANÇAMENTOS</div>
+                <h3>O que você deseja lançar?</h3>
+                <p>Escolha o tipo de lançamento para abrir somente os campos necessários.</p>
+                <div class="tipo-lancamento-grid">
+                    <button class="tipo-lancamento-card" onclick="abrirLancamentoFaltas()">
+                        <span class="tipo-lancamento-icon"><i class="fas fa-calendar-check"></i></span>
+                        <span><strong>Lançamento de Faltas</strong><small>Bimestre + disciplina + dias da semana</small></span>
+                    </button>
+                    <button class="tipo-lancamento-card" onclick="abrirLancamentoNotas()">
+                        <span class="tipo-lancamento-icon"><i class="fas fa-pen-to-square"></i></span>
+                        <span><strong>Lançamento de Notas</strong><small>Bimestre + disciplina + atividades</small></span>
+                    </button>
+                </div>
+            </div>
+
             <div class="section-header-block">
                 <h3 class="section-title">Minhas Disciplinas</h3>
                 <p class="section-desc">Toque em um bloco para gerenciar atividades, notas ou emitir boletins.</p>
@@ -368,77 +385,71 @@
         </div>
 
 
-        <!-- TELA: LANÇAMENTO DE FALTAS POR DISCIPLINA -->
+        <!-- TELA: LANÇAMENTOS DE FALTAS POR DISCIPLINA -->
         <div id="screen-lancar-faltas" class="screen">
-            <button class="btn-back" onclick="navigate('materia-hub')"><i class="fas fa-chevron-left"></i> Voltar ao Menu da Matéria</button>
-
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar</button>
             <div class="table-meta-header">
-                <h3><i class="fas fa-user-clock"></i> Lançamento de Faltas</h3>
-                <p class="sub-meta" id="faltas-subtitulo">Informe a quantidade de faltas de cada aluno na disciplina e no bimestre selecionados.</p>
-                <div class="faltas-toolbar">
-                    <label for="faltas-bimestre-select">Bimestre</label>
-                    <select id="faltas-bimestre-select" onchange="changeBimestreFaltas()">
-                        <option value="1">1º Bimestre</option>
-                        <option value="2">2º Bimestre</option>
-                        <option value="3">3º Bimestre</option>
-                        <option value="4">4º Bimestre</option>
-                    </select>
-                    <input type="text" class="search-box-input" id="search-aluno-faltas" placeholder="Pesquisar aluno..." onkeyup="filterTable('table-faltas-corpo', this.value)">
+                <h3><i class="fas fa-calendar-check"></i> Lançamento de Faltas</h3>
+                <p class="sub-meta">Selecione o bimestre e a disciplina. A planilha será organizada pelos dias da semana.</p>
+                <div class="lancamento-filtros">
+                    <div><label>Bimestre</label><select id="faltas-bimestre-select"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
+                    <div><label>Disciplina</label><select id="faltas-disciplina-select"></select></div>
+                    <button class="btn-submit-action" type="button" onclick="buscarLancamentoFaltas()"><i class="fas fa-search"></i> Buscar</button>
                 </div>
             </div>
-
+            <div id="faltas-planilha-resumo" class="planilha-resumo"></div>
             <div class="table-responsive-container">
-                <table class="table-custom-format faltas-table">
-                    <thead>
-                        <tr>
-                            <th>Aluno</th>
-                            <th class="faltas-input-col">Faltas</th>
-                            <th class="faltas-total-col">Total na Disciplina</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-faltas-corpo"></tbody>
+                <table class="table-custom-format faltas-matriz-table">
+                    <thead><tr><th>Alunos</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th><th>Total</th></tr></thead>
+                    <tbody id="table-faltas-matriz-corpo"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- TELA: CADASTRO DE AULAS POR DIA -->
+        <!-- TELA: LANÇAMENTO DE NOTAS -->
+        <div id="screen-lancamento-central-notas" class="screen">
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar</button>
+            <div class="table-meta-header">
+                <h3><i class="fas fa-pen-to-square"></i> Lançamento de Notas</h3>
+                <p class="sub-meta">Escolha o bimestre e a disciplina para abrir a planilha de atividades.</p>
+                <div class="lancamento-filtros">
+                    <div><label>Bimestre</label><select id="central-notas-bimestre"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
+                    <div><label>Disciplina</label><select id="central-notas-disciplina"></select></div>
+                    <button class="btn-submit-action" type="button" onclick="buscarLancamentoNotas()"><i class="fas fa-search"></i> Buscar</button>
+                </div>
+            </div>
+            <div id="central-notas-area"></div>
+        </div>
+
+        <!-- TELA: CADASTRO DA GRADE DE AULAS -->
         <div id="screen-cadastro-aulas" class="screen">
-            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar ao Início</button>
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar</button>
             <div class="table-meta-header">
-                <h3><i class="fas fa-calendar-day"></i> Cadastro de Aulas por Dia</h3>
-                <p class="sub-meta">Cadastre cada data letiva e quantas aulas aconteceram. O padrão é 5 aulas por dia.</p>
-                <form class="daily-form" onsubmit="salvarAulasDoDia(event)">
-                    <div><label>Data</label><input type="date" id="aula-data" required></div>
-                    <div><label>Bimestre</label><select id="aula-bimestre"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
-                    <div><label>Quantidade de aulas</label><input type="number" id="aula-quantidade" min="1" max="20" value="5" required></div>
-                    <button class="btn-submit-action" type="submit"><i class="fas fa-save"></i> Salvar Dia</button>
-                </form>
+                <h3><i class="fas fa-calendar-days"></i> Cadastro de Aulas por Dia</h3>
+                <p class="sub-meta">Defina as 5 aulas de cada dia. A quantidade de aulas de cada disciplina será usada automaticamente no lançamento de faltas.</p>
+                <div class="lancamento-filtros">
+                    <div><label>Bimestre</label><select id="grade-aulas-bimestre" onchange="renderGradeAulas()"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
+                    <div><label>Dia da semana</label><select id="grade-aulas-dia" onchange="renderGradeAulas()"><option value="segunda">Segunda-feira</option><option value="terca">Terça-feira</option><option value="quarta">Quarta-feira</option><option value="quinta">Quinta-feira</option><option value="sexta">Sexta-feira</option></select></div>
+                </div>
             </div>
-            <div class="table-responsive-container">
-                <table class="table-custom-format daily-table">
-                    <thead><tr><th>Data</th><th>Dia da Semana</th><th>Bimestre</th><th>Aulas</th><th>Ações</th></tr></thead>
-                    <tbody id="table-aulas-corpo"></tbody>
-                </table>
-            </div>
+            <div id="grade-aulas-editor"></div>
         </div>
 
-        <!-- TELA: LANÇAMENTO DE FALTAS DIÁRIAS -->
-        <div id="screen-faltas-diarias" class="screen">
-            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar ao Início</button>
+        <!-- TELA: NOTA FINAL POR DISCIPLINA -->
+        <div id="screen-nota-final-disciplina" class="screen">
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar</button>
             <div class="table-meta-header">
-                <h3><i class="fas fa-user-clock"></i> Lançamento de Faltas</h3>
-                <p class="sub-meta">Escolha o bimestre e a data. Informe quantas das aulas daquele dia o aluno perdeu.</p>
-                <div class="faltas-diarias-toolbar">
-                    <div><label>Bimestre</label><select id="faltas-dia-bimestre" onchange="atualizarDatasFaltas()"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
-                    <div><label>Data</label><select id="faltas-dia-data" onchange="renderFaltasDiarias()"></select></div>
-                    <div id="faltas-dia-resumo" class="daily-summary">Cadastre as aulas do dia para começar.</div>
-                    <input type="text" class="search-box-input" id="search-aluno-faltas-dia" placeholder="Pesquisar aluno..." onkeyup="filterTable('table-faltas-diarias-corpo', this.value)">
+                <h3><i class="fas fa-list-check"></i> Nota Final por Disciplina</h3>
+                <p class="sub-meta">Consulte as notas e faltas dos quatro bimestres e o resultado final de cada aluno.</p>
+                <div class="lancamento-filtros">
+                    <div><label>Disciplina</label><select id="final-disciplina-select"></select></div>
+                    <button class="btn-submit-action" type="button" onclick="buscarNotaFinalDisciplina()"><i class="fas fa-search"></i> Buscar</button>
                 </div>
             </div>
             <div class="table-responsive-container">
-                <table class="table-custom-format daily-table">
-                    <thead><tr><th>Aluno</th><th>Faltas no dia</th><th>Total de faltas no bimestre</th><th>Frequência no bimestre</th></tr></thead>
-                    <tbody id="table-faltas-diarias-corpo"></tbody>
+                <table class="table-custom-format nota-final-disc-table">
+                    <thead><tr><th>Aluno</th><th>1º Bim.</th><th>Faltas</th><th>2º Bim.</th><th>Faltas</th><th>3º Bim.</th><th>Faltas</th><th>4º Bim.</th><th>Faltas</th><th>Nota Final</th><th>Faltas Final</th><th>Situação</th></tr></thead>
+                    <tbody id="table-nota-final-disciplina-corpo"></tbody>
                 </table>
             </div>
         </div>
