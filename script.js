@@ -324,6 +324,23 @@ function garantirEstruturaFaltas() {
     });
 }
 function listaDisciplinasOptions(selected='') { return DISCIPLINAS.map(d=>`<option value="${escapeAttr(d)}" ${d===selected?'selected':''}>${escapeHtml(d)}</option>`).join(''); }
+let centralNotasRascunho = {};
+function chaveRascunho(aluno,id,tipo){ return `${tipo}__${aluno}__${id}`; }
+function iniciarRascunhoNotas(){
+    centralNotasRascunho = {};
+    const b=Number(document.getElementById('central-notas-bimestre')?.value||1);
+    const d=document.getElementById('central-notas-disciplina')?.value||DISCIPLINAS[0];
+    const bd=db.disciplinas[d]?.[b];
+    (bd?.atividades||[]).forEach(a=>ALUNOS.forEach(aluno=>{
+        const n=a.notas?.[aluno]||{};
+        centralNotasRascunho[chaveRascunho(aluno,a.id,'nota')] = n.notaOrig ?? '';
+        centralNotasRascunho[chaveRascunho(aluno,a.id,'rec')] = n.notaRec ?? '';
+    }));
+    ALUNOS.forEach(aluno=>{
+        centralNotasRascunho[chaveRascunho(aluno,'bim','recb')] = bd?.recuperacaoBimestral?.[aluno] ?? '';
+    });
+}
+function valorRascunho(aluno,id,tipo,fallback=''){ const k=chaveRascunho(aluno,id,tipo); return Object.prototype.hasOwnProperty.call(centralNotasRascunho,k)?centralNotasRascunho[k]:fallback; }
 function abrirLancamentos(){
     navigate('home');
     const sel=document.getElementById('tipo-lancamento-central');
@@ -336,20 +353,16 @@ function selecionarTipoLancamentoCentral(tipo){
     garantirEstruturaFaltas();
     const area=document.getElementById('central-lancamento-conteudo'); if(!area)return;
     const b=Number(db.configGlobal.currentBimestre||1);
+    if(!tipo){ area.innerHTML=''; return; }
     if(tipo==='faltas'){
-        area.innerHTML=`<div class="central-panel">\
-          <div class="central-panel-header"><div><span class="lancamento-kicker">LANÇAMENTO DE FALTAS</span><h4>Faltas por dia da semana</h4><p>Informe quantas aulas o aluno perdeu em cada dia. O sistema distribuirá automaticamente as faltas pelas disciplinas da grade.</p></div><button class="btn-clear-central" onclick="abrirLancamentos()">Trocar lançamento</button></div>\
-          <div class="lancamento-filtros central-filtros"><div><label>Selecione o Bimestre</label><select id="faltas-bimestre-central" onchange="renderPlanilhaFaltasCentral()"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div></div>\
-          <div id="central-faltas-area"></div></div>`;
+        area.innerHTML=`<div class="central-panel">          <div class="central-panel-header"><div><span class="lancamento-kicker">LANÇAMENTO DE FALTAS</span><h4>Faltas por dia da semana</h4><p>Informe quantas aulas o aluno perdeu em cada dia. O sistema distribui automaticamente essas faltas pelas disciplinas da grade.</p></div></div>          <div class="lancamento-filtros central-filtros"><div><label>Selecione o Bimestre</label><select id="faltas-bimestre-central" onchange="renderPlanilhaFaltasCentral()"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div></div>          <div id="central-faltas-area"></div></div>`;
         document.getElementById('faltas-bimestre-central').value=b<=4?b:1;
         renderPlanilhaFaltasCentral();
     } else if(tipo==='notas'){
-        area.innerHTML=`<div class="central-panel">\
-          <div class="central-panel-header"><div><span class="lancamento-kicker">LANÇAMENTO DE NOTAS</span><h4>Notas e recuperação por atividade</h4><p>As atividades aparecem em blocos por aluno. A recuperação da atividade é calculada automaticamente.</p></div><button class="btn-clear-central" onclick="abrirLancamentos()">Trocar lançamento</button></div>\
-          <div class="lancamento-filtros central-filtros"><div><label>Selecione o Bimestre</label><select id="central-notas-bimestre" onchange="renderPlanilhaNotasCentral()"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div><div><label>Selecione a Disciplina</label><select id="central-notas-disciplina" onchange="renderPlanilhaNotasCentral()">${listaDisciplinasOptions()}</select></div></div>\
-          <div id="central-notas-area"></div></div>`;
+        area.innerHTML=`<div class="central-panel">          <div class="central-panel-header"><div><span class="lancamento-kicker">LANÇAMENTO DE NOTAS</span><h4>Notas e recuperação por atividade</h4><p>Preencha os lançamentos e use o botão <strong>Salvar lançamento</strong> no final. Antes de salvar, nada é alterado na soma das notas.</p></div></div>          <div class="lancamento-filtros central-filtros"><div><label>Selecione o Bimestre</label><select id="central-notas-bimestre" onchange="iniciarRascunhoNotas();renderPlanilhaNotasCentral()"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div><div><label>Selecione a Disciplina</label><select id="central-notas-disciplina" onchange="iniciarRascunhoNotas();renderPlanilhaNotasCentral()">${listaDisciplinasOptions()}</select></div></div>          <div id="central-notas-area"></div></div>`;
         document.getElementById('central-notas-bimestre').value=b<=4?b:1;
         document.getElementById('central-notas-disciplina').value=DISCIPLINAS[0];
+        iniciarRascunhoNotas();
         renderPlanilhaNotasCentral();
     }
 }
@@ -377,8 +390,8 @@ function renderPlanilhaFaltasCentral(){
     garantirEstruturaFaltas(); const area=document.getElementById('central-faltas-area'); if(!area)return; const b=Number(document.getElementById('faltas-bimestre-central')?.value||1);
     const dias=[['segunda','Segunda-feira'],['terca','Terça-feira'],['quarta','Quarta-feira'],['quinta','Quinta-feira'],['sexta','Sexta-feira']];
     const gradeOk=dias.some(([d])=>(db.gradeSemanal[d]||[]).some(Boolean));
-    if(!gradeOk){area.innerHTML='<div class="empty-state-panel">Cadastre primeiro a grade semanal em <strong>Cadastro de Aulas por Dia</strong>. São 5 aulas por dia e a mesma grade vale para os quatro bimestres.</div>';return;}
-    area.innerHTML=`<div class="planilha-resumo"><strong>${b}º Bimestre</strong><span>Digite de 0 a 5 aulas ausentes em cada dia.</span><b>Máximo diário: 5</b></div><div class="table-responsive-container"><table class="table-custom-format faltas-matriz-table"><thead><tr><th>Alunos</th>${dias.map(x=>`<th>${x[1]}</th>`).join('')}<th>Total</th></tr></thead><tbody>${ALUNOS.map(aluno=>`<tr><td><strong>${escapeHtml(aluno)}</strong></td>${dias.map(([d])=>`<td><input class="falta-dia-input" type="number" min="0" max="5" value="${obterAusenciaDia(b,aluno,d)}" oninput="salvarAusenciaDia(${b},'${d}',${JSON.stringify(aluno)},this)" onkeydown="avancarCampoComEnter(event)"></td>`).join('')}<td class="faltas-matriz-total"><strong>${['segunda','terca','quarta','quinta','sexta'].reduce((s,d)=>s+obterAusenciaDia(b,aluno,d),0)}</strong></td></tr>`).join('')}</tbody></table></div><div class="attendance-note"><i class="fas fa-circle-info"></i> As faltas por disciplina são calculadas automaticamente a partir da ordem das 5 aulas cadastradas na grade de cada dia.</div>`;
+    const avisoGrade=gradeOk?'As faltas serão distribuídas automaticamente conforme a grade semanal fixa.':'A grade semanal ainda não foi preenchida. Você pode lançar as faltas agora; depois de cadastrar a grade, elas passarão a ser calculadas por disciplina.';
+    area.innerHTML=`<div class="planilha-resumo"><strong>${b}º Bimestre</strong><span>Digite de 0 a 5 aulas ausentes em cada dia.</span><b>Máximo diário: 5</b></div><div class="table-responsive-container"><table class="table-custom-format faltas-matriz-table"><thead><tr><th>Alunos</th>${dias.map(x=>`<th>${x[1]}</th>`).join('')}<th>Total</th></tr></thead><tbody>${ALUNOS.map(aluno=>`<tr><td><strong>${escapeHtml(aluno)}</strong></td>${dias.map(([d])=>`<td><input class="falta-dia-input" type="number" min="0" max="5" value="${obterAusenciaDia(b,aluno,d)}" oninput="salvarAusenciaDia(${b},'${d}',${JSON.stringify(aluno)},this)" onkeydown="avancarCampoComEnter(event)"></td>`).join('')}<td class="faltas-matriz-total"><strong>${['segunda','terca','quarta','quinta','sexta'].reduce((s,d)=>s+obterAusenciaDia(b,aluno,d),0)}</strong></td></tr>`).join('')}</tbody></table></div><div class="attendance-note"><i class="fas fa-circle-info"></i> ${avisoGrade}</div>`;
 }
 function abrirFaltasDiarias(){abrirLancamentoFaltas();} function atualizarDatasFaltas(){renderPlanilhaFaltasCentral();} function salvarFaltaAluno(){saveStorage();} function renderFaltasTable(){renderPlanilhaFaltasCentral();}
 
@@ -386,21 +399,54 @@ function calcularNotaAtividade(atv,aluno){
     const nd=atv.notas?.[aluno]||{}; const orig=nd.notaOrig===''||nd.notaOrig==null?null:Number(nd.notaOrig); const rec=nd.notaRec===''||nd.notaRec==null?null:Number(nd.notaRec); const limite=Number(atv.valor)||0; if(orig===null||!Number.isFinite(orig)) return {orig:null,rec:null,final:0,precisa:false}; const corte=limite*0.60; const precisa=orig<corte; let final=orig; if(precisa&&rec!==null&&Number.isFinite(rec)) final=rec>=corte?corte:Math.max(orig,rec); return {orig,rec,final,precisa};
 }
 function renderPlanilhaNotasCentral(){
-    const area=document.getElementById('central-notas-area'); if(!area)return; const b=Number(document.getElementById('central-notas-bimestre')?.value||1),disciplina=document.getElementById('central-notas-disciplina')?.value||DISCIPLINAS[0]; selectedBimestre=b;selectedMateria=disciplina;
+    const area=document.getElementById('central-notas-area'); if(!area)return;
+    const b=Number(document.getElementById('central-notas-bimestre')?.value||1),disciplina=document.getElementById('central-notas-disciplina')?.value||DISCIPLINAS[0];
+    selectedBimestre=b; selectedMateria=disciplina;
     const bData=db.disciplinas[disciplina][b],atividades=bData.atividades||[],fechado=!!db.configGlobal.bimestresFechados[b];
     let controls=`<div class="notas-central-head"><div><strong>${escapeHtml(disciplina)}</strong><span>${b}º Bimestre · ${atividades.length} atividade(s)</span></div><button class="btn-submit-action" ${fechado?'disabled':''} onclick="abrirCriacaoAtividadeCentral()"><i class="fas fa-plus"></i> Criar atividade</button></div>`;
     if(!atividades.length){area.innerHTML=controls+'<div class="empty-state-panel">Nenhuma atividade criada para este bimestre. Clique em <strong>Criar atividade</strong> para começar.</div>';return;}
     let head=`<tr><th>Alunos</th>${atividades.map(a=>`<th class="atividade-bloco-head">${escapeHtml(a.nome)}<small>Valor: ${Number(a.valor).toFixed(1)}</small></th>`).join('')}<th class="rec-bim-head">Recuperação Bimestral</th><th>Final do Bimestre</th></tr>`;
     let body=ALUNOS.map(aluno=>{
-        const cells=atividades.map(a=>{const r=calcularNotaAtividade(a,aluno);return `<td><div class="nota-aluno-bloco"><label>Nota</label><input class="nota-central-input" type="number" step="0.01" min="0" max="${a.valor}" value="${r.orig??''}" ${fechado?'disabled':''} oninput="salvarNotaAtividadeCentral('${escapeAttr(aluno)}','${escapeAttr(a.id)}',this,${Number(a.valor)})" onkeydown="avancarCampoComEnter(event)"><label>Recuperação</label><input class="rec-central-input" type="number" step="0.01" min="0" max="${a.valor}" value="${r.rec??''}" ${fechado||!r.precisa?'disabled':''} placeholder="${r.precisa?'Lançar':'—'}" title="${r.precisa?'Liberada: nota abaixo de 60%':'Aluno não precisa de recuperação'}" oninput="salvarRecAtividadeCentral('${escapeAttr(aluno)}','${escapeAttr(a.id)}',this,${Number(a.valor)})"><label>Final</label><strong class="atividade-final" data-final="${escapeAttr(aluno+'__'+a.id)}">${r.final.toFixed(1)}</strong></div></td>`}).join('');
-        const soma=atividades.reduce((s,a)=>s+calcularNotaAtividade(a,aluno).final,0),recB=bData.recuperacaoBimestral?.[aluno]; const precisaB=soma<15; let finalB=soma; if(precisaB&&recB!==undefined&&recB!==''){const rv=Number(recB)||0; finalB=rv>=15?15:Math.max(soma,rv);} return `<tr><td class="aluno-bloco-nome"><strong>${escapeHtml(aluno)}</strong><small>${precisaB?'Abaixo de 15 pontos':'Sem recuperação bimestral'}</small></td>${cells}<td><div class="rec-bim-bloco"><label>Nota atual</label><strong>${soma.toFixed(1)}</strong><label>Recuperação</label><input class="rec-bim-central-input" type="number" step="0.01" min="0" max="25" value="${recB??''}" ${fechado||!precisaB?'disabled':''} placeholder="${precisaB?'Lançar':'—'}" oninput="salvarRecBimestralCentral('${escapeAttr(aluno)}',this)"><label>Final</label><strong>${finalB.toFixed(1)}</strong></div></td><td class="nota-central-total"><strong>${finalB.toFixed(1)}</strong></td></tr>`;
+        const cells=atividades.map(a=>{
+            const stored=calcularNotaAtividade(a,aluno);
+            const orig=valorRascunho(aluno,a.id,'nota',stored.orig??'');
+            const rec=valorRascunho(aluno,a.id,'rec',stored.rec??'');
+            const origNum=orig===''?null:Number(orig); const precisa=origNum!==null && Number.isFinite(origNum) && origNum < Number(a.valor)*0.60;
+            return `<td><div class="nota-aluno-bloco"><label>Nota</label><input class="nota-central-input" type="number" step="0.01" min="0" max="${a.valor}" value="${orig}" ${fechado?'disabled':''} oninput="alterarRascunhoNota('${escapeAttr(aluno)}','${escapeAttr(a.id)}','nota',this,${Number(a.valor)})" onkeydown="avancarCampoComEnter(event)"><label>Recuperação</label><input class="rec-central-input" type="number" step="0.01" min="0" max="${a.valor}" value="${rec}" ${fechado||!precisa?'disabled':''} placeholder="${precisa?'Lançar':'—'}" oninput="alterarRascunhoNota('${escapeAttr(aluno)}','${escapeAttr(a.id)}','rec',this,${Number(a.valor)})"><label>Final</label><strong class="atividade-final">${stored.final.toFixed(1)}</strong></div></td>`;
+        }).join('');
+        const soma=atividades.reduce((s,a)=>s+calcularNotaAtividade(a,aluno).final,0),recB=valorRascunho(aluno,'bim','recb',bData.recuperacaoBimestral?.[aluno]??''); const precisaB=soma<15; let finalB=soma; if(precisaB&&recB!==''){const rv=Number(recB)||0; finalB=rv>=15?15:Math.max(soma,rv);} return `<tr><td class="aluno-bloco-nome"><strong>${escapeHtml(aluno)}</strong><small>${precisaB?'Abaixo de 15 pontos':'Sem recuperação bimestral'}</small></td>${cells}<td><div class="rec-bim-bloco"><label>Nota atual</label><strong>${soma.toFixed(1)}</strong><label>Recuperação</label><input class="rec-bim-central-input" type="number" step="0.01" min="0" max="25" value="${recB}" ${fechado||!precisaB?'disabled':''} placeholder="${precisaB?'Lançar':'—'}" oninput="alterarRascunhoNota('${escapeAttr(aluno)}','bim','recb',this,25)"><label>Final</label><strong>${finalB.toFixed(1)}</strong></div></td><td class="nota-central-total"><strong>${finalB.toFixed(1)}</strong></td></tr>`;
     }).join('');
-    area.innerHTML=controls+`<div class="table-responsive-container"><table class="table-custom-format notas-central-table notas-blocos-table"><thead>${head}</thead><tbody>${body}</tbody></table></div><div class="regras-recuperacao"><strong>Regra da recuperação:</strong> abaixo de 60% da atividade, o aluno entra em recuperação. Se a recuperação atingir 60%, a nota final da atividade fica em exatamente 60%. Se ficar abaixo de 60%, vale a maior nota entre a original e a recuperação.</div>`;
+    area.innerHTML=controls+`<div class="table-responsive-container"><table class="table-custom-format notas-central-table notas-blocos-table"><thead>${head}</thead><tbody>${body}</tbody></table></div><div class="regras-recuperacao"><strong>Regra da recuperação:</strong> abaixo de 60% da atividade, o aluno entra em recuperação. Se a recuperação atingir 60%, a nota final da atividade fica em exatamente 60%. Se ficar abaixo de 60%, vale a maior nota entre a original e a recuperação.</div><div class="central-save-footer"><span>As alterações acima ainda não foram lançadas no sistema.</span><button class="btn-submit-action btn-salvar-lancamento" type="button" onclick="salvarLancamentoNotasCentral()"><i class="fas fa-save"></i> Salvar lançamento</button></div>`;
 }
-function salvarNotaAtividadeCentral(aluno,id,input,max){const atv=db.disciplinas[selectedMateria][selectedBimestre].atividades.find(a=>a.id===id);if(!atv)return;atv.notas[aluno]=atv.notas[aluno]||{notaOrig:'',notaRec:'',notaFinal:0};let v=input.value.replace(',','.');if(v===''){atv.notas[aluno].notaOrig='';atv.notas[aluno].notaFinal=0;}else{v=Math.max(0,Math.min(max,Number(v)||0));atv.notas[aluno].notaOrig=v;const r=calcularNotaAtividade(atv,aluno);atv.notas[aluno].notaFinal=r.final;}saveStorage();atualizarBlocoAtividade(aluno,id);}
-function salvarRecAtividadeCentral(aluno,id,input,max){const atv=db.disciplinas[selectedMateria][selectedBimestre].atividades.find(a=>a.id===id);if(!atv)return;atv.notas[aluno]=atv.notas[aluno]||{notaOrig:'',notaRec:'',notaFinal:0};let v=input.value.replace(',','.');atv.notas[aluno].notaRec=v===''?'':Math.max(0,Math.min(max,Number(v)||0));const r=calcularNotaAtividade(atv,aluno);atv.notas[aluno].notaFinal=r.final;saveStorage();atualizarBlocoAtividade(aluno,id);}
-function atualizarBlocoAtividade(aluno,id){renderPlanilhaNotasCentral();}
-function salvarRecBimestralCentral(aluno,input){const bData=db.disciplinas[selectedMateria][selectedBimestre];let v=input.value.replace(',','.');if(v==='')delete bData.recuperacaoBimestral[aluno];else bData.recuperacaoBimestral[aluno]=Math.max(0,Math.min(25,Number(v)||0));saveStorage();renderPlanilhaNotasCentral();}
+function alterarRascunhoNota(aluno,id,tipo,input,max){
+    let v=input.value.replace(',','.');
+    if(v!==''){const n=Number(v);v=Number.isFinite(n)?Math.max(0,Math.min(max,n)):'';input.value=v;}
+    centralNotasRascunho[chaveRascunho(aluno,id,tipo)]=v;
+}
+function salvarLancamentoNotasCentral(){
+    const b=Number(document.getElementById('central-notas-bimestre')?.value||1),disciplina=document.getElementById('central-notas-disciplina')?.value||DISCIPLINAS[0];
+    const bd=db.disciplinas[disciplina][b];
+    (bd.atividades||[]).forEach(a=>ALUNOS.forEach(aluno=>{
+        const orig=valorRascunho(aluno,a.id,'nota',a.notas?.[aluno]?.notaOrig??'');
+        const rec=valorRascunho(aluno,a.id,'rec',a.notas?.[aluno]?.notaRec??'');
+        a.notas[aluno]=a.notas[aluno]||{notaOrig:'',notaRec:'',notaFinal:0};
+        a.notas[aluno].notaOrig=orig;
+        a.notas[aluno].notaRec=rec;
+        a.notas[aluno].notaFinal=calcularNotaAtividade(a,aluno).final;
+    }));
+    ALUNOS.forEach(aluno=>{const rv=valorRascunho(aluno,'bim','recb',bd.recuperacaoBimestral?.[aluno]??''); if(rv==='') delete bd.recuperacaoBimestral[aluno]; else bd.recuperacaoBimestral[aluno]=Math.max(0,Math.min(25,Number(rv)||0));});
+    saveStorage();
+    centralNotasRascunho={};
+    document.getElementById('tipo-lancamento-central').value='';
+    document.getElementById('central-lancamento-conteudo').innerHTML='';
+    navigate('home');
+    window.scrollTo({top:0,behavior:'smooth'});
+    alert('Lançamento de notas salvo com sucesso. As notas foram somadas.');
+}
+function salvarNotaAtividadeCentral(aluno,id,input,max){ alterarRascunhoNota(aluno,id,'nota',input,max); }
+function salvarRecAtividadeCentral(aluno,id,input,max){ alterarRascunhoNota(aluno,id,'rec',input,max); }
+function atualizarBlocoAtividade(){ /* atualização somente após salvar */ }
+function salvarRecBimestralCentral(aluno,input){ alterarRascunhoNota(aluno,'bim','recb',input,25); }
 function avancarCampoComEnter(e){if(e.key!=='Enter')return;e.preventDefault();const root=e.target.closest('.screen')||document;const campos=[...root.querySelectorAll('input:not([disabled]):not([type="hidden"]),select:not([disabled])')].filter(x=>x.offsetParent!==null);const i=campos.indexOf(e.target);if(i>=0&&campos[i+1]){campos[i+1].focus();campos[i+1].select?.();}}
 
 function getNotaFinalBimestre(disciplina,b,aluno){

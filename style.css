@@ -1722,3 +1722,25 @@ input,select,textarea,.search-box-input{border:1px solid #9da5ad!important;borde
 
 /* Faltas: deixar claro que o lançamento é por dia e não por disciplina */
 .central-panel .attendance-note{margin-top:12px;padding:10px 12px;border-left:3px solid var(--gold,#b08a3e);background:#f6f6f3;font-size:.72rem;color:var(--text-light)}
+
+/* Ajustes finais da Central de Lançamentos e do boletim */
+.lancamento-flutuante{max-width:760px!important;margin:0 auto!important;padding:30px 34px!important;border:1px solid #c7ccd1!important;border-radius:12px!important;box-shadow:0 16px 40px rgba(37,42,48,.10)!important;background:#fff!important}
+.tipo-lancamento-select-wrap{max-width:680px!important;margin:22px auto 0!important}
+.tipo-lancamento-select{width:100%!important;min-height:58px!important;padding:0 18px!important;font-size:17px!important;font-weight:700!important;border:2px solid #aeb5bb!important;border-radius:8px!important;background:#f7f8f9!important;color:#252a30!important}
+.central-panel{margin-top:18px!important;border-radius:10px!important;border:1px solid #c7ccd1!important;overflow:hidden!important}
+.central-panel-header{padding:20px 22px!important;background:#f3f4f5!important;border-bottom:1px solid #c7ccd1!important}
+.central-filtros{padding:18px 22px!important;background:#fff!important}
+.central-filtros select{min-height:44px!important;min-width:230px!important}
+.central-save-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;margin-top:14px;border:1px solid #c7ccd1;border-radius:8px;background:#f3f4f5}
+.central-save-footer span{font-size:12px;color:#5f666d}
+.btn-salvar-lancamento{min-width:210px!important;min-height:46px!important}
+.faltas-matriz-table input.falta-dia-input{width:70px!important;min-width:70px!important;text-align:center!important;font-weight:700!important}
+.notas-blocos-table .nota-aluno-bloco{min-width:110px!important}
+.notas-blocos-table .nota-central-input,.notas-blocos-table .rec-central-input{width:74px!important;min-width:74px!important}
+.notas-blocos-table .aluno-bloco-nome{min-width:155px!important}
+/* Boletim mais compacto para caber integralmente em A4 */
+.boletim-table{font-size:7px!important;line-height:1.05!important}
+.boletim-table th{font-size:6.5px!important;padding:3px 2px!important;line-height:1.05!important}
+.boletim-table td{font-size:7px!important;padding:3px 2px!important;line-height:1.05!important}
+.boletim-table .boletim-vertical-header{font-size:6px!important;max-height:55px!important}
+@media(max-width:700px){.lancamento-flutuante{padding:22px 16px!important}.central-save-footer{flex-direction:column;align-items:stretch}.btn-salvar-lancamento{width:100%!important}.tipo-lancamento-select{font-size:16px!important}}
