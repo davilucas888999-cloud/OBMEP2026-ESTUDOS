@@ -1713,6 +1713,7 @@ function executeGlobalClosureProcedure(bimestreParaFechar) {
         saveStorage();
         alert(`Sucesso! O ${bimestreParaFechar}º Bimestre foi trancado em todas as disciplinas.`);
         renderFechamentoGlobalScreen();
+        checkRecuperacaoAnualButtonVisibility();
     }
 }
 
@@ -1725,6 +1726,7 @@ function executeReabrirBimestreProcedure(bimestreParaReabrir) {
         saveStorage();
         alert(`O ${bimestreParaReabrir}º Bimestre foi reaberto com sucesso!`);
         renderFechamentoGlobalScreen();
+        checkRecuperacaoAnualButtonVisibility();
     }
 }
 
@@ -2316,4 +2318,169 @@ function gerarBoletimPDF(aluno) {
 
     adicionarPaginaBoletim(doc, aluno, imgLogo);
     doc.save(`boletim_2026_${aluno.replace(/ /g, '_')}.pdf`);
+}
+
+/* ================================================================
+   RECUPERAÇÃO ANUAL — FLUXO PELA TELA INICIAL
+   Integração sem alteração do layout existente.
+   Disponível somente após o fechamento dos 4 bimestres.
+================================================================ */
+function todosOsBimestresFechados(){
+    return [1,2,3,4].every(b => !!db.configGlobal.bimestresFechados[b]);
+}
+
+function garantirOpcaoRecuperacaoAnualHome(){
+    const select=document.getElementById('home-tipo-lancamento');
+    if(!select)return;
+    const existente=[...select.options].find(o=>o.value==='rec-anual');
+    if(todosOsBimestresFechados()){
+        if(!existente){
+            const opt=document.createElement('option');
+            opt.value='rec-anual';
+            opt.textContent='LANÇAR RECUPERAÇÃO ANUAL';
+            select.appendChild(opt);
+        }
+    }else if(existente){
+        existente.remove();
+    }
+}
+
+function renderLancamentoSeletorHome(tipoInicial=''){
+    const box=document.getElementById('lancamento-seletor-home');
+    if(!box)return;
+    const incluirRec=todosOsBimestresFechados();
+    box.innerHTML=`<div class="lancamento-filtros lancamento-filtros-unificados lancamento-home-filtros">
+        <div class="lancamento-field tipo-field"><label for="home-tipo-lancamento">TIPO DE LANÇAMENTO</label><select id="home-tipo-lancamento" onchange="atualizarTipoLancamentoInline()">
+            <option value="" ${tipoInicial?'':'selected'} disabled>SELECIONE</option>
+            <option value="faltas" ${tipoInicial==='faltas'?'selected':''}>LANÇAMENTO DE FALTAS</option>
+            <option value="notas" ${tipoInicial==='notas'?'selected':''}>LANÇAMENTO DE NOTAS</option>
+            ${incluirRec?`<option value="rec-anual" ${tipoInicial==='rec-anual'?'selected':''}>LANÇAR RECUPERAÇÃO ANUAL</option>`:''}
+        </select></div>
+        <div id="home-filtros-dinamicos" class="lancamento-filtros-dinamicos"></div>
+        <div id="home-buscar-wrap" class="lancamento-buscar-wrap"></div>
+    </div>`;
+    atualizarTipoLancamentoInline();
+}
+
+function atualizarTipoLancamentoInline(){
+    const tipo=document.getElementById('home-tipo-lancamento')?.value||'';
+    const filtros=document.getElementById('home-filtros-dinamicos');
+    const buscar=document.getElementById('home-buscar-wrap');
+    const resultado=document.getElementById('lancamento-inline-resultado');
+    if(!filtros||!buscar)return;
+    filtros.innerHTML='';
+    buscar.innerHTML='';
+    if(resultado)resultado.innerHTML='';
+    if(!tipo)return;
+
+    if(tipo==='faltas'){
+        filtros.innerHTML=`<div class="lancamento-field"><label for="home-bimestre-lancamento">BIMESTRE</label><select id="home-bimestre-lancamento"><option value="" selected disabled>SELECIONE</option><option value="1">1º BIMESTRE</option><option value="2">2º BIMESTRE</option><option value="3">3º BIMESTRE</option><option value="4">4º BIMESTRE</option></select></div>`;
+        buscar.innerHTML='<button class="btn-submit-action btn-buscar-lancamento" type="button" onclick="buscarLancamentoFaltasHome()"><i class="fas fa-search"></i> BUSCAR</button>';
+    }else if(tipo==='notas'){
+        filtros.innerHTML=`<div class="lancamento-field"><label for="home-bimestre-lancamento">BIMESTRE</label><select id="home-bimestre-lancamento"><option value="" selected disabled>SELECIONE</option><option value="1">1º BIMESTRE</option><option value="2">2º BIMESTRE</option><option value="3">3º BIMESTRE</option><option value="4">4º BIMESTRE</option></select></div><div class="lancamento-field"><label for="home-notas-disciplina">DISCIPLINA</label><select id="home-notas-disciplina"><option value="" selected disabled>SELECIONE</option>${listaDisciplinasOptions()}</select></div>`;
+        buscar.innerHTML='<button class="btn-submit-action btn-buscar-lancamento" type="button" onclick="buscarLancamentoNotasHome()"><i class="fas fa-search"></i> BUSCAR</button>';
+    }else if(tipo==='rec-anual'){
+        if(!todosOsBimestresFechados()){
+            filtros.innerHTML='<div class="lancamento-placeholder">A RECUPERAÇÃO ANUAL SERÁ LIBERADA APÓS O FECHAMENTO DOS 4 BIMESTRES.</div>';
+            return;
+        }
+        filtros.innerHTML=`<div class="lancamento-field"><label for="home-rec-anual-disciplina">DISCIPLINA</label><select id="home-rec-anual-disciplina"><option value="" selected disabled>SELECIONE</option>${listaDisciplinasOptions()}</select></div>`;
+        buscar.innerHTML='<button class="btn-submit-action btn-buscar-lancamento" type="button" onclick="buscarRecuperacaoAnualHome()"><i class="fas fa-search"></i> BUSCAR</button>';
+    }
+}
+
+function buscarRecuperacaoAnualHome(){
+    if(!todosOsBimestresFechados()){
+        alert('A Recuperação Anual fica disponível somente após o fechamento dos 4 bimestres.');
+        return;
+    }
+    const disciplina=document.getElementById('home-rec-anual-disciplina')?.value||'';
+    if(!disciplina){
+        alert('Selecione a DISCIPLINA antes de buscar.');
+        return;
+    }
+    selectedMateria=disciplina;
+    renderRecuperacaoAnualHome(disciplina);
+}
+
+function calcularTotalAnualComRecuperacoes(disciplina,aluno){
+    let total=0;
+    for(let b=1;b<=4;b++){
+        const bData=db.disciplinas[disciplina][b];
+        let soma=(bData.atividades||[]).reduce((sum,a)=>sum+(parseFloat(a.notas?.[aluno]?.notaFinal)||0),0);
+        if(soma<15 && bData.recuperacaoBimestral?.[aluno]!==undefined && bData.recuperacaoBimestral[aluno]!==''){
+            const rec=Number(String(bData.recuperacaoBimestral[aluno]).replace(',','.'))||0;
+            soma=rec>=15 ? 15 : Math.max(soma,rec);
+        }
+        total+=soma;
+    }
+    return Number(total.toFixed(1));
+}
+
+function resultadoRecuperacaoAnual(total,rec){
+    if(rec==='' || rec===null || rec===undefined)return total;
+    const r=Number(String(rec).replace(',','.'))||0;
+    return r>=60 ? 60 : Math.max(total,r);
+}
+
+function renderRecuperacaoAnualHome(disciplina){
+    const area=document.getElementById('lancamento-inline-resultado');
+    if(!area)return;
+    const recObj=db.disciplinas[disciplina].recuperacaoAnual||{};
+    const linhas=[];
+    ALUNOS.forEach(aluno=>{
+        const total=calcularTotalAnualComRecuperacoes(disciplina,aluno);
+        if(total<60){
+            const rec=recObj[aluno]===undefined?'':recObj[aluno];
+            const final=resultadoRecuperacaoAnual(total,rec);
+            linhas.push({aluno,total,rec,final});
+        }
+    });
+    area.innerHTML=`<div class="inline-result-panel">
+        <div class="notas-central-head">
+            <div><strong>RECUPERAÇÃO ANUAL · ${escapeHtml(disciplina.toUpperCase())}</strong><span>VALOR MÁXIMO: 100,0 PONTOS</span></div>
+        </div>
+        <div class="table-responsive-container">
+            <table class="table-custom-format">
+                <thead><tr><th>ALUNO</th><th>SOMA ANUAL</th><th>RECUPERAÇÃO ANUAL</th><th>RESULTADO FINAL</th></tr></thead>
+                <tbody>${linhas.length?linhas.map(x=>`<tr>
+                    <td><strong>${escapeHtml(x.aluno)}</strong></td>
+                    <td class="${x.total<60?'nota-abaixo-corte':'nota-no-corte'}">${x.total.toFixed(1)}</td>
+                    <td><input class="nota-central-input" type="text" inputmode="decimal" maxlength="6" value="${x.rec===''?'':Number(x.rec).toFixed(1)}" data-rec-anual="1" data-aluno="${escapeAttr(x.aluno)}" data-total="${x.total}" data-max="100" oninput="atualizarRecuperacaoAnualHome(this)"></td>
+                    <td id="rec-anual-home-${safeId(x.aluno)}" class="${x.final<60?'nota-abaixo-corte':'nota-no-corte'}"><strong>${x.final.toFixed(1)}</strong></td>
+                </tr>`).join(''):`<tr><td colspan="4" style="text-align:center;padding:20px;">NENHUM ALUNO ELEGÍVEL PARA RECUPERAÇÃO ANUAL.</td></tr>`}</tbody>
+            </table>
+        </div>
+        <div class="launch-save-bar"><button class="btn-submit-action" type="button" onclick="salvarRecuperacaoAnualHome('${escapeAttr(disciplina)}')"><i class="fas fa-save"></i> SALVAR LANÇAMENTO</button></div>
+    </div>`;
+}
+
+function atualizarRecuperacaoAnualHome(input){
+    normalizarNumeroCampo(input);
+    const total=Number(input.dataset.total)||0;
+    const rec=input.value===''?'':Number(String(input.value).replace(',','.'))||0;
+    const final=resultadoRecuperacaoAnual(total,rec);
+    const cell=document.getElementById(`rec-anual-home-${safeId(input.dataset.aluno)}`);
+    if(cell){cell.className=final<60?'nota-abaixo-corte':'nota-no-corte';cell.innerHTML=`<strong>${final.toFixed(1)}</strong>`;}
+}
+
+function salvarRecuperacaoAnualHome(disciplina){
+    if(!db.disciplinas[disciplina].recuperacaoAnual)db.disciplinas[disciplina].recuperacaoAnual={};
+    document.querySelectorAll('#lancamento-inline-resultado input[data-rec-anual="1"]').forEach(input=>{
+        const aluno=input.dataset.aluno;
+        const raw=String(input.value||'').replace(',','.').trim();
+        if(raw==='')delete db.disciplinas[disciplina].recuperacaoAnual[aluno];
+        else db.disciplinas[disciplina].recuperacaoAnual[aluno]=notaUmaCasa(raw,100);
+    });
+    saveStorage();
+    renderRecuperacaoAnualHome(disciplina);
+    alert('Recuperação Anual salva com sucesso.');
+}
+
+/* Atualiza a opção da tela inicial assim que o 4º bimestre for fechado/reaberto. */
+function checkRecuperacaoAnualButtonVisibility(){
+    const todosFechados=todosOsBimestresFechados();
+    const btnRecAnual=document.getElementById('btn-hub-rec-anual');
+    if(btnRecAnual)btnRecAnual.style.display=todosFechados?'flex':'none';
+    garantirOpcaoRecuperacaoAnualHome();
 }
