@@ -69,22 +69,28 @@
                 </div>
             </div>
             
-            <div class="lancamento-central-shell" id="lancamento-central-shell">
-                <div class="lancamento-flutuante">
-                    <div class="lancamento-kicker">CENTRAL DE LANÇAMENTOS</div>
-                    <h3>O que você deseja lançar?</h3>
-                    <p>Escolha o tipo de lançamento. Tudo será feito nesta mesma área.</p>
-                    <div class="tipo-lancamento-select-wrap">
-                        <label for="tipo-lancamento-central">Tipo de Lançamento</label>
-                        <select id="tipo-lancamento-central" class="tipo-lancamento-select" onchange="selecionarTipoLancamentoCentral(this.value)">
-                            <option value="">Selecione...</option>
-                            <option value="faltas">Lançamento de Faltas</option>
-                            <option value="notas">Lançamento de Notas</option>
-                        </select>
-                    </div>
+            <div class="lancamento-flutuante">
+                <div class="lancamento-kicker">CENTRAL DE LANÇAMENTOS</div>
+                <h3>O que você deseja lançar?</h3>
+                <p>Escolha o tipo de lançamento para abrir somente os campos necessários.</p>
+                <div class="tipo-lancamento-grid">
+                    <button class="tipo-lancamento-card" onclick="abrirLancamentoFaltas()">
+                        <span class="tipo-lancamento-icon"><i class="fas fa-calendar-check"></i></span>
+                        <span><strong>Lançamento de Faltas</strong><small>Bimestre + disciplina + dias da semana</small></span>
+                    </button>
+                    <button class="tipo-lancamento-card" onclick="abrirLancamentoNotas()">
+                        <span class="tipo-lancamento-icon"><i class="fas fa-pen-to-square"></i></span>
+                        <span><strong>Lançamento de Notas</strong><small>Bimestre + disciplina + atividades</small></span>
+                    </button>
                 </div>
-                <div id="central-lancamento-conteudo" class="central-lancamento-conteudo"></div>
             </div>
+
+            <div class="section-header-block">
+                <h3 class="section-title">Minhas Disciplinas</h3>
+                <p class="section-desc">Toque em um bloco para gerenciar atividades, notas ou emitir boletins.</p>
+            </div>
+            
+            <div class="disciplinas-grid" id="disciplinas-grid"></div>
         </div>
 
         <!-- TELA: CADASTRO DE ALUNOS -->
@@ -224,7 +230,7 @@
                     <small>Menos de 60 pts no ano</small>
                 </button>
                 <button class="hub-card-btn" onclick="exportBoletimCompletoPDF()">
-                    <div class="icon-circle bc-red"><i class="fas fa-file-pdf"></i></div>
+                    <div class="icon-circle bc-blue"><i class="fas fa-file-pdf"></i></div>
                     <span>Exportar Notas</span>
                     <small>Tabela - 1 folha por aluno</small>
                 </button>
@@ -379,14 +385,52 @@
         </div>
 
 
-        <!-- TELAS DE COMPATIBILIDADE: os lançamentos agora acontecem na central da página inicial -->
-        <div id="screen-lancar-faltas" class="screen"></div>
-        <div id="screen-lancamento-central-notas" class="screen"></div>
+        <!-- TELA: LANÇAMENTOS DE FALTAS POR DISCIPLINA -->
+        <div id="screen-lancar-faltas" class="screen">
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar</button>
+            <div class="table-meta-header">
+                <h3><i class="fas fa-calendar-check"></i> Lançamento de Faltas</h3>
+                <p class="sub-meta">Selecione o bimestre e a disciplina. A planilha será organizada pelos dias da semana.</p>
+                <div class="lancamento-filtros">
+                    <div><label>Bimestre</label><select id="faltas-bimestre-select"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
+                    <div><label>Disciplina</label><select id="faltas-disciplina-select"></select></div>
+                    <button class="btn-submit-action" type="button" onclick="buscarLancamentoFaltas()"><i class="fas fa-search"></i> Buscar</button>
+                </div>
+            </div>
+            <div id="faltas-planilha-resumo" class="planilha-resumo"></div>
+            <div class="table-responsive-container">
+                <table class="table-custom-format faltas-matriz-table">
+                    <thead><tr><th>Alunos</th><th>Segunda-feira</th><th>Terça-feira</th><th>Quarta-feira</th><th>Quinta-feira</th><th>Sexta-feira</th><th>Total</th></tr></thead>
+                    <tbody id="table-faltas-matriz-corpo"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TELA: LANÇAMENTO DE NOTAS -->
+        <div id="screen-lancamento-central-notas" class="screen">
+            <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar</button>
+            <div class="table-meta-header">
+                <h3><i class="fas fa-pen-to-square"></i> Lançamento de Notas</h3>
+                <p class="sub-meta">Escolha o bimestre e a disciplina para abrir a planilha de atividades.</p>
+                <div class="lancamento-filtros">
+                    <div><label>Bimestre</label><select id="central-notas-bimestre"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
+                    <div><label>Disciplina</label><select id="central-notas-disciplina"></select></div>
+                    <button class="btn-submit-action" type="button" onclick="buscarLancamentoNotas()"><i class="fas fa-search"></i> Buscar</button>
+                </div>
+            </div>
+            <div id="central-notas-area"></div>
+        </div>
+
+        <!-- TELA: CADASTRO DA GRADE DE AULAS -->
         <div id="screen-cadastro-aulas" class="screen">
             <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar</button>
             <div class="table-meta-header">
-                <h3><i class="fas fa-calendar-days"></i> Cadastro da Grade Semanal</h3>
-                <p class="sub-meta">A grade é única para todos os bimestres. Cadastre as 5 aulas de cada dia.</p>
+                <h3><i class="fas fa-calendar-days"></i> Cadastro de Aulas por Dia</h3>
+                <p class="sub-meta">Defina as 5 aulas de cada dia. A quantidade de aulas de cada disciplina será usada automaticamente no lançamento de faltas.</p>
+                <div class="lancamento-filtros">
+                    <div><label>Bimestre</label><select id="grade-aulas-bimestre" onchange="renderGradeAulas()"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
+                    <div><label>Dia da semana</label><select id="grade-aulas-dia" onchange="renderGradeAulas()"><option value="segunda">Segunda-feira</option><option value="terca">Terça-feira</option><option value="quarta">Quarta-feira</option><option value="quinta">Quinta-feira</option><option value="sexta">Sexta-feira</option></select></div>
+                </div>
             </div>
             <div id="grade-aulas-editor"></div>
         </div>
@@ -542,33 +586,13 @@
         </div>
     </div>
 
-    <!-- MODAL: CRIAR ATIVIDADE DENTRO DA CENTRAL DE LANÇAMENTOS -->
-    <div class="modal-overlay-view" id="modal-criar-atividade-central" style="display:none;">
-        <div class="modal-content-container central-atividade-modal">
-            <div class="modal-header-row">
-                <div><span class="lancamento-kicker">NOVA AVALIAÇÃO</span><h4>Criar atividade</h4><p>Cadastre a atividade sem sair da Central de Lançamentos.</p></div>
-                <button type="button" class="btn-modal-close" onclick="fecharCriacaoAtividadeCentral()">&times;</button>
-            </div>
-            <form id="form-atividade-central" onsubmit="salvarAtividadeCentral(event)">
-                <div class="central-atividade-form-grid">
-                    <div class="input-group"><label for="central-atv-nome">Nome da atividade</label><input type="text" id="central-atv-nome" required placeholder="Ex.: Avaliação 02"></div>
-                    <div class="input-group"><label for="central-atv-valor">Valor máximo</label><input type="number" id="central-atv-valor" step="0.01" min="0.01" required placeholder="Ex.: 10"></div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-modal-secondary" onclick="fecharCriacaoAtividadeCentral()">Cancelar</button>
-                    <button type="submit" class="btn-submit-action"><i class="fas fa-save"></i> Criar atividade</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- MODAL DE INSTRUÇÕES DE AJUDA -->
     <div class="modal-overlay-view" id="help-modal">
         <div class="modal-content-container">
             <h4>Manual Operacional Rápido</h4>
             <hr style="margin: 10px 0; border: 0; border-top: 1px solid var(--border);">
             <ul style="padding-left: 20px; font-size: 0.85rem; line-height: 1.5; color: var(--text-light);">
-                <li><strong>Cores Importantes:</strong> Notas exibidas em <span style="color: #2b4e80; font-weight:bold;">Azul</span> representam aproveitamento igual ou superior a 60%. Notas em <span style="color: #dc2626; font-weight:bold;">Vermelho</span> sinalizam que o estudante está abaixo da média estipulada.</li>
+                <li><strong>Cores Importantes:</strong> Notas exibidas em <span style="color: #2b4e80; font-weight:bold;">Azul</span> representam aproveitamento igual ou superior a 60%. Notas em <span style="color: #2b4e80; font-weight:bold;">azul institucional</span> sinalizam que o estudante está abaixo da média estipulada.</li>
                 <li><strong>Bloqueios:</strong> Se o bimestre foi encerrado na aba "Fechamento de Bimestre", você não conseguirá alterar nenhuma nota ou criar atividades para aquele período.</li>
                 <li><strong>Recuperações:</strong> O sistema cumpre rigorosamente as regras do diário de classe eletrônico da instituição.</li>
             </ul>
