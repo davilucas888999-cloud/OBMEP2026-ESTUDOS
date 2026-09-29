@@ -1713,117 +1713,34 @@ input,select,textarea,.search-box-input{border:1px solid #9da5ad!important;borde
 .nota-final-disc-table{min-width:1120px}.nota-final-disc-table th,.nota-final-disc-table td{text-align:center;white-space:nowrap}.nota-final-disc-table th:first-child,.nota-final-disc-table td:first-child{text-align:left;min-width:220px}
 @media(max-width:760px){.tipo-lancamento-grid{grid-template-columns:1fr}.lancamento-filtros{display:grid;grid-template-columns:1fr}.lancamento-filtros>div{min-width:0}.lancamento-filtros .btn-submit-action{width:100%}.planilha-resumo span{display:block;margin:5px 0 0}.grade-slots-grid{grid-template-columns:1fr 1fr}.grade-editor-footer{align-items:stretch;flex-direction:column}.grade-editor-footer button{width:100%}.notas-central-head{align-items:stretch;flex-direction:column}.notas-central-head button{width:100%}}
 
-/* REPAGINAÇÃO FINAL — identidade #2b4e80 */
-:root{--primary:#2b4e80;--primary-dark:#203b61;--primary-light:#e8eef7;--secondary:#172b46;--bg:#f4f6f9;--card:#fff;--text:#172235;--text-light:#667085;--border:#c9d2df;--success:#2f6b50;--warning:#8a6b2e;--danger:#2b4e80;--radius-lg:6px;--radius-md:4px;--shadow:0 3px 12px rgba(31,55,88,.08)}
-body{background:var(--bg);color:var(--text)}
-.topbar{height:62px;background:#fff;border-bottom:2px solid var(--primary);box-shadow:0 2px 10px rgba(31,55,88,.08)}.topbar-title{color:var(--primary);font-size:1.05rem}.menu-hamburger,.theme-toggle{border-radius:4px;color:var(--primary)}
-.main-container{max-width:1180px;padding:24px}.sidebar{width:310px;border-right:3px solid var(--primary);padding:22px 16px}.sidebar-nav ul li{border-radius:5px}.sidebar-nav ul li:hover,.sidebar-nav ul li:active{background:var(--primary-light);color:var(--primary)}
-.welcome-banner{background:linear-gradient(135deg,#203b61,#2b4e80);border-radius:6px;box-shadow:0 10px 24px rgba(43,78,128,.18)}.badge-active{background:#fff;color:var(--primary)}
-.disciplinas-grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.disciplina-card,.hub-card-btn,.card-box,.materia-header-banner,.table-meta-header,.table-responsive-container,.atividades-grade-wrapper{border-radius:6px}.disciplina-card{padding:20px 12px;border:1px solid var(--border);box-shadow:var(--shadow)}.disciplina-card i,.title-icon{color:var(--primary)}.disciplina-card:hover,.hub-card-btn:hover{border-color:var(--primary);box-shadow:0 7px 18px rgba(43,78,128,.14)}.hub-card-btn{padding:18px 12px}.icon-circle{border-radius:5px}.bc-blue,.bc-green,.bc-orange,.bc-red,.bc-purple{background:var(--primary)!important;color:#fff!important}.btn-submit-action,.btn-action-atv{background:var(--primary);border-radius:4px}.btn-submit-action:hover,.btn-action-atv:hover{background:var(--primary-dark)}.btn-back{color:var(--primary)}
-.input-group input,.search-box-input,.lancamento-filtros select,.grade-slot select{border-radius:4px;border:1px solid var(--border)}.input-group input:focus,.search-box-input:focus,.lancamento-filtros select:focus,.grade-slot select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(43,78,128,.12)}
-.table-responsive-container{overflow:auto;border:1px solid #aeb9c8;background:#fff}.table-custom-format{border-collapse:separate;border-spacing:0;border:1px solid #aeb9c8;min-width:100%}.table-custom-format th{background:var(--primary);color:#fff;border-right:1px solid rgba(255,255,255,.25);border-bottom:1px solid var(--primary-dark);padding:9px 8px;white-space:nowrap}.table-custom-format td{border-right:1px solid #d4dbe5;border-bottom:1px solid #d4dbe5;padding:7px 8px}.table-custom-format tr:last-child td{border-bottom:0}.table-custom-format td:last-child,.table-custom-format th:last-child{border-right:0}.table-custom-format tbody tr:nth-child(even){background:#f8fafc}.table-custom-format tbody tr:hover{background:#eef3fa}
-.table-custom-format input[type=number]{width:50px;min-width:50px;max-width:50px;height:32px;padding:3px;border:1px solid #aeb9c8;border-radius:3px;background:#fff;text-align:center;font-weight:800;color:var(--text)}.table-custom-format input[type=number]:focus{outline:2px solid rgba(43,78,128,.18);border-color:var(--primary)}
-#screen-lancar-notas .table-custom-format th:nth-child(n+2),#screen-lancar-notas .table-custom-format td:nth-child(n+2){width:58px;min-width:58px;max-width:58px;text-align:center}#screen-lancar-notas .table-custom-format th:first-child,#screen-lancar-notas .table-custom-format td:first-child{min-width:230px}.notas-central-table{min-width:760px}.nota-central-input,.rec-central-input{width:50px!important;min-width:50px!important;max-width:50px!important;height:32px;padding:3px!important;border-radius:3px!important;border:1px solid #aeb9c8!important;text-align:center}.nota-central-total{font-weight:800;background:#edf2f8!important;color:var(--primary)!important}
-.lancamento-flutuante{border:1px solid #b8c4d3;border-radius:7px;box-shadow:0 8px 24px rgba(31,55,88,.08);background:#fff}.tipo-lancamento-card{border:1px solid var(--border);border-radius:5px;background:#fff}.tipo-lancamento-card:hover{border-color:var(--primary);background:var(--primary-light)}.lancamento-filtros{background:#f7f9fc;border:1px solid #d3dae5;border-radius:5px;padding:14px}.planilha-resumo{border-left:4px solid var(--primary);background:#eef3fa;border-radius:4px;color:var(--text)}.frequencia-instruction{display:flex;gap:9px;align-items:flex-start;margin:12px 0;padding:11px 13px;border:1px solid #cdd7e4;border-radius:5px;background:#f7f9fc;color:var(--text-light);font-size:.8rem}.frequencia-instruction i{color:var(--primary);margin-top:2px}
-.faltas-matriz-table{min-width:820px}.faltas-matriz-table th,.faltas-matriz-table td{text-align:center;vertical-align:middle}.faltas-matriz-table th:first-child,.faltas-matriz-table td:first-child{text-align:left;min-width:240px}.falta-dia-input{width:52px!important;min-width:52px!important;max-width:52px!important;height:32px!important;border:1px solid #aeb9c8!important;border-radius:3px!important;padding:3px!important;text-align:center;font-weight:800}.faltas-matriz-total{font-weight:800;background:#edf2f8!important;color:var(--primary)!important}
-.grade-editor-card{border:1px solid var(--border);border-radius:6px;background:#fff;box-shadow:var(--shadow)}.grade-count-badge{border-radius:4px;background:var(--primary)}.grade-slot{border-radius:4px;background:#f8fafc}.grade-slot select{background:#fff}.notas-central-head{border-radius:6px;background:#f7f9fc}.empty-state-panel{border-radius:5px}
-.modal-overlay-view{background:rgba(15,28,48,.58);backdrop-filter:blur(3px)}.modal-content-container{border:1px solid #b7c3d2;border-radius:7px;box-shadow:0 18px 50px rgba(18,37,62,.24)}.modal-close-btn{border-radius:4px;color:var(--primary)}.btn-modal-secondary{border-radius:4px;border:1px solid var(--border);background:#fff}.bg-red-light,.danger-alert{background:#eef3fa!important;color:var(--primary)!important;border-color:#c6d3e3!important}.btn-icon-del{color:var(--primary)!important}.nota-alta,.nota-baixa,.nota-final-value{color:var(--primary)!important}
-@media(min-width:900px){body{padding-top:68px}.topbar{padding:0 28px}.main-container{padding:28px 30px}.disciplinas-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:760px){.main-container{padding:14px 10px}.topbar{height:58px}body{padding-top:58px}.welcome-banner{padding:16px}.welcome-banner h2{font-size:1.2rem}.school-text{font-size:.72rem}.disciplinas-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.disciplina-card{padding:15px 8px;gap:8px}.disciplina-card i{font-size:1.5rem}.disciplina-card span{font-size:.76rem}.hub-options-grid{grid-template-columns:1fr 1fr;gap:9px}.table-meta-header{padding:12px}.table-custom-format{font-size:.74rem}.table-custom-format th{padding:8px 6px}.table-custom-format td{padding:6px}.table-custom-format input[type=number]{width:48px;min-width:48px;max-width:48px}#screen-lancar-notas .table-custom-format th:first-child,#screen-lancar-notas .table-custom-format td:first-child{min-width:190px}.lancamento-filtros{grid-template-columns:1fr;display:grid}.lancamento-filtros .btn-submit-action{width:100%}.grade-slots-grid{grid-template-columns:1fr 1fr}.grade-editor-footer{flex-direction:column;align-items:stretch}.grade-editor-footer button{width:100%}.nota-final-disc-table{min-width:1040px}}
-@media(max-width:420px){.hub-options-grid{grid-template-columns:1fr}.topbar-title{font-size:.94rem}}
+/* ===== CENTRAL ÚNICA: MODAL DE ATIVIDADE ===== */
+.central-atividade-modal{max-width:560px!important;width:min(94vw,560px)!important}
+.modal-header-row{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.modal-header-row h4{margin:4px 0 4px;font-size:1.2rem;color:var(--text-dark)}.modal-header-row p{margin:0;color:var(--text-light);font-size:.8rem}.btn-modal-close{border:1px solid var(--border);background:#fff;color:var(--text-dark);width:34px;height:34px;border-radius:5px;font-size:1.3rem;cursor:pointer}.central-atividade-form-grid{display:grid;grid-template-columns:1.5fr .7fr;gap:14px;margin-top:20px}.central-atividade-form-grid .input-group input{width:100%;height:42px;border:1px solid var(--border);border-radius:6px;padding:0 10px}@media(max-width:600px){.central-atividade-form-grid{grid-template-columns:1fr}}
 
-/* =========================================================
-   AJUSTES FINAIS — LANÇAMENTOS, FALTAS E BOLETIM
-   ========================================================= */
-.lancamento-filtros {
-    display:grid !important;
-    grid-template-columns:minmax(135px, .9fr) minmax(135px, .9fr) minmax(180px, 1.25fr) minmax(120px, .65fr) !important;
-    align-items:end !important;
-    gap:10px !important;
-}
-.lancamento-filtros > div { min-width:0 !important; }
-.lancamento-filtros label {
-    text-transform:uppercase !important;
-    font-size:.68rem !important;
-    letter-spacing:.04em;
-}
-.lancamento-filtros select {
-    height:36px !important;
-    min-height:36px !important;
-    padding:0 8px !important;
-    font-size:.76rem !important;
-    background:#fff !important;
-    color:#252a30 !important;
-    text-transform:uppercase;
-}
-.lancamento-filtros .btn-submit-action {
-    height:36px !important;
-    padding:0 12px !important;
-    font-size:.78rem !important;
-    width:100% !important;
-}
-.btn-salvar-lancamento {
-    width:100% !important;
-    margin:14px 0 20px !important;
-    min-height:42px;
-}
-.notas-central-table .nota-central-input,
-.notas-central-table .rec-central-input {
-    width:58px !important;
-    min-width:58px !important;
-    max-width:58px !important;
-    height:31px !important;
-    padding:3px 4px !important;
-    font-size:.78rem !important;
-    background:#fff !important;
-}
-.falta-dia-input {
-    width:46px !important;
-    min-width:46px !important;
-    max-width:46px !important;
-    height:31px !important;
-    padding:3px !important;
-    background:#fff !important;
-}
-.planilha-resumo, .notas-central-head { text-transform:none; }
-.planilha-resumo strong, .notas-central-head strong { text-transform:uppercase; }
-.planilha-resumo { font-size:.75rem !important; }
-.notas-central-head span { font-size:.72rem !important; text-transform:uppercase; }
+/* Blocos de nota por aluno: Nota / Recuperação / Final empilhados */
+.notas-blocos-table th,.notas-blocos-table td{vertical-align:top}.notas-blocos-table .aluno-bloco-nome{min-width:145px;vertical-align:middle}.aluno-bloco-nome strong{display:block}.aluno-bloco-nome small{display:block;margin-top:5px;font-size:.65rem;color:var(--text-light)}.nota-aluno-bloco{display:flex;flex-direction:column;gap:4px;min-width:86px;padding:6px;border:1px solid #d7dadd;border-radius:6px;background:#fafafa}.nota-aluno-bloco label,.rec-bim-bloco label{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#69727a}.nota-aluno-bloco input{width:100%!important;min-width:0!important;max-width:none!important}.nota-aluno-bloco .atividade-final{font-size:.82rem;padding:4px 0;background:#eef0f2;border-radius:4px}.rec-bim-bloco{display:flex;flex-direction:column;gap:4px;min-width:105px;padding:6px;border:1px solid #d7dadd;border-radius:6px;background:#f7f8f9}.rec-bim-bloco strong{font-size:.82rem}.rec-bim-central-input{width:100%!important}.regras-recuperacao{margin-top:12px;padding:10px 12px;border-left:3px solid var(--gold,#b08a3e);background:#f6f6f3;font-size:.72rem;color:var(--text-light);line-height:1.45}
 
-/* Boletim mais compacto e visualmente limpo */
-#screen-boletim-individual .table-custom-format {
-    font-size:.72rem !important;
-}
-#screen-boletim-individual .table-custom-format th,
-#screen-boletim-individual .table-custom-format td {
-    padding:7px 8px !important;
-}
-#screen-boletim-individual .btn-action-atv {
-    font-size:.72rem !important;
-    padding:7px 10px !important;
-}
-#screen-boletim-individual .table-meta-header h3 {
-    font-size:1rem !important;
-}
-#screen-boletim-individual .sub-meta {
-    font-size:.72rem !important;
-}
+/* Faltas: deixar claro que o lançamento é por dia e não por disciplina */
+.central-panel .attendance-note{margin-top:12px;padding:10px 12px;border-left:3px solid var(--gold,#b08a3e);background:#f6f6f3;font-size:.72rem;color:var(--text-light)}
 
-/* Todas as disciplinas e bimestres visíveis em MAIÚSCULAS */
-.disciplinas-grid .disciplina-card span,
-#hub-materia-titulo,
-.atividade-name,
-.atividade-index,
-.notas-central-table th,
-.grade-resumo-wrap td:first-child,
-.nota-final-disc-table th,
-.nota-final-disc-table td,
-#screen-lancar-faltas th,
-#screen-lancamento-central-notas th {
-    text-transform:uppercase;
-}
-
-@media(max-width:760px){
-    .lancamento-filtros { grid-template-columns:1fr !important; }
-    .lancamento-filtros .btn-submit-action { width:100% !important; }
-}
+/* Ajustes finais da Central de Lançamentos e do boletim */
+.lancamento-flutuante{max-width:760px!important;margin:0 auto!important;padding:30px 34px!important;border:1px solid #c7ccd1!important;border-radius:12px!important;box-shadow:0 16px 40px rgba(37,42,48,.10)!important;background:#fff!important}
+.tipo-lancamento-select-wrap{max-width:680px!important;margin:22px auto 0!important}
+.tipo-lancamento-select{width:100%!important;min-height:58px!important;padding:0 18px!important;font-size:17px!important;font-weight:700!important;border:2px solid #aeb5bb!important;border-radius:8px!important;background:#f7f8f9!important;color:#252a30!important}
+.central-panel{margin-top:18px!important;border-radius:10px!important;border:1px solid #c7ccd1!important;overflow:hidden!important}
+.central-panel-header{padding:20px 22px!important;background:#f3f4f5!important;border-bottom:1px solid #c7ccd1!important}
+.central-filtros{padding:18px 22px!important;background:#fff!important}
+.central-filtros select{min-height:44px!important;min-width:230px!important}
+.central-save-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;margin-top:14px;border:1px solid #c7ccd1;border-radius:8px;background:#f3f4f5}
+.central-save-footer span{font-size:12px;color:#5f666d}
+.btn-salvar-lancamento{min-width:210px!important;min-height:46px!important}
+.faltas-matriz-table input.falta-dia-input{width:70px!important;min-width:70px!important;text-align:center!important;font-weight:700!important}
+.notas-blocos-table .nota-aluno-bloco{min-width:110px!important}
+.notas-blocos-table .nota-central-input,.notas-blocos-table .rec-central-input{width:74px!important;min-width:74px!important}
+.notas-blocos-table .aluno-bloco-nome{min-width:155px!important}
+/* Boletim mais compacto para caber integralmente em A4 */
+.boletim-table{font-size:7px!important;line-height:1.05!important}
+.boletim-table th{font-size:6.5px!important;padding:3px 2px!important;line-height:1.05!important}
+.boletim-table td{font-size:7px!important;padding:3px 2px!important;line-height:1.05!important}
+.boletim-table .boletim-vertical-header{font-size:6px!important;max-height:55px!important}
+@media(max-width:700px){.lancamento-flutuante{padding:22px 16px!important}.central-save-footer{flex-direction:column;align-items:stretch}.btn-salvar-lancamento{width:100%!important}.tipo-lancamento-select{font-size:16px!important}}
