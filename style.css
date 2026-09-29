@@ -1868,3 +1868,9 @@ select,input,button,.card-box,.table-meta-header,.table-responsive-container,.di
   #atividade-modal .modal-actions{flex-direction:column-reverse;}
   #atividade-modal .modal-actions button{width:100%;justify-content:center;}
 }
+
+/* AJUSTE PONTUAL — NOTA FINAL POR DISCIPLINA */
+#screen-nota-final-disciplina .table-meta-header{border-left:4px solid #2b4e80;background:linear-gradient(135deg,#f8fbff,#eef4fb);}
+#screen-nota-final-disciplina .nota-final-disc-table thead th{background:#2b4e80;color:#fff;border-color:#2b4e80;}
+#screen-nota-final-disciplina .nota-final-disc-table tbody tr:hover{background:#f3f7fc;}
+#screen-nota-final-disciplina .nota-final-disc-table td:last-child{font-weight:700;color:#2b4e80;}
