@@ -512,7 +512,7 @@ function renderLancamentoNotasInline(){
       </div>`;
 }
 function buscarLancamentoNotasInline(){
-    const b=Number(document.getElementById('inline-notas-bimestre')?.value||0),disciplina=document.getElementById('inline-notas-disciplina')?.value||'',area=document.getElementById('lancamento-inline-resultado');
+    const b=Number(document.getElementById('inline-notas-bimestre')?.value||0),disciplina=document.getElementById('inline-notas-disciplina')?.value||'',area=document.getElementById('inline-notas-planilha');
     if(!area)return;
     if(!b||!disciplina){alert('Selecione o BIMESTRE e a DISCIPLINA antes de buscar.');return;}
     selectedBimestre=b;selectedMateria=disciplina;
