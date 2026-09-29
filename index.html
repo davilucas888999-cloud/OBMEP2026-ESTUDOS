@@ -426,10 +426,9 @@
             <button class="btn-back" onclick="navigate('home')"><i class="fas fa-chevron-left"></i> Voltar</button>
             <div class="table-meta-header">
                 <h3><i class="fas fa-calendar-days"></i> Cadastro de Aulas por Dia</h3>
-                <p class="sub-meta">Defina as 5 aulas de cada dia. A quantidade de aulas de cada disciplina será usada automaticamente no lançamento de faltas.</p>
+                <p class="sub-meta">Cadastre as 5 aulas de cada dia. Essa grade será usada automaticamente para calcular o limite de faltas por disciplina.</p>
                 <div class="lancamento-filtros">
                     <div><label>Bimestre</label><select id="grade-aulas-bimestre" onchange="renderGradeAulas()"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
-                    <div><label>Dia da semana</label><select id="grade-aulas-dia" onchange="renderGradeAulas()"><option value="segunda">Segunda-feira</option><option value="terca">Terça-feira</option><option value="quarta">Quarta-feira</option><option value="quinta">Quinta-feira</option><option value="sexta">Sexta-feira</option></select></div>
                 </div>
             </div>
             <div id="grade-aulas-editor"></div>

@@ -341,54 +341,62 @@ function abrirCadastroAulas(){
 function renderGradeAulas(){
     garantirEstruturaFaltas();
     const b=Number(document.getElementById('grade-aulas-bimestre')?.value||1);
-    const dia=document.getElementById('grade-aulas-dia')?.value||'segunda';
-    const aulas=db.gradeAulas[b][dia]||[null,null,null,null,null];
     const editor=document.getElementById('grade-aulas-editor'); if(!editor)return;
-    const nomes={segunda:'Segunda-feira',terca:'Terça-feira',quarta:'Quarta-feira',quinta:'Quinta-feira',sexta:'Sexta-feira'};
+    const dias=[['segunda','Segunda-feira'],['terca','Terça-feira'],['quarta','Quarta-feira'],['quinta','Quinta-feira'],['sexta','Sexta-feira']];
     editor.innerHTML=`
       <div class="grade-editor-card">
-        <div class="grade-editor-heading"><div><span class="lancamento-kicker">GRADE SEMANAL</span><h4>${nomes[dia]}</h4></div><span class="grade-count-badge">5 aulas</span></div>
-        <div class="grade-slots-grid">
-          ${[0,1,2,3,4].map(i=>`<div class="grade-slot"><span>Aula ${i+1}</span><select id="grade-slot-${i}"><option value="">— Sem disciplina —</option>${listaDisciplinasOptions(aulas[i]||'')}</select></div>`).join('')}
+        <div class="grade-editor-heading"><div><span class="lancamento-kicker">GRADE SEMANAL</span><h4>5 aulas por dia</h4></div><span class="grade-count-badge">${b}º Bimestre</span></div>
+        <div class="table-responsive-container">
+          <table class="table-custom-format grade-week-table">
+            <thead><tr><th>Dia</th><th>Aula 1</th><th>Aula 2</th><th>Aula 3</th><th>Aula 4</th><th>Aula 5</th></tr></thead>
+            <tbody>${dias.map(([dia,nome])=>{const aulas=db.gradeAulas[b][dia]||[null,null,null,null,null];return `<tr><td><strong>${nome}</strong></td>${[0,1,2,3,4].map(i=>`<td><select class="grade-week-select" id="grade-${dia}-${i}"><option value="">—</option>${listaDisciplinasOptions(aulas[i]||'')}</select></td>`).join('')}</tr>`}).join('')}</tbody>
+          </table>
         </div>
-        <div class="grade-editor-footer"><span id="grade-total-disc">Preencha as disciplinas das 5 aulas.</span><button class="btn-submit-action" onclick="salvarGradeAulas()"><i class="fas fa-save"></i> Salvar grade do dia</button></div>
-      </div>
-      <div class="table-responsive-container grade-resumo-wrap"><table class="table-custom-format"><thead><tr><th>Disciplina</th><th>Quantidade de aulas</th></tr></thead><tbody>${DISCIPLINAS.map(d=>{const q=aulas.filter(x=>x===d).length;return `<tr><td>${escapeHtml(d)}</td><td><strong>${q}</strong></td></tr>`}).join('')}</tbody></table></div>`;
-    atualizarResumoGrade();
-}
-function atualizarResumoGrade(){
-    const b=Number(document.getElementById('grade-aulas-bimestre')?.value||1),dia=document.getElementById('grade-aulas-dia')?.value||'segunda';
-    const vals=[0,1,2,3,4].map(i=>document.getElementById(`grade-slot-${i}`)?.value||'').filter(Boolean);
-    const el=document.getElementById('grade-total-disc'); if(el)el.textContent=`${vals.length} de 5 aulas preenchidas`;
-    [0,1,2,3,4].forEach(i=>document.getElementById(`grade-slot-${i}`)?.addEventListener('change',atualizarResumoGrade));
+        <div class="grade-editor-footer"><span>Depois de salvar, a tela de faltas mostrará automaticamente quantas aulas de cada disciplina existem em cada dia.</span><button class="btn-submit-action" type="button" onclick="salvarGradeAulas()"><i class="fas fa-save"></i> Salvar grade completa</button></div>
+      </div>`;
 }
 function salvarGradeAulas(){
     garantirEstruturaFaltas();
-    const b=Number(document.getElementById('grade-aulas-bimestre').value),dia=document.getElementById('grade-aulas-dia').value;
-    db.gradeAulas[b][dia]=[0,1,2,3,4].map(i=>document.getElementById(`grade-slot-${i}`).value||null);
-    saveStorage(); renderGradeAulas();
-    alert('Grade de aulas salva. A quantidade de aulas de cada disciplina já está disponível para o lançamento de faltas.');
+    const b=Number(document.getElementById('grade-aulas-bimestre').value);
+    const dias=['segunda','terca','quarta','quinta','sexta'];
+    dias.forEach(dia=>{db.gradeAulas[b][dia]=[0,1,2,3,4].map(i=>document.getElementById(`grade-${dia}-${i}`)?.value||null);});
+    saveStorage();
+    alert('Grade completa salva com sucesso. Agora o lançamento de faltas calculará o limite de aulas por disciplina e dia.');
+    renderGradeAulas();
 }
 function contarAulasDisciplinaNoDia(b,disciplina,dia){ return (db.gradeAulas?.[b]?.[dia]||[]).filter(x=>x===disciplina).length; }
 function obterFaltaDiscDia(b,disciplina,dia,aluno){ return Number(db.faltasPorDisciplina?.[b]?.[disciplina]?.[dia]?.[aluno]||0); }
 function salvarFaltaMatriz(b,disciplina,dia,aluno,input){
+    garantirEstruturaFaltas();
     const max=contarAulasDisciplinaNoDia(b,disciplina,dia);
-    let v=parseInt(input.value,10); if(!Number.isFinite(v)||v<0)v=0; if(v>max)v=max;
-    if(!db.faltasPorDisciplina[b][disciplina][dia])db.faltasPorDisciplina[b][disciplina][dia]={};
-    if(v===0) delete db.faltasPorDisciplina[b][disciplina][dia][aluno]; else db.faltasPorDisciplina[b][disciplina][dia][aluno]=v;
-    input.value=v; saveStorage();
-    const row=input.closest('tr'); if(row){ const total=[...row.querySelectorAll('.falta-dia-input')].reduce((s,x)=>s+(Number(x.value)||0),0); const cell=row.querySelector('.faltas-matriz-total'); if(cell)cell.textContent=total; }
+    let v=Number(input.value);
+    if(!Number.isFinite(v)||v<0)v=0;
+    if(max===0){
+        input.value=0;
+        input.title='Não há aula desta disciplina neste dia conforme a grade.';
+        return;
+    }
+    v=Math.min(Math.floor(v),max);
+    if(!db.faltasPorDisciplina[b][disciplina][dia]) db.faltasPorDisciplina[b][disciplina][dia]={};
+    if(v===0) delete db.faltasPorDisciplina[b][disciplina][dia][aluno];
+    else db.faltasPorDisciplina[b][disciplina][dia][aluno]=v;
+    input.value=v; input.title=`Máximo: ${max} aula(s)`;
+    saveStorage();
+    const row=input.closest('tr');
+    if(row){const total=[...row.querySelectorAll('.falta-dia-input')].reduce((s,x)=>s+(Number(x.value)||0),0);const cell=row.querySelector('.faltas-matriz-total');if(cell)cell.textContent=total;}
 }
 function buscarLancamentoFaltas(){
     garantirEstruturaFaltas();
     const b=Number(document.getElementById('faltas-bimestre-select').value),disciplina=document.getElementById('faltas-disciplina-select').value;
     const dias=[['segunda','Segunda-feira'],['terca','Terça-feira'],['quarta','Quarta-feira'],['quinta','Quinta-feira'],['sexta','Sexta-feira']];
-    const resumo=document.getElementById('faltas-planilha-resumo');
     const quant=dias.map(([d])=>contarAulasDisciplinaNoDia(b,disciplina,d));
-    if(resumo) resumo.innerHTML=`<strong>${escapeHtml(disciplina)}</strong> · ${b}º Bimestre <span>Segunda: ${quant[0]} · Terça: ${quant[1]} · Quarta: ${quant[2]} · Quinta: ${quant[3]} · Sexta: ${quant[4]}</span>`;
+    const totalAulas=quant.reduce((a,v)=>a+v,0);
+    const resumo=document.getElementById('faltas-planilha-resumo');
+    if(resumo) resumo.innerHTML=`<strong>${escapeHtml(disciplina)}</strong> · ${b}º Bimestre <span>${dias.map((x,i)=>`${x[1]}: ${quant[i]}`).join(' · ')}</span> <b>Total semanal: ${totalAulas} aula(s)</b>`;
     const corpo=document.getElementById('table-faltas-matriz-corpo');
+    if(totalAulas===0){corpo.innerHTML=`<tr><td colspan="7"><div class="empty-state-panel"><strong>Esta disciplina ainda não foi cadastrada na grade.</strong><br>Vá em <b>Cadastro de Aulas por Dia</b>, preencha as 5 aulas de cada dia e salve a grade. Depois volte e clique em Buscar.</div></td></tr>`;return;}
     corpo.innerHTML=ALUNOS.map(aluno=>{
-      const inputs=dias.map(([d])=>{const max=contarAulasDisciplinaNoDia(b,disciplina,d),v=obterFaltaDiscDia(b,disciplina,d,aluno);return `<td><input class="falta-dia-input" type="number" min="0" max="${max}" value="${v}" title="Máximo: ${max} aula(s)" oninput="salvarFaltaMatriz(${b},'${escapeAttr(disciplina)}','${d}','${escapeAttr(aluno)}',this)" onkeydown="avancarCampoComEnter(event)"></td>`}).join('');
+      const inputs=dias.map(([d])=>{const max=contarAulasDisciplinaNoDia(b,disciplina,d),v=obterFaltaDiscDia(b,disciplina,d,aluno);return `<td><input class="falta-dia-input" type="number" min="0" max="${max}" value="${v}" ${max===0?'disabled':''} title="Máximo: ${max} aula(s)" oninput="salvarFaltaMatriz(${b},${JSON.stringify(disciplina)},'${d}',${JSON.stringify(aluno)},this)" onkeydown="avancarCampoComEnter(event)"></td>`}).join('');
       const total=dias.reduce((s,[d])=>s+obterFaltaDiscDia(b,disciplina,d,aluno),0);
       return `<tr><td><strong>${escapeHtml(aluno)}</strong></td>${inputs}<td class="faltas-matriz-total"><strong>${total}</strong></td></tr>`;
     }).join('');
