@@ -37,6 +37,8 @@
                 <li onclick="navigate('boletim-individual')"><i class="fas fa-file-invoice"></i> Boletim Individual</li>
                 <li onclick="abrirCadastroAlunos()"><i class="fas fa-user-plus"></i> Cadastro de Alunos</li>
                 <li onclick="abrirLancamentos()"><i class="fas fa-pen-ruler"></i> Lançamentos</li>
+                <li onclick="abrirLancamentoFaltas()"><i class="fas fa-calendar-check"></i> Lançamento de Faltas</li>
+                <li onclick="abrirCadastroAulas()"><i class="fas fa-calendar-days"></i> Cadastro de Aulas por Dia</li>
                 <li onclick="abrirNotaFinalDisciplina()"><i class="fas fa-list-check"></i> Ver Nota Final por Disciplina</li>
                 <li onclick="navigate('fechamento-global')"><i class="fas fa-lock"></i> Fechamento de Bimestre</li>
                 <li onclick="navigate('dashboard')"><i class="fas fa-chart-line"></i> Estatísticas e Gráficos</li>
@@ -70,18 +72,9 @@
             
             <div class="lancamento-flutuante">
                 <div class="lancamento-kicker">CENTRAL DE LANÇAMENTOS</div>
-                <h3>O que você deseja lançar?</h3>
-                <p>Escolha o tipo de lançamento para abrir somente os campos necessários.</p>
-                <div class="tipo-lancamento-grid">
-                    <button class="tipo-lancamento-card" onclick="abrirLancamentoFaltas()">
-                        <span class="tipo-lancamento-icon"><i class="fas fa-calendar-check"></i></span>
-                        <span><strong>Lançamento de Faltas</strong><small>Bimestre + faltas por dia da semana</small></span>
-                    </button>
-                    <button class="tipo-lancamento-card" onclick="abrirLancamentoNotas()">
-                        <span class="tipo-lancamento-icon"><i class="fas fa-pen-to-square"></i></span>
-                        <span><strong>Lançamento de Notas</strong><small>Bimestre + disciplina + atividades</small></span>
-                    </button>
-                </div>
+                <h3>LANÇAMENTOS</h3>
+                <p>Escolha o tipo, selecione os filtros e clique em <strong>BUSCAR</strong>. A planilha será aberta abaixo, no mesmo espaço da página.</p>
+                <div id="lancamento-seletor-home" class="lancamento-seletor-home"></div>
             </div>
 
             <!-- ÁREA INLINE DE LANÇAMENTOS: ocupa o lugar de MINHAS DISCIPLINAS sem trocar de tela -->
@@ -600,5 +593,17 @@
     <img src="brasao.png" id="img-brasao-base64" style="display:none;" alt="Brasão Oculto">
 
     <script src="script.js"></script>
+
+    <!-- Estrutura reservada para expansão responsiva do Portal do Professor. -->
+    <!-- Todos os lançamentos permanecem no fluxo principal da página. -->
+    <!-- A planilha de notas mantém a identidade visual da tabela original. -->
+    <!-- Os campos numéricos são compactos para facilitar o lançamento. -->
+    <!-- A grade semanal permanece persistida no armazenamento local. -->
+    <!-- As faltas são lançadas somente por dia da semana. -->
+    <!-- O cálculo por disciplina utiliza a grade cadastrada. -->
+    <!-- A consulta final apresenta notas e faltas por bimestre. -->
+    <!-- Os cabeçalhos longos do boletim podem ser apresentados na vertical. -->
+    <!-- O layout se adapta a celular, tablet e computador. -->
+    <!-- Fim da estrutura complementar. -->
 </body>
 </html>

@@ -60,6 +60,7 @@ let myChartInstance = null;
 document.addEventListener("DOMContentLoaded", () => {
     initDatabaseEngine();
     renderMateriaBlocks();
+    renderLancamentoSeletorHome();
     updateGlobalBimestreUI();
     applyThemeLoad();
 });
@@ -165,6 +166,7 @@ function cadastrarNovoAluno(event) {
     db.alunosCadastro.push(cadastro);
     ALUNOS.push(nome);
 
+    if (typeof renderLancamentoSeletorHome === 'function') renderLancamentoSeletorHome('');
     DISCIPLINAS.forEach(m => {
         for (let b = 1; b <= 4; b++) {
             (db.disciplinas[m][b].atividades || []).forEach(atv => {
@@ -237,6 +239,12 @@ function salvarEdicaoAluno(event) {
                     bData.faltas[nome] = bData.faltas[nomeAtual];
                     delete bData.faltas[nomeAtual];
                 }
+                for (const dia of DIAS_SEMANA.map(x=>x[0])) {
+                    if (db.faltasDiarias?.[b]?.[dia] && Object.prototype.hasOwnProperty.call(db.faltasDiarias[b][dia], nomeAtual)) {
+                        db.faltasDiarias[b][dia][nome] = db.faltasDiarias[b][dia][nomeAtual];
+                        delete db.faltasDiarias[b][dia][nomeAtual];
+                    }
+                }
             }
         });
         const idx = ALUNOS.indexOf(nomeAtual);
@@ -278,6 +286,9 @@ function excluirAluno(nome) {
             });
             if (bData.recuperacaoBimestral) delete bData.recuperacaoBimestral[nome];
             if (bData.faltas) delete bData.faltas[nome];
+            for (const dia of DIAS_SEMANA.map(x=>x[0])) {
+                if (db.faltasDiarias?.[b]?.[dia]) delete db.faltasDiarias[b][dia][nome];
+            }
         }
         if (db.disciplinas[m].recuperacaoAnual) delete db.disciplinas[m].recuperacaoAnual[nome];
     });
@@ -304,7 +315,7 @@ function garantirEstruturaFaltas(){
  // Ela é gravada para os quatro bimestres exatamente como informada.
  [1,2,3,4].forEach(b=>{
   if(!db.gradeAulas[b])db.gradeAulas[b]={};
-  DIAS_SEMANA.forEach(([dia])=>{db.gradeAulas[b][dia]=GRADE_PADRAO[dia].slice();});
+  DIAS_SEMANA.forEach(([dia])=>{if(!Array.isArray(db.gradeAulas[b][dia])||db.gradeAulas[b][dia].length!==5)db.gradeAulas[b][dia]=GRADE_PADRAO[dia].slice();});
  });
  if(!db.faltasDiarias||typeof db.faltasDiarias!=='object')db.faltasDiarias={};
  if(!db.faltasPorDisciplina||typeof db.faltasPorDisciplina!=='object')db.faltasPorDisciplina={};
@@ -325,7 +336,33 @@ function garantirEstruturaFaltas(){
 }
 function listaDisciplinasOptions(selected=''){return DISCIPLINAS.map(d=>`<option value="${escapeAttr(d)}" ${d===selected?'selected':''}>${escapeHtml(d.toUpperCase())}</option>`).join('');}
 function limparSelectLancamento(id){const el=document.getElementById(id);if(el)el.value='';}
-function mostrarLancamentoInline(tipo){
+function renderLancamentoSeletorHome(tipoInicial=''){
+    const box=document.getElementById('lancamento-seletor-home');
+    if(!box)return;
+    box.innerHTML=`<div class="lancamento-filtros lancamento-filtros-unificados lancamento-home-filtros">
+        <div class="lancamento-field tipo-field"><label for="home-tipo-lancamento">TIPO DE LANÇAMENTO</label><select id="home-tipo-lancamento" onchange="atualizarTipoLancamentoInline()"><option value="" ${tipoInicial?'':'selected'} disabled>SELECIONE</option><option value="faltas" ${tipoInicial==='faltas'?'selected':''}>LANÇAMENTO DE FALTAS</option><option value="notas" ${tipoInicial==='notas'?'selected':''}>LANÇAMENTO DE NOTAS</option></select></div>
+        <div id="home-filtros-dinamicos" class="lancamento-filtros-dinamicos"></div>
+        <div id="home-buscar-wrap" class="lancamento-buscar-wrap"></div>
+    </div>`;
+    atualizarTipoLancamentoInline();
+}
+function atualizarTipoLancamentoInline(){
+    const tipo=document.getElementById('home-tipo-lancamento')?.value||'';
+    const filtros=document.getElementById('home-filtros-dinamicos'),buscar=document.getElementById('home-buscar-wrap');
+    if(!filtros||!buscar)return;
+    filtros.innerHTML='';buscar.innerHTML='';
+    if(!tipo){
+        filtros.innerHTML='<div class="lancamento-placeholder">SELECIONE O TIPO DE LANÇAMENTO PARA CONTINUAR.</div>';return;
+    }
+    if(tipo==='faltas'){
+        filtros.innerHTML=`<div class="lancamento-field"><label for="inline-faltas-bimestre">BIMESTRE</label><select id="inline-faltas-bimestre"><option value="" selected disabled>SELECIONE</option><option value="1">1º BIMESTRE</option><option value="2">2º BIMESTRE</option><option value="3">3º BIMESTRE</option><option value="4">4º BIMESTRE</option></select></div>`;
+        buscar.innerHTML='<button class="btn-submit-action btn-buscar-lancamento" type="button" onclick="buscarLancamentoFaltasInline()"><i class="fas fa-search"></i> BUSCAR</button>';
+    }else{
+        filtros.innerHTML=`<div class="lancamento-field"><label for="inline-notas-bimestre">BIMESTRE</label><select id="inline-notas-bimestre"><option value="" selected disabled>SELECIONE</option><option value="1">1º BIMESTRE</option><option value="2">2º BIMESTRE</option><option value="3">3º BIMESTRE</option><option value="4">4º BIMESTRE</option></select></div><div class="lancamento-field"><label for="inline-notas-disciplina">DISCIPLINA</label><select id="inline-notas-disciplina"><option value="" selected disabled>SELECIONE</option>${listaDisciplinasOptions()}</select></div>`;
+        buscar.innerHTML='<button class="btn-submit-action btn-buscar-lancamento" type="button" onclick="buscarLancamentoNotasInline()"><i class="fas fa-search"></i> BUSCAR</button>';
+    }
+}
+function mostrarLancamentoInline(tipo=''){
     const area=document.getElementById('lancamento-inline-area');
     const header=document.getElementById('minhas-disciplinas-header');
     const grid=document.getElementById('disciplinas-grid');
@@ -333,29 +370,37 @@ function mostrarLancamentoInline(tipo){
     if(header)header.style.display='none';
     if(grid)grid.style.display='none';
     area.style.display='block';
-    area.innerHTML='';
+    area.innerHTML=`<div class="inline-launch-shell">
+        <div class="inline-launch-top"><div><span class="lancamento-kicker">CENTRAL DE LANÇAMENTOS</span><h3>LANÇAMENTO</h3><p>Selecione o tipo e os filtros. O resultado aparecerá logo abaixo, sem trocar de página.</p></div><button type="button" class="btn-back-inline" onclick="fecharLancamentoInline()"><i class="fas fa-xmark"></i> FECHAR</button></div>
+        <div id="lancamento-seletor-inline" class="lancamento-seletor-inline"></div>
+        <div id="lancamento-inline-resultado" class="lancamento-result-area"></div>
+    </div>`;
+    const box=document.getElementById('lancamento-seletor-inline');
+    box.innerHTML=`<div class="lancamento-filtros lancamento-filtros-unificados lancamento-home-filtros"><div class="lancamento-field tipo-field"><label for="inline-tipo-lancamento">TIPO DE LANÇAMENTO</label><select id="inline-tipo-lancamento" onchange="atualizarTipoLancamentoInlineTela()"><option value="" ${tipo?'':'selected'} disabled>SELECIONE</option><option value="faltas" ${tipo==='faltas'?'selected':''}>LANÇAMENTO DE FALTAS</option><option value="notas" ${tipo==='notas'?'selected':''}>LANÇAMENTO DE NOTAS</option></select></div><div id="inline-tipo-filtros" class="lancamento-filtros-dinamicos"></div><div id="inline-tipo-buscar" class="lancamento-buscar-wrap"></div></div>`;
+    atualizarTipoLancamentoInlineTela();
     window.scrollTo({top:Math.max(0,area.getBoundingClientRect().top+window.scrollY-18),behavior:'smooth'});
-    if(tipo==='faltas') renderLancamentoFaltasInline();
-    else renderLancamentoNotasInline();
+}
+function atualizarTipoLancamentoInlineTela(){
+    const tipo=document.getElementById('inline-tipo-lancamento')?.value||'',filtros=document.getElementById('inline-tipo-filtros'),buscar=document.getElementById('inline-tipo-buscar'),resultado=document.getElementById('lancamento-inline-resultado');
+    if(!filtros||!buscar)return;
+    filtros.innerHTML='';buscar.innerHTML='';if(resultado)resultado.innerHTML='';
+    if(!tipo){filtros.innerHTML='<div class="lancamento-placeholder">SELECIONE O TIPO DE LANÇAMENTO.</div>';return;}
+    if(tipo==='faltas'){
+        filtros.innerHTML=`<div class="lancamento-field"><label for="inline-faltas-bimestre">BIMESTRE</label><select id="inline-faltas-bimestre"><option value="" selected disabled>SELECIONE</option><option value="1">1º BIMESTRE</option><option value="2">2º BIMESTRE</option><option value="3">3º BIMESTRE</option><option value="4">4º BIMESTRE</option></select></div>`;
+        buscar.innerHTML='<button class="btn-submit-action btn-buscar-lancamento" type="button" onclick="buscarLancamentoFaltasInline()"><i class="fas fa-search"></i> BUSCAR</button>';
+    }else{
+        filtros.innerHTML=`<div class="lancamento-field"><label for="inline-notas-bimestre">BIMESTRE</label><select id="inline-notas-bimestre"><option value="" selected disabled>SELECIONE</option><option value="1">1º BIMESTRE</option><option value="2">2º BIMESTRE</option><option value="3">3º BIMESTRE</option><option value="4">4º BIMESTRE</option></select></div><div class="lancamento-field"><label for="inline-notas-disciplina">DISCIPLINA</label><select id="inline-notas-disciplina"><option value="" selected disabled>SELECIONE</option>${listaDisciplinasOptions()}</select></div>`;
+        buscar.innerHTML='<button class="btn-submit-action btn-buscar-lancamento" type="button" onclick="buscarLancamentoNotasInline()"><i class="fas fa-search"></i> BUSCAR</button>';
+    }
 }
 function fecharLancamentoInline(){
-    const area=document.getElementById('lancamento-inline-area');
-    const header=document.getElementById('minhas-disciplinas-header');
-    const grid=document.getElementById('disciplinas-grid');
-    if(area){area.style.display='none';area.innerHTML='';}
-    if(header)header.style.display='';
-    if(grid)grid.style.display='';
-    window.scrollTo({top:0,behavior:'smooth'});
+    const area=document.getElementById('lancamento-inline-area'),header=document.getElementById('minhas-disciplinas-header'),grid=document.getElementById('disciplinas-grid');
+    if(area){area.style.display='none';area.innerHTML='';}if(header)header.style.display='';if(grid)grid.style.display='';window.scrollTo({top:0,behavior:'smooth'});
 }
-function abrirLancamentos(){abrirLancamentoNotas();}
-function abrirLancamentoFaltas(){
-    garantirEstruturaFaltas();
-    mostrarLancamentoInline('faltas');
-}
-function abrirLancamentoNotas(){
-    garantirEstruturaFaltas();
-    mostrarLancamentoInline('notas');
-}
+function abrirLancamentos(){navigate('home');setTimeout(()=>{mostrarLancamentoInline('');},20);}
+function abrirLancamentoFaltas(){garantirEstruturaFaltas();navigate('home');setTimeout(()=>{mostrarLancamentoInline('faltas');},20);}
+function abrirLancamentoNotas(){garantirEstruturaFaltas();navigate('home');setTimeout(()=>{mostrarLancamentoInline('notas');},20);}
+
 function renderLancamentoFaltasInline(){
     const area=document.getElementById('lancamento-inline-area');
     if(!area)return;
@@ -378,7 +423,7 @@ function renderLancamentoFaltasInline(){
       </div>`;
 }
 function buscarLancamentoFaltasInline(){
-    const b=Number(document.getElementById('inline-faltas-bimestre')?.value||0),area=document.getElementById('inline-faltas-planilha');
+    const b=Number(document.getElementById('inline-faltas-bimestre')?.value||0),area=document.getElementById('lancamento-inline-resultado');
     if(!area)return;
     if(!b){alert('Selecione o BIMESTRE antes de buscar.');return;}
     garantirEstruturaFaltas();
@@ -392,7 +437,7 @@ function buscarLancamentoFaltasInline(){
       <div class="save-launch-bar"><span>As faltas por disciplina são calculadas automaticamente pela grade.</span><button class="btn-submit-action" type="button" onclick="salvarFaltasDiariasInline()"><i class="fas fa-save"></i> SALVAR LANÇAMENTO</button></div>`;
 }
 function atualizarTotaisFaltasDiariasInline(){
-    document.querySelectorAll('#inline-faltas-planilha tbody tr').forEach(row=>{
+    document.querySelectorAll('#lancamento-inline-resultado tbody tr').forEach(row=>{
         let total=0;row.querySelectorAll('.falta-diaria-input').forEach(i=>{total+=Math.max(0,Math.min(5,Number(i.value)||0));});
         const out=row.querySelector('.faltas-dia-total');if(out)out.textContent=total;
     });
@@ -401,7 +446,7 @@ function salvarFaltasDiariasInline(){
     const b=Number(document.getElementById('inline-faltas-bimestre')?.value||0);
     if(!b){alert('Selecione o BIMESTRE antes de salvar.');return;}
     garantirEstruturaFaltas();
-    document.querySelectorAll('#inline-faltas-planilha .falta-diaria-input').forEach(input=>{
+    document.querySelectorAll('#lancamento-inline-resultado .falta-diaria-input').forEach(input=>{
         const aluno=input.dataset.aluno,dia=input.dataset.dia;
         const v=Math.max(0,Math.min(5,Math.round(Number(String(input.value||'0').replace(',','.'))||0)));
         if(!db.faltasDiarias[b])db.faltasDiarias[b]={};
@@ -440,7 +485,7 @@ function renderLancamentoNotasInline(){
       </div>`;
 }
 function buscarLancamentoNotasInline(){
-    const b=Number(document.getElementById('inline-notas-bimestre')?.value||0),disciplina=document.getElementById('inline-notas-disciplina')?.value||'',area=document.getElementById('inline-notas-planilha');
+    const b=Number(document.getElementById('inline-notas-bimestre')?.value||0),disciplina=document.getElementById('inline-notas-disciplina')?.value||'',area=document.getElementById('lancamento-inline-resultado');
     if(!area)return;
     if(!b||!disciplina){alert('Selecione o BIMESTRE e a DISCIPLINA antes de buscar.');return;}
     selectedBimestre=b;selectedMateria=disciplina;
@@ -530,10 +575,32 @@ function salvarLancamentoNotasCentral(){
 }
 function salvarNotaCentral(aluno,atvId,input,max){normalizarNumeroCampo(input);}
 function salvarRecCentral(aluno,input){normalizarNumeroCampo(input);}
-function abrirCriacaoAtividadeCentral(){
-    navigate('criar-atividade');
-    const back=document.querySelector('#screen-criar-atividade .btn-back'); if(back)back.innerHTML='<i class="fas fa-chevron-left"></i> Voltar aos Lançamentos';
+function abrirFormularioAtividadeInline(editId=''){
+    const area=document.getElementById('lancamento-inline-resultado');
+    if(!area)return;
+    const b=Number(document.getElementById('inline-notas-bimestre')?.value||selectedBimestre||0),disciplina=document.getElementById('inline-notas-disciplina')?.value||selectedMateria||'';
+    if(!b||!disciplina){alert('Selecione o BIMESTRE e a DISCIPLINA antes de criar ou editar uma atividade.');return;}
+    selectedBimestre=b;selectedMateria=disciplina;
+    const atv=(db.disciplinas[disciplina]?.[b]?.atividades||[]).find(a=>a.id===editId);
+    let box=document.getElementById('inline-atividade-editor');
+    if(!box){box=document.createElement('div');box.id='inline-atividade-editor';box.className='inline-atividade-editor';area.prepend(box);}
+    box.innerHTML=`<div class="inline-atividade-editor-head"><div><span class="lancamento-kicker">ATIVIDADE AVALIATIVA</span><h4>${atv?'EDITAR ATIVIDADE':'CRIAR ATIVIDADE'}</h4></div><button type="button" class="btn-back-inline" onclick="fecharFormularioAtividadeInline()">CANCELAR</button></div><div class="inline-atividade-editor-grid"><div><label>NOME DA ATIVIDADE</label><input id="inline-atv-nome" type="text" value="${escapeAttr(atv?.nome||'')}" placeholder="EX.: PROVA, TRABALHO 1"></div><div><label>VALOR MÁXIMO</label><input id="inline-atv-valor" type="text" inputmode="decimal" value="${atv?Number(atv.valor).toFixed(2):''}" placeholder="0,00" oninput="normalizarNumeroCampo(this)"></div><button type="button" class="btn-submit-action" onclick="salvarAtividadeInline()"><i class="fas fa-save"></i> ${atv?'SALVAR ALTERAÇÕES':'CRIAR ATIVIDADE'}</button></div>`;
+    document.getElementById('inline-atv-nome')?.focus();
 }
+function fecharFormularioAtividadeInline(){document.getElementById('inline-atividade-editor')?.remove();}
+function abrirCriacaoAtividadeCentral(){abrirFormularioAtividadeInline('');}
+function salvarAtividadeInline(){
+    const b=Number(document.getElementById('inline-notas-bimestre')?.value||selectedBimestre||0),disciplina=document.getElementById('inline-notas-disciplina')?.value||selectedMateria||'';
+    const nome=(document.getElementById('inline-atv-nome')?.value||'').trim();
+    const valor=Number(String(document.getElementById('inline-atv-valor')?.value||'').replace(',','.'));
+    if(!b||!disciplina||!nome||!Number.isFinite(valor)||valor<=0){alert('Informe o nome e um valor válido para a atividade.');return;}
+    const bData=db.disciplinas[disciplina][b],editId=document.getElementById('inline-atividade-editor')?.dataset?.editId||'';
+    const totalSemEditada=(bData.atividades||[]).filter(a=>a.id!==editId).reduce((sum,a)=>sum+(Number(a.valor)||0),0);
+    if(totalSemEditada+valor>CONFIG.limitPoints){alert(`Impossível salvar. A soma das atividades ultrapassaria ${CONFIG.limitPoints.toFixed(2)} pontos.`);return;}
+    if(editId){const atv=(bData.atividades||[]).find(a=>a.id===editId);if(!atv)return;atv.nome=nome;atv.valor=valor;recalcularNotasDaAtividade(atv);}else{bData.atividades.push({id:'atv_'+Date.now(),nome,valor,notas:{}});}
+    saveStorage();fecharFormularioAtividadeInline();buscarLancamentoNotasInline();
+}
+
 function avancarCampoComEnter(e){
  if(e.key!=='Enter')return;e.preventDefault();const root=e.target.closest('.screen')||document;
  const campos=[...root.querySelectorAll('input:not([disabled]):not([type="hidden"]),select:not([disabled]),button:not([disabled])')].filter(x=>x.offsetParent!==null&&!x.classList.contains('btn-back'));
@@ -806,6 +873,13 @@ function editAtividade(id) {
     const atividades = db.disciplinas[selectedMateria][selectedBimestre].atividades;
     const atv = atividades.find(a => a.id === id);
     if (!atv) return;
+
+    if(document.getElementById('lancamento-inline-resultado')){
+        abrirFormularioAtividadeInline(id);
+        const editor=document.getElementById('inline-atividade-editor');
+        if(editor)editor.dataset.editId=id;
+        return;
+    }
 
     document.getElementById('atv-edit-id').value = atv.id;
     document.getElementById('atv-nome').value = atv.nome;
@@ -1957,7 +2031,7 @@ function obterFichaRendimentoAluno(aluno) {
                 }
             }
             ficha[m].somas[b] = somaBimestre;
-            ficha[m].faltas[b] = Number(bData.faltas?.[aluno] || 0);
+            ficha[m].faltas[b] = obterFaltasAlunoDisciplina(aluno, m, b);
             ficha[m].totalFaltas += ficha[m].faltas[b];
             ficha[m].totalAnual += somaBimestre;
         }
