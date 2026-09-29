@@ -252,7 +252,7 @@
                         </div>
                         <div class="input-group">
                             <label for="atv-valor">Valor Máximo (Pontos) *</label>
-                            <input type="number" id="atv-valor" step="0.01" min="0.01" required placeholder="Ex: 10.00">
+                            <input type="text" id="atv-valor" inputmode="decimal" required placeholder="Ex: 10,00 ou 10.00">
                         </div>
                         <div class="activity-form-actions">
                             <button type="submit" class="btn-submit-action" id="btn-salvar-atividade">
@@ -392,7 +392,7 @@
                 <h3><i class="fas fa-calendar-check"></i> Lançamento de Faltas</h3>
                 <p class="sub-meta">Selecione o bimestre e a disciplina. A planilha será organizada pelos dias da semana.</p>
                 <div class="lancamento-filtros">
-                    <div><label>Bimestre</label><select id="faltas-bimestre-select"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
+                    <div><label>Bimestre</label><select id="faltas-bimestre-select"><option value="">SELECIONE O BIMESTRE</option><option value="1">1º BIMESTRE</option><option value="2">2º BIMESTRE</option><option value="3">3º BIMESTRE</option><option value="4">4º BIMESTRE</option></select></div>
                     <div><label>Disciplina</label><select id="faltas-disciplina-select"></select></div>
                     <button class="btn-submit-action" type="button" onclick="buscarLancamentoFaltas()"><i class="fas fa-search"></i> Buscar</button>
                 </div>
@@ -413,7 +413,7 @@
                 <h3><i class="fas fa-pen-to-square"></i> Lançamento de Notas</h3>
                 <p class="sub-meta">Escolha o bimestre e a disciplina para abrir a planilha de atividades.</p>
                 <div class="lancamento-filtros">
-                    <div><label>Bimestre</label><select id="central-notas-bimestre"><option value="1">1º Bimestre</option><option value="2">2º Bimestre</option><option value="3">3º Bimestre</option><option value="4">4º Bimestre</option></select></div>
+                    <div><label>Bimestre</label><select id="central-notas-bimestre"><option value="">SELECIONE O BIMESTRE</option><option value="1">1º BIMESTRE</option><option value="2">2º BIMESTRE</option><option value="3">3º BIMESTRE</option><option value="4">4º BIMESTRE</option></select></div>
                     <div><label>Disciplina</label><select id="central-notas-disciplina"></select></div>
                     <button class="btn-submit-action" type="button" onclick="buscarLancamentoNotas()"><i class="fas fa-search"></i> Buscar</button>
                 </div>
@@ -442,7 +442,7 @@
                 <h3><i class="fas fa-list-check"></i> Nota Final por Disciplina</h3>
                 <p class="sub-meta">Consulte as notas e faltas dos quatro bimestres e o resultado final de cada aluno.</p>
                 <div class="lancamento-filtros">
-                    <div><label>Disciplina</label><select id="final-disciplina-select"></select></div>
+                    <div><label>Disciplina</label><select id="final-disciplina-select"><option value="">SELECIONE A DISCIPLINA</option></select></div>
                     <button class="btn-submit-action" type="button" onclick="buscarNotaFinalDisciplina()"><i class="fas fa-search"></i> Buscar</button>
                 </div>
             </div>

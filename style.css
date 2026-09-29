@@ -1731,3 +1731,32 @@ body{background:var(--bg);color:var(--text)}
 @media(min-width:900px){body{padding-top:68px}.topbar{padding:0 28px}.main-container{padding:28px 30px}.disciplinas-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:760px){.main-container{padding:14px 10px}.topbar{height:58px}body{padding-top:58px}.welcome-banner{padding:16px}.welcome-banner h2{font-size:1.2rem}.school-text{font-size:.72rem}.disciplinas-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.disciplina-card{padding:15px 8px;gap:8px}.disciplina-card i{font-size:1.5rem}.disciplina-card span{font-size:.76rem}.hub-options-grid{grid-template-columns:1fr 1fr;gap:9px}.table-meta-header{padding:12px}.table-custom-format{font-size:.74rem}.table-custom-format th{padding:8px 6px}.table-custom-format td{padding:6px}.table-custom-format input[type=number]{width:48px;min-width:48px;max-width:48px}#screen-lancar-notas .table-custom-format th:first-child,#screen-lancar-notas .table-custom-format td:first-child{min-width:190px}.lancamento-filtros{grid-template-columns:1fr;display:grid}.lancamento-filtros .btn-submit-action{width:100%}.grade-slots-grid{grid-template-columns:1fr 1fr}.grade-editor-footer{flex-direction:column;align-items:stretch}.grade-editor-footer button{width:100%}.nota-final-disc-table{min-width:1040px}}
 @media(max-width:420px){.hub-options-grid{grid-template-columns:1fr}.topbar-title{font-size:.94rem}}
+
+
+/* AJUSTES DE USABILIDADE — LANÇAMENTOS / BOLETIM */
+.lancamento-filtros{align-items:flex-end;gap:8px;padding:12px;}
+.lancamento-filtros>div{min-width:150px;flex:1;}
+.lancamento-filtros select{height:36px;padding:0 8px;font-size:.78rem;font-weight:700;}
+.lancamento-filtros select:invalid,.lancamento-filtros select[value=""]{background:#fff;}
+.lancamento-filtros .btn-submit-action{height:36px;width:auto;min-width:110px;padding:8px 12px;font-size:.78rem;}
+.lancamento-filtros label{text-transform:uppercase;}
+#faltas-planilha-resumo:empty{display:none;}
+.btn-salvar-lancamento{margin-top:12px;max-width:240px;padding:11px 14px;font-size:.85rem;}
+.notas-central-table{font-size:.76rem;}
+.notas-central-table th,.notas-central-table td{white-space:nowrap;}
+.notas-central-input,.rec-central-input{width:64px!important;min-width:64px!important;max-width:64px!important;padding:7px 4px!important;text-align:center;}
+#screen-boletim-individual .table-custom-format{font-size:.72rem;}
+#screen-boletim-individual .table-custom-format th{padding:8px 9px;}
+#screen-boletim-individual .table-custom-format td{padding:7px 9px;}
+#screen-boletim-individual .btn-action-atv{font-size:.7rem;padding:6px 9px;}
+#hub-materia-titulo,.disciplinas-grid .disciplina-card span,.materia-header-banner .bimestre-selector-wrapper select,.table-meta-header h3,.section-title{text-transform:uppercase;}
+#central-notas-area,.planilha-resumo,.faltas-matriz-table{ text-transform:none;}
+.atividades-grade-table{font-size:.72rem;}
+.atividades-grade-table th,.atividades-grade-table td{padding:7px 8px;}
+@media(max-width:760px){
+  .lancamento-filtros>div{min-width:0;}
+  .lancamento-filtros select{height:34px;font-size:.72rem;}
+  .lancamento-filtros .btn-submit-action{height:34px;min-width:0;width:100%;}
+  .btn-salvar-lancamento{max-width:none;width:100%;}
+  #screen-boletim-individual .table-custom-format{font-size:.68rem;}
+}
