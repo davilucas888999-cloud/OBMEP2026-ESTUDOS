@@ -2225,3 +2225,67 @@ select,input,button,.card-box,.table-meta-header,.table-responsive-container,.di
     min-width: 28px;
     color: #64748b;
 }
+
+/* PLANILHA DE NOTAS — TELA CENTRAL REAL */
+#screen-lancamento-central-notas .notas-central-table {
+    min-width: 1180px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+#screen-lancamento-central-notas .notas-central-table th {
+    background: #2b4e80;
+    color: #fff;
+    font-size: .74rem;
+    font-weight: 900;
+    padding: 12px 10px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+#screen-lancamento-central-notas .notas-central-table th:first-child,
+#screen-lancamento-central-notas .notas-central-table td:first-child {
+    min-width: 255px;
+    text-align: left;
+}
+#screen-lancamento-central-notas .notas-central-table tbody tr:nth-child(even) { background:#f7f9fc; }
+#screen-lancamento-central-notas .notas-central-table tbody tr:hover { background:#eef4fb; }
+#screen-lancamento-central-notas .notas-central-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #dfe5ec;
+    text-align: center;
+    vertical-align: middle;
+}
+#screen-lancamento-central-notas .central-aluno-name { position:sticky; left:0; z-index:2; background:inherit; }
+#screen-lancamento-central-notas .central-atividade-head span,
+#screen-lancamento-central-notas .central-atividade-head small { display:block; font-size:.64rem; opacity:.9; }
+#screen-lancamento-central-notas .central-atividade-head strong { display:block; margin:3px 0; font-size:.76rem; }
+#screen-lancamento-central-notas .nota-central-input {
+    width: 78px !important; min-width:78px !important; max-width:78px !important;
+    height: 46px !important; min-height:46px !important;
+    border: 1.5px solid #b7c4d3 !important; border-radius: 11px !important;
+    background:#fff !important; font-size:.95rem !important; font-weight:800 !important;
+    text-align:center;
+}
+#screen-lancamento-central-notas .nota-central-input:focus,
+#screen-lancamento-central-notas .rec-central-input:focus {
+    outline:none; border-color:#2b4e80 !important; box-shadow:0 0 0 3px rgba(43,78,128,.12) !important;
+}
+#screen-lancamento-central-notas .nota-central-total,
+#screen-lancamento-central-notas .nota-oficial-central {
+    min-width:125px; font-weight:900;
+}
+#screen-lancamento-central-notas .nota-cell-label,
+#screen-lancamento-central-notas .nota-oficial-label {
+    display:block; font-size:.63rem; font-weight:900; text-transform:uppercase; margin-bottom:4px;
+}
+#screen-lancamento-central-notas .nota-central-total strong,
+#screen-lancamento-central-notas .nota-oficial-central strong { display:block; font-size:1.05rem; }
+#screen-lancamento-central-notas .rec-central-cell { min-width:145px; background:#eef4fb; }
+#screen-lancamento-central-notas .rec-central-input {
+    width:92px !important; min-width:92px !important; max-width:92px !important;
+    height:48px !important; min-height:48px !important;
+    border:2px solid #7891ad !important; border-radius:12px !important;
+    background:#fff !important; font-size:1rem !important; font-weight:800 !important; text-align:center;
+}
+#screen-lancamento-central-notas .nota-baixa { color:#c62828 !important; }
+#screen-lancamento-central-notas .nota-alta { color:#172235 !important; }
