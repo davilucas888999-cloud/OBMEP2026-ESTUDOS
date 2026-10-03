@@ -334,7 +334,7 @@ function garantirEstruturaFaltas(){
  // Ela é gravada para os quatro bimestres exatamente como informada.
  [1,2,3,4].forEach(b=>{
   if(!db.gradeAulas[b])db.gradeAulas[b]={};
-  DIAS_SEMANA.forEach(([dia])=>{if(!Array.isArray(db.gradeAulas[b][dia])||db.gradeAulas[b][dia].length!==5)db.gradeAulas[b][dia]=GRADE_PADRAO[dia].slice();});
+  DIAS_SEMANA.forEach(([dia])=>{db.gradeAulas[b][dia]=GRADE_PADRAO[dia].slice();});
  });
  if(!db.faltasDiarias||typeof db.faltasDiarias!=='object')db.faltasDiarias={};
  if(!db.faltasPorDisciplina||typeof db.faltasPorDisciplina!=='object')db.faltasPorDisciplina={};
@@ -343,8 +343,7 @@ function garantirEstruturaFaltas(){
   if(!db.faltasDiarias[b])db.faltasDiarias[b]={};
   if(!db.faltasPorDisciplina[b])db.faltasPorDisciplina[b]={};
   DIAS_SEMANA.forEach(([dia])=>{
-   if(!Array.isArray(db.gradeAulas[b][dia])||db.gradeAulas[b][dia].length!==5)db.gradeAulas[b][dia]=GRADE_PADRAO[dia].slice();
-   else db.gradeAulas[b][dia]=db.gradeAulas[b][dia].map((v,i)=>v||GRADE_PADRAO[dia][i]);
+   db.gradeAulas[b][dia]=GRADE_PADRAO[dia].slice();
    if(!db.faltasDiarias[b][dia])db.faltasDiarias[b][dia]={};
   });
   DISCIPLINAS.forEach(d=>{
@@ -370,6 +369,16 @@ function limitarValorInputPontos(input, maximo){
     if(raw==='') return;
     const n=Number(raw);
     if(Number.isFinite(n) && n>limite){ input.value=String(limite.toFixed(2)).replace(/\.00$/,'').replace(/(\.\d)0$/,'$1'); }
+}
+function normalizarNotaPlanilha(input, maximo){
+    let raw=normalizarNumeroDigitado(input.value,1);
+    if(raw==='') return '';
+    let n=Number(raw);
+    if(!Number.isFinite(n)) n=0;
+    n=Math.max(0,Math.min(Number(maximo)||0,n));
+    n=Math.round(n*10)/10;
+    input.value=String(n.toFixed(1));
+    return input.value;
 }
 function totalBimestreComDadosSalvos(disciplina,bimestre,aluno){
     const bData=db.disciplinas[disciplina]?.[Number(bimestre)]||{};
@@ -605,13 +614,13 @@ function buscarLancamentoNotasInline(){
     limparRascunhosLancamento();
     area.innerHTML=`
       <div class="notas-central-head"><div><strong>${escapeHtml(disciplina.toUpperCase())}</strong><span>${b}º BIMESTRE · ${atividades.length} ATIVIDADE(S)</span></div><div class="notas-central-head-actions"><button class="btn-secondary-action" ${fechado?'disabled':''} onclick="abrirCriacaoAtividadeCentral()"><i class="fas fa-plus"></i> CRIAR ATIVIDADE</button><button class="btn-submit-action" ${fechado?'disabled':''} onclick="salvarLancamentoNotasInline()"><i class="fas fa-save"></i> SALVAR LANÇAMENTO</button></div></div>
-      <div class="table-responsive-container"><table class="table-custom-format notas-inline-table"><thead><tr><th>ALUNO</th>${atividades.map((a,i)=>`<th><div class="atividade-inline-header"><span>ATIVIDADE ${i+1}</span><strong>${escapeHtml(a.nome.toUpperCase())}</strong><small>VALOR: ${Number(a.valor).toFixed(2)}</small><div class="atividade-header-actions"><button type="button" class="btn-grade-edit" onclick="editAtividade('${a.id}')" ${fechado?'disabled':''} title="Editar atividade"><i class="fas fa-pen"></i></button><button type="button" class="btn-grade-delete" onclick="deleteAtividade('${a.id}')" ${fechado?'disabled':''} title="Excluir atividade"><i class="fas fa-trash"></i></button></div></div></th>`).join('')}<th>NOTA FINAL DO BIMESTRE</th><th>RECUPERAÇÃO BIMESTRAL</th></tr></thead><tbody>
+      <div class="table-responsive-container"><table class="table-custom-format notas-inline-table"><thead><tr><th>ALUNO</th>${atividades.map((a,i)=>`<th><div class="atividade-inline-header"><span>ATIVIDADE ${i+1}</span><strong>${escapeHtml(a.nome.toUpperCase())}</strong><small>VALOR: ${Number(a.valor).toFixed(1)}</small><div class="atividade-header-actions"><button type="button" class="btn-grade-edit" onclick="editAtividade('${a.id}')" ${fechado?'disabled':''} title="Editar atividade"><i class="fas fa-pen"></i></button><button type="button" class="btn-grade-delete" onclick="deleteAtividade('${a.id}')" ${fechado?'disabled':''} title="Excluir atividade"><i class="fas fa-trash"></i></button></div></div></th>`).join('')}<th>NOTA FINAL DO BIMESTRE</th><th>RECUPERAÇÃO BIMESTRAL</th></tr></thead><tbody>
       ${ALUNOS.map((aluno,idx)=>{
           const rec=getDraftRecBim(disciplina,b,aluno,bData.recuperacaoBimestral?.[aluno] ?? '');
           return `<tr><td><strong>${idx+1}. ${escapeHtml(aluno)}</strong></td>${atividades.map(a=>{
               const nd=a.notas?.[aluno]||{notaOrig:'',notaRec:'',notaFinal:0},d=getDraftNota(disciplina,b,a.id,aluno,nd.notaOrig??'',nd.notaRec??'');
               const corte=Number(a.valor)*CONFIG.passingScorePct,recDisabled=(d.notaOrig!==''&&Number(d.notaOrig)>=corte)||fechado,final=calcularResultadoRecuperacao(Number(nd.notaOrig)||0,nd.notaRec,a.valor);
-              return `<td class="atividade-stacked-cell"><div class="nota-field-stack"><label>NOTA</label><input class="nota-inline-input" type="text" inputmode="decimal" value="${escapeAttr(d.notaOrig??'')}" data-aluno="${escapeAttr(aluno)}" data-atv="${escapeAttr(a.id)}" data-campo="notaOrig" data-max="${a.valor}" ${fechado?'disabled':''} oninput="atualizarNotaInline(this)" onkeydown="avancarCampoComEnter(event)"></div><div class="nota-field-stack recuperacao-field"><label>RECUPERAÇÃO</label><input class="rec-inline-input" type="text" inputmode="decimal" value="${escapeAttr(d.notaRec??'')}" data-aluno="${escapeAttr(aluno)}" data-atv="${escapeAttr(a.id)}" data-campo="notaRec" data-max="${a.valor}" ${recDisabled?'disabled':''} oninput="atualizarNotaInline(this)" onkeydown="avancarCampoComEnter(event)"></div><div class="nota-field-stack nota-final-field"><label>NOTA FINAL</label><div id="inline-final-${safeId(a.id)}-${safeId(aluno)}" class="nota-final-value ${classeNotaPercentual(final,a.valor)}">${final.toFixed(2)}</div></div></td>`;
+              return `<td class="atividade-stacked-cell"><div class="nota-field-stack"><label>NOTA</label><input class="nota-inline-input" type="text" inputmode="decimal" value="${escapeAttr(d.notaOrig??'')}" data-aluno="${escapeAttr(aluno)}" data-atv="${escapeAttr(a.id)}" data-campo="notaOrig" data-max="${a.valor}" ${fechado?'disabled':''} oninput="atualizarNotaInline(this)" onkeydown="avancarCampoComEnter(event)"></div><div class="nota-field-stack recuperacao-field"><label>RECUPERAÇÃO</label><input class="rec-inline-input" type="text" inputmode="decimal" value="${escapeAttr(d.notaRec??'')}" data-aluno="${escapeAttr(aluno)}" data-atv="${escapeAttr(a.id)}" data-campo="notaRec" data-max="${a.valor}" ${recDisabled?'disabled':''} oninput="atualizarNotaInline(this)" onkeydown="avancarCampoComEnter(event)"></div><div class="nota-field-stack nota-final-field"><label>NOTA FINAL</label><div id="inline-final-${safeId(a.id)}-${safeId(aluno)}" class="nota-final-value ${classeNotaPercentual(final,a.valor)}">${final.toFixed(1)}</div></div></td>`;
           }).join('')}<td class="nota-final-bimestre-cell"><strong id="inline-bim-${safeId(aluno)}" class="${classeNotaPercentual(totalBimestreComDadosSalvos(disciplina,b,aluno),CONFIG.limitPoints)}">${totalBimestreComDadosSalvos(disciplina,b,aluno).toFixed(2)}</strong></td><td class="rec-bim-cell"><input type="text" inputmode="decimal" maxlength="6" class="rec-bim-inline-input" value="${escapeAttr(rec)}" data-aluno="${escapeAttr(aluno)}" data-rec-bim="1" ${fechado?'disabled':''} placeholder="—" oninput="atualizarRecuperacaoBimestralDraft(this)" onkeydown="avancarCampoComEnter(event)"></td></tr>`;
       }).join('')}
       </tbody></table></div>`;
@@ -619,10 +628,7 @@ function buscarLancamentoNotasInline(){
 function atualizarNotaInline(input){
     const aluno=input.dataset.aluno,atvId=input.dataset.atv,atv=db.disciplinas[selectedMateria]?.[selectedBimestre]?.atividades?.find(a=>a.id===atvId);if(!atv)return;
     const campo=input.dataset.campo,max=Number(input.dataset.max),nd=atv.notas?.[aluno]||{notaOrig:'',notaRec:''},draft=getDraftNota(selectedMateria,selectedBimestre,atvId,aluno,nd.notaOrig??'',nd.notaRec??'');
-    let exibicao=normalizarNumeroDigitado(input.value,2);
-    input.value=exibicao;
-    limitarValorInputPontos(input,max);
-    exibicao=input.value;
+    let exibicao=normalizarNotaPlanilha(input,max);
     draft[campo]=exibicao==='.'?'':exibicao;
     // O lançamento é apenas rascunho. Nenhuma soma/nota final visual é recalculada antes do SALVAR LANÇAMENTO.
 }
@@ -634,7 +640,7 @@ function atualizarRecuperacaoBimestralDraft(input){
         draftRecBimestral[`${selectedMateria}\u001f${selectedBimestre}\u001f${aluno}`]='';
         return;
     }
-    let raw=normalizarNumeroDigitado(input.value,2); input.value=raw; limitarValorInputPontos(input,CONFIG.limitPoints); raw=input.value;
+    let raw=normalizarNotaPlanilha(input,CONFIG.limitPoints);
     draftRecBimestral[`${selectedMateria}\u001f${selectedBimestre}\u001f${aluno}`]=raw;
 }
 function salvarLancamentoNotasInline(){
@@ -644,14 +650,14 @@ function salvarLancamentoNotasInline(){
     document.querySelectorAll('#lancamento-inline-resultado .nota-inline-input, #lancamento-inline-resultado .rec-inline-input').forEach(input=>{
         const aluno=input.dataset.aluno,atv=bData.atividades.find(a=>a.id===input.dataset.atv);if(!atv)return;
         if(!atv.notas)atv.notas={};if(!atv.notas[aluno])atv.notas[aluno]={notaOrig:'',notaRec:'',notaFinal:0};
-        limitarValorInputPontos(input,Number(atv.valor));
-        const nd=atv.notas[aluno]; nd[input.dataset.campo]=String(input.value||'').trim()===''?'':Number(String(input.value).replace(',','.'))||0;
+        const nd=atv.notas[aluno];
+        if(String(input.value||'').trim()===''){ nd[input.dataset.campo]=''; } else { const n=Math.max(0,Math.min(Number(atv.valor),Number(String(input.value).replace(',','.'))||0)); nd[input.dataset.campo]=Math.round(n*10)/10; input.value=nd[input.dataset.campo].toFixed(1); }
     });
     (bData.atividades||[]).forEach(recalcularNotasDaAtividade);
     document.querySelectorAll('#lancamento-inline-resultado input[data-rec-bim="1"]').forEach(input=>{
         const aluno=input.dataset.aluno,raw=String(input.value||'').replace(',','.').trim(),totalSalvo=totalBimestreComDadosSalvos(selectedMateria,selectedBimestre,aluno);
         if(totalSalvo>=CONFIG.limitPoints*CONFIG.passingScorePct || raw==='') delete bData.recuperacaoBimestral[aluno];
-        else bData.recuperacaoBimestral[aluno]=Math.max(0,Math.min(CONFIG.limitPoints,Number(raw)||0));
+        else bData.recuperacaoBimestral[aluno]=Math.round(Math.max(0,Math.min(CONFIG.limitPoints,Number(raw)||0))*10)/10;
     });
     salvarERetornarInicio('Lançamento de notas salvo com sucesso.');
 }
@@ -1303,7 +1309,6 @@ function renderAtividadesCriadasList() {
     const head = document.getElementById('atividades-grade-head');
     const body = document.getElementById('atividades-grade-body');
     if (!head || !body) return;
-
     head.innerHTML = '';
     body.innerHTML = '';
 
@@ -1312,147 +1317,131 @@ function renderAtividadesCriadasList() {
     const isFechado = db.configGlobal.bimestresFechados[selectedBimestre];
 
     if (atividades.length === 0) {
-        head.innerHTML = `
-            <tr><th class="atividade-vazia-header">
-                <i class="fas fa-table"></i> Nenhuma atividade criada neste bimestre
-            </th></tr>`;
-        body.innerHTML = `
-            <tr><td class="atividade-vazia-cell">
-                Crie a primeira atividade usando o formulário acima.
-            </td></tr>`;
+        head.innerHTML = '<tr><th class="atividade-vazia-header"><i class="fas fa-table"></i> Nenhuma atividade criada neste bimestre</th></tr>';
+        body.innerHTML = '<tr><td class="atividade-vazia-cell">Crie a primeira atividade usando o formulário acima.</td></tr>';
         return;
     }
 
-    // Cada atividade é UMA COLUNA. Dentro dela ficam, verticalmente:
-    // NOTA -> RECUPERAÇÃO -> NOTA FINAL.
+    /*
+     * Planilha principal, na ordem solicitada:
+     * NOME | ATIVIDADES CRIADAS | NOTA DO BIMESTRE |
+     * RECUPERAÇÃO BIMESTRAL | NOTA OFICIAL DO BIMESTRE
+     *
+     * Os campos de atividade e recuperação são rascunhos. Somente os valores
+     * já gravados em db entram nas somas e na Nota Oficial.
+     */
     const headRow = document.createElement('tr');
     headRow.innerHTML = `
-        <th class="aluno-fixed-head">ALUNO</th>
+        <th class="aluno-fixed-head">NOME</th>
         ${atividades.map((a, index) => `
             <th class="atividade-group-head atividade-column-head">
                 <div class="atividade-header-content">
                     <div class="atividade-header-text">
                         <span class="atividade-index">ATIVIDADE ${index + 1}</span>
                         <strong class="atividade-name">${escapeHtml(a.nome)}</strong>
-                        <small>Valor: ${Number(a.valor).toFixed(2)} pts</small>
+                        <small>Valor: ${Number(a.valor).toFixed(1)} pts</small>
                     </div>
                     <div class="atividade-header-actions">
-                        <button type="button" class="btn-grade-edit"
-                            onclick="editAtividade('${a.id}')" ${isFechado ? 'disabled' : ''}
-                            title="Editar atividade"><i class="fas fa-pen"></i></button>
-                        <button type="button" class="btn-grade-delete"
-                            onclick="deleteAtividade('${a.id}')" ${isFechado ? 'disabled' : ''}
-                            title="Excluir atividade"><i class="fas fa-trash"></i></button>
+                        <button type="button" class="btn-grade-edit" onclick="editAtividade('${a.id}')" ${isFechado ? 'disabled' : ''} title="Editar atividade"><i class="fas fa-pen"></i></button>
+                        <button type="button" class="btn-grade-delete" onclick="deleteAtividade('${a.id}')" ${isFechado ? 'disabled' : ''} title="Excluir atividade"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
             </th>
         `).join('')}
-        <th class="nota-bimestre-head">NOTA FINAL<br>DO BIMESTRE</th>
-        <th class="rec-bim-matrix-head">RECUPERAÇÃO<br>BIMESTRAL</th>
+        <th class="nota-bimestre-head">NOTA DO<br>BIMESTRE</th>
+        <th class="rec-bim-matrix-head">NOTA DA RECUPERAÇÃO<br>BIMESTRAL</th>
+        <th class="nota-oficial-head">NOTA OFICIAL<br>DO BIMESTRE</th>
     `;
     head.appendChild(headRow);
 
     ALUNOS.forEach((aluno, alunoIndex) => {
         const tr = document.createElement('tr');
-        let cells = `
-            <td class="aluno-grade-name">
-                <span class="aluno-number">${alunoIndex + 1}.</span>
-                <strong>${escapeHtml(getCadastroAluno(aluno).matricula)} • ${escapeHtml(aluno)}</strong>
-                <small class="student-enrollment-date">Matrícula: ${escapeHtml(formatarDataMatricula(getCadastroAluno(aluno).dataMatricula))}</small>
-            </td>`;
+        let cells = `<td class="aluno-grade-name"><span class="aluno-number">${alunoIndex + 1}.</span><strong>${escapeHtml(aluno)}</strong></td>`;
 
         atividades.forEach((atv) => {
             if (!atv.notas) atv.notas = {};
-            if (!atv.notas[aluno]) {
-                atv.notas[aluno] = { notaOrig: "", notaRec: "", notaFinal: 0.0 };
-            }
-
+            if (!atv.notas[aluno]) atv.notas[aluno] = { notaOrig: '', notaRec: '', notaFinal: 0.0 };
             const nData = atv.notas[aluno];
             const valor = Number(atv.valor);
             const corte = valor * CONFIG.passingScorePct;
-            const dNota = getDraftNota(selectedMateria,selectedBimestre,atv.id,aluno,nData.notaOrig??'',nData.notaRec??'');
-            const recBloqueada = nData.notaOrig !== "" && parseFloat(nData.notaOrig) >= corte;
-            const notaFinal = parseFloat(nData.notaFinal || 0);
-            const classeFinal = notaFinal >= corte ? 'nota-alta' : 'nota-baixa';
-            const alunoKey = safeId(aluno);
+            const dNota = getDraftNota(selectedMateria, selectedBimestre, atv.id, aluno, nData.notaOrig ?? '', nData.notaRec ?? '');
+            const recBloqueada = nData.notaOrig !== '' && parseFloat(nData.notaOrig) >= corte;
+            const notaSalva = parseFloat(nData.notaFinal || 0);
+            const classeSalva = classeNotaPercentual(notaSalva, valor);
 
             cells += `
-                <td class="atividade-stacked-cell">
+                <td class="atividade-stacked-cell atividade-lancamento-cell">
                     <div class="nota-field-stack">
                         <label>NOTA</label>
-                        <input class="matrix-nota-input" type="number" step="0.01" min="0" max="${valor}"
-                            value="${escapeAttr(dNota.notaOrig??'')}"
+                        <input class="matrix-nota-input" type="text" inputmode="decimal" maxlength="6"
+                            value="${escapeAttr(dNota.notaOrig ?? '')}"
                             data-aluno="${escapeAttr(aluno)}" data-atv="${escapeAttr(atv.id)}" data-campo="notaOrig" data-max="${valor}"
                             ${isFechado ? 'disabled' : ''}
                             oninput="autoSaveNotaMatrix('${escapeAttr(aluno)}','${atv.id}','notaOrig',this,${valor})"
                             aria-label="Nota de ${escapeAttr(aluno)} em ${escapeAttr(atv.nome)}">
                     </div>
-
                     <div class="nota-field-stack recuperacao-field">
                         <label>RECUPERAÇÃO</label>
-                        <input class="matrix-rec-input" type="number" step="0.01" min="0" max="${valor}"
-                            value="${escapeAttr(dNota.notaRec??'')}"
+                        <input class="matrix-rec-input" type="text" inputmode="decimal" maxlength="6"
+                            value="${escapeAttr(dNota.notaRec ?? '')}"
                             id="rec-matrix-${atv.id}-${alunoKey}"
                             data-aluno="${escapeAttr(aluno)}" data-atv="${escapeAttr(atv.id)}" data-campo="notaRec" data-max="${valor}"
                             ${recBloqueada || isFechado ? 'disabled' : ''}
                             oninput="autoSaveNotaMatrix('${escapeAttr(aluno)}','${atv.id}','notaRec',this,${valor})"
                             aria-label="Recuperação de ${escapeAttr(aluno)} em ${escapeAttr(atv.nome)}">
                     </div>
-
                     <div class="nota-field-stack nota-final-field">
-                        <label>NOTA FINAL</label>
-                        <div id="final-matrix-${atv.id}-${alunoKey}" class="nota-final-value ${classeFinal}">
-                            ${notaFinal.toFixed(2)}
-                        </div>
+                        <label>NOTA SALVA</label>
+                        <div class="nota-final-value ${classeSalva}">${notaSalva.toFixed(1)}</div>
                     </div>
-                </td>
-            `;
+                </td>`;
         });
 
-        // NOTA FINAL DO BIMESTRE = soma das notas finais de todas as atividades.
-        // Como o bimestre vale 25 pontos, 60% corresponde a 15 pontos.
-        const notaFinalBimestre = atividades.reduce((sum, a) => {
-            return sum + (parseFloat(a.notas?.[aluno]?.notaFinal) || 0);
-        }, 0);
-        const classeBimestre = notaFinalBimestre >= (CONFIG.limitPoints * CONFIG.passingScorePct)
-            ? 'nota-alta'
-            : 'nota-baixa';
+        const notaBimestre = totalBimestreComDadosSalvos(selectedMateria, selectedBimestre, aluno);
+        const corteBimestre = CONFIG.limitPoints * CONFIG.passingScorePct;
+        const classeBimestre = classeNotaPercentual(notaBimestre, CONFIG.limitPoints);
+        const recSalva = bData.recuperacaoBimestral?.[aluno] ?? '';
+        const recRascunho = getDraftRecBim(selectedMateria, selectedBimestre, aluno, recSalva);
+        const elegivelRecBim = notaBimestre < corteBimestre;
+        const notaOficial = getNotaFinalBimestre(selectedMateria, selectedBimestre, aluno);
+        const classeOficial = classeNotaPercentual(notaOficial, CONFIG.limitPoints);
 
-        const recBimSalva = db.disciplinas[selectedMateria][selectedBimestre].recuperacaoBimestral?.[aluno] ?? '';
-        const recBimRascunho = getDraftRecBim(selectedMateria,selectedBimestre,aluno,recBimSalva);
-        const elegivelRecBim = notaFinalBimestre < (CONFIG.limitPoints * CONFIG.passingScorePct);
         cells += `
-            <td class="nota-final-bimestre-cell">
-                <strong id="nota-bimestre-${safeId(aluno)}" class="${classeBimestre}">
-                    ${notaFinalBimestre.toFixed(2)}
-                </strong>
+            <td class="nota-bimestre-cell ${classeBimestre}">
+                <span class="nota-cell-label">NOTA DO BIMESTRE</span>
+                <strong>${notaBimestre.toFixed(1)}</strong>
             </td>
             <td class="rec-bim-matrix-cell">
-                <input class="rec-bim-matrix-input" type="text" inputmode="decimal" maxlength="6"
-                    value="${escapeAttr(recBimRascunho)}" data-aluno="${escapeAttr(aluno)}" data-rec-bim="1" data-max="25"
+                <span class="nota-cell-label">RECUPERAÇÃO BIMESTRAL</span>
+                <input class="rec-bim-matrix-input" type="text" inputmode="decimal" maxlength="5"
+                    value="${escapeAttr(recRascunho)}" data-aluno="${escapeAttr(aluno)}" data-rec-bim="1" data-max="25"
                     ${(!elegivelRecBim || isFechado) ? 'disabled' : ''}
-                    placeholder="—" title="Recuperação bimestral: até 25,00 pontos"
+                    placeholder="—" title="Recuperação bimestral: até 25,0 pontos"
                     oninput="autoSaveRecuperacaoBimestralMatrix(this)" onkeydown="avancarCampoComEnter(event)">
             </td>
-        `;
+            <td class="nota-oficial-cell ${classeOficial}">
+                <span class="nota-oficial-label">Nota Oficial</span>
+                <strong>${notaOficial.toFixed(1)}</strong>
+            </td>`;
 
         tr.innerHTML = cells;
         body.appendChild(tr);
     });
 
-    const oldBar=document.getElementById('matrix-notas-save-bar');
-    if(oldBar)oldBar.remove();
-    if(!isFechado){
-        const wrap=document.querySelector('#screen-materia-hub .atividades-grade-wrapper');
-        if(wrap){
-            const bar=document.createElement('div');bar.id='matrix-notas-save-bar';bar.className='save-launch-bar matrix-notas-save-bar';
-            bar.innerHTML='<span>As notas e a recuperação bimestral só entram nas somas depois de salvar.</span><button class="btn-submit-action" type="button" onclick="salvarNotasMatrix()"><i class="fas fa-save"></i> SALVAR LANÇAMENTO</button>';
+    const oldBar = document.getElementById('matrix-notas-save-bar');
+    if (oldBar) oldBar.remove();
+    if (!isFechado) {
+        const wrap = document.querySelector('#screen-materia-hub .atividades-grade-wrapper');
+        if (wrap) {
+            const bar = document.createElement('div');
+            bar.id = 'matrix-notas-save-bar';
+            bar.className = 'save-launch-bar matrix-notas-save-bar';
+            bar.innerHTML = '<span>Os valores digitados são rascunhos. As somas e a Nota Oficial só mudam depois de salvar.</span><button class="btn-submit-action" type="button" onclick="salvarNotasMatrix()"><i class="fas fa-save"></i> SALVAR LANÇAMENTO</button>';
             wrap.parentElement.appendChild(bar);
         }
     }
     saveStorage();
 }
-
 function safeId(value) {
     return String(value).replace(/[^a-zA-Z0-9_-]/g, '_');
 }
@@ -1475,13 +1464,7 @@ function escapeAttr(value) {
 function autoSaveNotaMatrix(aluno, atvId, campo, input, valorAtv) {
     const atv = db.disciplinas[selectedMateria]?.[selectedBimestre]?.atividades?.find(a => a.id === atvId);
     if (!atv) return;
-    let valStr=String(input.value??'').replace(',','.');
-    if(valStr!==''){
-        let numeric=Number(valStr); if(!Number.isFinite(numeric))numeric=0;
-        numeric=Math.max(0,Math.min(numeric,Number(valorAtv)));
-        input.value=numeric;
-        valStr=String(numeric);
-    }
+    let valStr=normalizarNotaPlanilha(input, valorAtv);
     const base=atv.notas?.[aluno]||{notaOrig:'',notaRec:''};
     const d=getDraftNota(selectedMateria,selectedBimestre,atvId,aluno,base.notaOrig??'',base.notaRec??'');
     d[campo]=valStr;
@@ -1496,7 +1479,7 @@ function autoSaveNotaMatrix(aluno, atvId, campo, input, valorAtv) {
 function autoSaveRecuperacaoBimestralMatrix(input){
     const aluno=input.dataset.aluno,totalSalvo=totalBimestreComDadosSalvos(selectedMateria,selectedBimestre,aluno);
     if(totalSalvo>=CONFIG.limitPoints*CONFIG.passingScorePct){input.value='';return;}
-    let raw=normalizarNumeroDigitado(input.value,2);input.value=raw;limitarValorInputPontos(input,CONFIG.limitPoints);raw=input.value;
+    let raw=normalizarNotaPlanilha(input,CONFIG.limitPoints);
     draftRecBimestral[`${selectedMateria}\u001f${selectedBimestre}\u001f${aluno}`]=raw;
 }
 function salvarNotasMatrix(){
@@ -1506,14 +1489,15 @@ function salvarNotasMatrix(){
     document.querySelectorAll('#atividades-grade-body .matrix-nota-input, #atividades-grade-body .matrix-rec-input').forEach(input=>{
         const aluno=input.dataset.aluno,atv=bData.atividades.find(a=>a.id===input.dataset.atv);if(!atv)return;
         if(!atv.notas)atv.notas={};if(!atv.notas[aluno])atv.notas[aluno]={notaOrig:'',notaRec:'',notaFinal:0};
-        limitarValorInputPontos(input,Number(atv.valor));
-        const nd=atv.notas[aluno],raw=String(input.value||'').trim();nd[input.dataset.campo]=raw===''?'':Number(raw.replace(',','.'))||0;
+        const nd=atv.notas[aluno];
+        const raw=String(input.value||'').trim();
+        if(raw===''){ nd[input.dataset.campo]=''; } else { const n=Math.max(0,Math.min(Number(atv.valor),Number(raw.replace(',','.'))||0)); nd[input.dataset.campo]=Math.round(n*10)/10; input.value=nd[input.dataset.campo].toFixed(1); }
     });
     (bData.atividades||[]).forEach(recalcularNotasDaAtividade);
     document.querySelectorAll('#atividades-grade-body .rec-bim-matrix-input').forEach(input=>{
         const aluno=input.dataset.aluno,raw=String(input.value||'').replace(',','.').trim(),totalSalvo=totalBimestreComDadosSalvos(selectedMateria,selectedBimestre,aluno);
         if(raw===''||totalSalvo>=CONFIG.limitPoints*CONFIG.passingScorePct)delete bData.recuperacaoBimestral[aluno];
-        else bData.recuperacaoBimestral[aluno]=Math.max(0,Math.min(CONFIG.limitPoints,Number(raw)||0));
+        else bData.recuperacaoBimestral[aluno]=Math.round(Math.max(0,Math.min(CONFIG.limitPoints,Number(raw)||0))*10)/10;
     });
     salvarERetornarInicio('Lançamento de notas salvo com sucesso.');
 }
@@ -1588,7 +1572,7 @@ function renderNotasTable(atv) {
                     data-campo="notaRec" oninput="autoSaveNotaEngine('${aluno}', 'notaRec', this, ${atv.valor})" onkeydown="avancarCampoComEnter(event)">
             </td>
             <td id="final-disp-${aluno.replace(/ /g, '_')}" class="${corClasse}">
-                ${notaFinalNum.toFixed(2)}
+                ${notaFinalNum.toFixed(1)}
             </td>
             <td class="rec-bim-cell">
                 <input type="text" inputmode="decimal" maxlength="6" class="rec-bim-inline-input"
@@ -1605,7 +1589,7 @@ function renderNotasTable(atv) {
 function autoSaveRecuperacaoBimestralInline(input) {
     const aluno=input.dataset.aluno,totalSalvo=totalBimestreComDadosSalvos(selectedMateria,selectedBimestre,aluno);
     if(totalSalvo>=CONFIG.limitPoints*CONFIG.passingScorePct){input.value='';return;}
-    let raw=normalizarNumeroDigitado(input.value,2); input.value=raw; limitarValorInputPontos(input,CONFIG.limitPoints); raw=input.value;
+    let raw=normalizarNotaPlanilha(input,CONFIG.limitPoints);
     draftRecBimestral[`${selectedMateria}\u001f${selectedBimestre}\u001f${aluno}`]=raw;
 }
 
@@ -1650,7 +1634,7 @@ function openVerNotas() {
     const corpo=document.getElementById('table-visao-corpo');if(!corpo)return;corpo.innerHTML='';
     ALUNOS.forEach(aluno=>{
         const detalhe=getResultadoFinalAluno(aluno),somas={1:getNotaFinalBimestre(selectedMateria,1,aluno),2:getNotaFinalBimestre(selectedMateria,2,aluno),3:getNotaFinalBimestre(selectedMateria,3,aluno),4:getNotaFinalBimestre(selectedMateria,4,aluno)},final=detalhe.disciplinas[selectedMateria]?.final ?? somas[1]+somas[2]+somas[3]+somas[4];
-        const tr=document.createElement('tr');tr.innerHTML=`<td><strong>${escapeHtml(aluno)}</strong></td><td class="${classeNotaPercentual(somas[1],25)}">${somas[1].toFixed(2)}</td><td class="${classeNotaPercentual(somas[2],25)}">${somas[2].toFixed(2)}</td><td class="${classeNotaPercentual(somas[3],25)}">${somas[3].toFixed(2)}</td><td class="${classeNotaPercentual(somas[4],25)}">${somas[4].toFixed(2)}</td><td class="${classeNotaPercentual(final,100)}" style="font-size:0.9rem;">${final.toFixed(2)}</td>`;corpo.appendChild(tr);
+        const tr=document.createElement('tr');tr.innerHTML=`<td><strong>${escapeHtml(aluno)}</strong></td><td class="${classeNotaPercentual(somas[1],25)}">${somas[1].toFixed(2)}</td><td class="${classeNotaPercentual(somas[2],25)}">${somas[2].toFixed(2)}</td><td class="${classeNotaPercentual(somas[3],25)}">${somas[3].toFixed(2)}</td><td class="${classeNotaPercentual(somas[4],25)}">${somas[4].toFixed(2)}</td><td class="${classeNotaPercentual(final,100)}" style="font-size:0.9rem;">${final.toFixed(1)}</td>`;corpo.appendChild(tr);
     });
     navigate('ver-notas');
 }
@@ -1668,7 +1652,7 @@ function openRecuperacaoBimestral() {
             const current=getDraftRecBim(selectedMateria,selectedBimestre,aluno,bData.recuperacaoBimestral?.[aluno] ?? '');
             const final=calcularResultadoRecuperacao(notaOrigBimestre,current,CONFIG.limitPoints);
             const tr=document.createElement('tr');
-            tr.innerHTML=`<td><strong>${escapeHtml(aluno)}</strong></td><td class="${classeNotaPercentual(notaOrigBimestre,CONFIG.limitPoints)}">${notaOrigBimestre.toFixed(2)}</td><td><input type="text" inputmode="decimal" maxlength="6" value="${escapeAttr(current)}" ${isFechado?'disabled':''} data-aluno="${escapeAttr(aluno)}" data-max="25" class="rec-bim-screen-input" oninput="atualizarRecBimestralScreen(this)" onkeydown="avancarCampoComEnter(event)"></td><td id="rec-bim-final-${safeId(aluno)}" class="${classeNotaPercentual(final,CONFIG.limitPoints)}">${final.toFixed(2)}</td>`;
+            tr.innerHTML=`<td><strong>${escapeHtml(aluno)}</strong></td><td class="${classeNotaPercentual(notaOrigBimestre,CONFIG.limitPoints)}">${notaOrigBimestre.toFixed(2)}</td><td><input type="text" inputmode="decimal" maxlength="6" value="${escapeAttr(current)}" ${isFechado?'disabled':''} data-aluno="${escapeAttr(aluno)}" data-max="25" class="rec-bim-screen-input" oninput="atualizarRecBimestralScreen(this)" onkeydown="avancarCampoComEnter(event)"></td><td id="rec-bim-final-${safeId(aluno)}" class="${classeNotaPercentual(final,CONFIG.limitPoints)}">${final.toFixed(1)}</td>`;
             corpo.appendChild(tr);
         }
     });
@@ -1705,7 +1689,7 @@ function openRecuperacaoAnual() {
         const totalAnual=calcularTotalAnualComRecuperacoes(selectedMateria,aluno),faltas=totalFaltasDisciplina(aluno,selectedMateria),limite=LIMITES_FALTAS_DISCIPLINA[selectedMateria]??Infinity,porFalta=faltas>limite;
         if(totalAnual<60||porFalta){
             const current=getDraftRecAnual(selectedMateria,aluno,recAnualObj[aluno]!==undefined?recAnualObj[aluno]:''),base=porFalta?0:totalAnual,final=calcularResultadoRecuperacao(base,current,100);
-            const tr=document.createElement('tr');tr.innerHTML=`<td><strong>${escapeHtml(aluno)}</strong></td><td class="${classeNotaPercentual(base,100)}">${base.toFixed(2)}</td><td>${faltas}</td><td><input type="text" inputmode="decimal" maxlength="7" value="${escapeAttr(current)}" data-aluno="${escapeAttr(aluno)}" class="rec-anual-screen-input" data-total="${base}" oninput="atualizarRecAnualScreen(this)" onkeydown="avancarCampoComEnter(event)"></td><td id="rec-anual-final-${safeId(aluno)}" class="${classeNotaPercentual(final,100)}">${final.toFixed(2)}</td>`;corpo.appendChild(tr);
+            const tr=document.createElement('tr');tr.innerHTML=`<td><strong>${escapeHtml(aluno)}</strong></td><td class="${classeNotaPercentual(base,100)}">${base.toFixed(2)}</td><td>${faltas}</td><td><input type="text" inputmode="decimal" maxlength="7" value="${escapeAttr(current)}" data-aluno="${escapeAttr(aluno)}" class="rec-anual-screen-input" data-total="${base}" oninput="atualizarRecAnualScreen(this)" onkeydown="avancarCampoComEnter(event)"></td><td id="rec-anual-final-${safeId(aluno)}" class="${classeNotaPercentual(final,100)}">${final.toFixed(1)}</td>`;corpo.appendChild(tr);
         }
     });
     if(corpo.innerHTML==='')corpo.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:20px;">Nenhum aluno em recuperação anual nesta disciplina.</td></tr>';
@@ -1715,7 +1699,7 @@ function openRecuperacaoAnual() {
 function atualizarRecAnualScreen(input){
     const raw=normalizarNumeroDigitado(input.value,2);input.value=raw;draftRecAnual[`${selectedMateria}\u001f${input.dataset.aluno}`]=raw;
     const total=Number(input.dataset.total)||0,final=calcularResultadoRecuperacao(total,raw,100),cell=document.getElementById(`rec-anual-final-${safeId(input.dataset.aluno)}`);
-    if(cell){cell.textContent=final.toFixed(2);cell.className=classeNotaPercentual(final,100);}
+    if(cell){cell.textContent=final.toFixed(1);cell.className=classeNotaPercentual(final,100);}
 }
 function salvarRecAnualScreen(){
     if(!db.disciplinas[selectedMateria].recuperacaoAnual)db.disciplinas[selectedMateria].recuperacaoAnual={};
@@ -1971,7 +1955,7 @@ function gerarAtaResultadosFinaisPDF(){
     doc.text('Endereço: Praça Tiradentes, nº 88, Centro · Abre Campo - MG · CEP 35365-000',36,36);
     const head1=['Nº','NOME DO(A) ALUNO(A)'];DISCIPLINAS.forEach(d=>head1.push(d.toUpperCase(),''));head1.push('RESULTADO FINAL');
     const head2=['',''];DISCIPLINAS.forEach(()=>head2.push('RES.','FAL.'));head2.push('');
-    const body=ALUNOS.map((aluno,i)=>{const r=getResultadoFinalAluno(aluno);const row=[String(i+1),aluno];DISCIPLINAS.forEach(d=>{const f=r.disciplinas[d];row.push(f.final.toFixed(2),String(f.faltas));});row.push(r.resultado);return row;});
+    const body=ALUNOS.map((aluno,i)=>{const r=getResultadoFinalAluno(aluno);const row=[String(i+1),aluno];DISCIPLINAS.forEach(d=>{const f=r.disciplinas[d];row.push(f.final.toFixed(1),String(f.faltas));});row.push(r.resultado);return row;});
     doc.autoTable({startY:43,head:[head1,head2],body,theme:'grid',styles:{fontSize:5.4,cellPadding:1.5,halign:'center',valign:'middle',overflow:'ellipsize'},headStyles:{fontSize:5.3,fontStyle:'bold',halign:'center',valign:'middle'},columnStyles:{0:{cellWidth:8},1:{cellWidth:46,halign:'left',fontStyle:'bold',overflow:'ellipsize'}},didParseCell:data=>{if(data.section==='body'){const idx=data.column.index;if(idx>=2&&idx<2+DISCIPLINAS.length*2&&idx%2===0&&parseFloat(data.cell.raw)<60)data.cell.styles.textColor=[176,0,0];const last=2+DISCIPLINAS.length*2;if(idx===last){if(data.cell.raw==='REPROVADO')data.cell.styles.textColor=[176,0,0];else if(data.cell.raw==='APROVADO')data.cell.styles.textColor=[17,17,17];}}}});
     const y=(doc.lastAutoTable?.finalY||190)+8;doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.text(`Critérios registrados no sistema: 200 dias letivos; frequência geral mínima de 75%; limites de faltas por disciplina e recuperação final conforme regras cadastradas.`,12,y);
     doc.text(`Emitido em ${new Date().toLocaleDateString('pt-BR')} · Portal do Professor`,410,y,{align:'right'});
